@@ -1,4 +1,5 @@
 import { Ionicons } from "@expo/vector-icons";
+import { useRouter } from "expo-router";
 import React, { useState } from "react";
 import {
   FlatList,
@@ -93,6 +94,7 @@ const testsData: TestItem[] = [
 
 export default function TestScreen() {
   const [selectedFilter, setSelectedFilter] = useState("all");
+  const router = useRouter();
 
   const filters: FilterItem[] = [
     { id: "all", label: "Hamısı" },
@@ -139,7 +141,10 @@ export default function TestScreen() {
         </View>
       </View>
 
-      <TouchableOpacity style={styles.startButton}>
+      <TouchableOpacity
+        style={styles.startButton}
+        onPress={() => router.push("/test/1")}
+      >
         <Text style={styles.startButtonText}>Testə başla</Text>
       </TouchableOpacity>
     </View>
