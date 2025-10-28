@@ -1,3 +1,4 @@
+import { AuthProvider } from "@/context/auth-context";
 import { Stack, useRouter } from "expo-router";
 import { useColorScheme } from "react-native";
 
@@ -14,5 +15,9 @@ function RootLayoutContent() {
 }
 
 export default function RootLayout() {
-  return <RootLayoutContent />;
+  return (
+    <AuthProvider>
+      <RootLayoutContent />
+    </AuthProvider>
+  );
 }

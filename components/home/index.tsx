@@ -1,4 +1,4 @@
-import { Ionicons, MaterialCommunityIcons } from "@expo/vector-icons";
+import { Ionicons } from "@expo/vector-icons";
 import React from "react";
 import {
   SafeAreaView,
@@ -7,6 +7,7 @@ import {
   Text,
   TouchableOpacity,
   View,
+  Image
 } from "react-native";
 
 export default function HomeScreen() {
@@ -17,10 +18,10 @@ export default function HomeScreen() {
         <View style={styles.header}>
           <View style={styles.headerLeft}>
             <View style={styles.logo}>
-              <MaterialCommunityIcons
-                name="scale-balance"
-                size={20}
-                color="#FFFFFF"
+              <Image
+                source={require("../../assets/images/qanun.png")}
+                style={{ width: 36, height: 36, resizeMode: "contain" }}
+                accessibilityLabel="qanun"
               />
             </View>
             <Text style={styles.headerTitle}>Qanun Qapısı</Text>

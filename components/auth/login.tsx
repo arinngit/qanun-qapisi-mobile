@@ -1,7 +1,8 @@
-import { Ionicons, MaterialCommunityIcons } from "@expo/vector-icons";
+import { Ionicons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
 import React, { useState } from "react";
 import {
+  Image,
   SafeAreaView,
   ScrollView,
   StyleSheet,
@@ -24,10 +25,10 @@ export default function Login() {
       <ScrollView contentContainerStyle={styles.scrollContent}>
         <View style={styles.header}>
           <View style={styles.logoContainer}>
-            <MaterialCommunityIcons
-              name="scale-balance"
-              size={40}
-              color="#FFFFFF"
+            <Image
+              source={require("../../assets/images/qanun.png")}
+              style={{width: 80, height: 80, resizeMode: "contain"}}
+              accessibilityLabel="qanun"
             />
           </View>
           <Text style={styles.title}>Qanun Qapısı</Text>
