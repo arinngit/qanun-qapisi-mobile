@@ -17,6 +17,20 @@ export default function AuthLayout() {
           headerShown: false,
         }}
       />
+      <Stack.Screen
+        name="verify-code"
+        options={{
+          title: 'Verify',
+          headerShown: false,
+        }}
+      />
+      <Stack.Screen
+        name="resed-password"
+        options={{
+          title: 'Resed',
+          headerShown: false,
+        }}
+      />
     </Stack>
   );
 } 

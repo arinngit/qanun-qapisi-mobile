@@ -1,22 +1,27 @@
-import React, { createContext, useState, useContext, useEffect } from 'react';
-import AsyncStorage from '@react-native-async-storage/async-storage';
-import { api } from '../services/api';
-import { jwtDecode } from 'jwt-decode';
-import { translations } from '../constants/translations';
+import { authAPI, profileAPI, tokenManager } from "@/services/api";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import { jwtDecode } from "jwt-decode";
+import React, { createContext, useContext, useEffect, useState } from "react";
+import { translations } from "../constants/translations";
 
+// Обновите интерфейс User для совместимости с ProfileResponse
 interface User {
   id: string;
   email: string;
   name: string;
   surname: string;
   role: string;
+  verified?: boolean;
+  profilePicture?: string;
+  createdAt?: string;
+  updatedAt?: string;
 }
 
 interface DecodedToken {
   exp: number;
-  'http://schemas.xmlsoap.org/ws/2005/05/identity/claims/nameidentifier': string;
-  'http://schemas.xmlsoap.org/ws/2005/05/identity/claims/emailaddress': string;
-  'http://schemas.microsoft.com/ws/2008/06/identity/claims/role': string;
+  "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/nameidentifier": string;
+  "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/emailaddress": string;
+  "http://schemas.microsoft.com/ws/2008/06/identity/claims/role": string;
 }
 
 interface AuthContextType {
@@ -26,11 +31,15 @@ interface AuthContextType {
   login: (email: string, password: string) => Promise<void>;
   logout: () => Promise<void>;
   loading: boolean;
+  refreshUser: () => Promise<void>; // Добавляем эту функцию
+  updateUser: (userData: Partial<User>) => void; // И эту
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
-export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
+  children,
+}) => {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [user, setUser] = useState<User | null>(null);
   const [token, setToken] = useState<string | null>(null);
@@ -44,8 +53,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     try {
       return jwtDecode<DecodedToken>(token);
     } catch (error) {
-      console.error('Error decoding token:', error);
-      throw new Error('Invalid token');
+      console.error("Error decoding token:", error);
+      throw new Error("Invalid token");
     }
   };
 
@@ -61,81 +70,169 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const extractUserFromToken = (token: string): User => {
     const decoded = decodeToken(token);
     return {
-      id: decoded['http://schemas.xmlsoap.org/ws/2005/05/identity/claims/nameidentifier'],
-      email: decoded['http://schemas.xmlsoap.org/ws/2005/05/identity/claims/emailaddress'],
-      role: decoded['http://schemas.microsoft.com/ws/2008/06/identity/claims/role'],
-      name: '', // These will be populated from the login response
-      surname: '', // These will be populated from the login response
+      id: decoded[
+        "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/nameidentifier"
+      ],
+      email:
+        decoded[
+          "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/emailaddress"
+        ],
+      role: decoded[
+        "http://schemas.microsoft.com/ws/2008/06/identity/claims/role"
+      ],
+      name: "",
+      surname: "",
     };
   };
 
+  // Функция для обновления пользователя в состоянии
+  const updateUser = (userData: Partial<User>) => {
+    if (user) {
+      const updatedUser = { ...user, ...userData };
+      setUser(updatedUser);
+      AsyncStorage.setItem("user", JSON.stringify(updatedUser));
+    }
+  };
+
+  // auth-context.tsx faylında aşağıdakı dəyişiklikləri edin
+
   const checkAuth = async () => {
     try {
-      const storedToken = await AsyncStorage.getItem('token');
-      const storedUser = await AsyncStorage.getItem('user');
+      const storedToken = await tokenManager.getToken();
+      const storedUser = await AsyncStorage.getItem("user");
 
-      if (storedToken && storedUser && !isTokenExpired(storedToken)) {
-        const userData = JSON.parse(storedUser);
+      if (storedToken && !isTokenExpired(storedToken)) {
         setToken(storedToken);
-        setUser(userData);
-        setIsAuthenticated(true);
+
+        // Əvvəlcə storedUser istifadə et, sonra refresh et
+        if (storedUser) {
+          const userData = JSON.parse(storedUser);
+          setUser(userData);
+          setIsAuthenticated(true);
+        }
+
+        // Background-da user məlumatlarını yenilə
+        try {
+          await refreshUser();
+        } catch (refreshError) {
+          console.error("Background refresh failed:", refreshError);
+          // Əsas auth-u pozma
+        }
       } else {
-        // Token is expired or invalid, clear everything
         await logout();
       }
     } catch (error) {
-      console.error('Error checking auth:', error);
+      console.error("Error checking auth:", error);
       await logout();
     } finally {
       setLoading(false);
     }
   };
 
-  const login = async (email: string, password: string) => {
+  const refreshUser = async (): Promise<void> => {
     try {
-      console.log('AuthContext: Starting login process');
-      const response = await api.login({ email, password });
-      console.log('AuthContext: Login response:', JSON.stringify(response, null, 2));
-      
-      if (!response.token || !response.user) {
-        console.log('AuthContext: Login failed - missing token or user data');
-        return { success: false, message: response.message || translations.loginFailed };
+      const currentToken = await tokenManager.getToken();
+      if (!currentToken || isTokenExpired(currentToken)) {
+        await logout();
+        return;
       }
 
-      // Store token and user data
-      console.log('AuthContext: Storing user data:', JSON.stringify(response.user, null, 2));
-      await AsyncStorage.setItem('token', response.token);
-      await AsyncStorage.setItem('user', JSON.stringify(response.user));
-      
-      setToken(response.token);
-      setUser(response.user);
-      setIsAuthenticated(true);
-      
-      console.log('AuthContext: Login successful, user set to:', JSON.stringify(response.user, null, 2));
-      return { success: true };
-    } catch (error) {
-      console.error('AuthContext: Login error:', error);
-      return { 
-        success: false, 
-        message: error instanceof Error ? error.message : translations.loginFailed 
+      const profileData = await profileAPI.getProfile();
+
+      const userData: User = {
+        id: profileData.id,
+        email: profileData.email,
+        name: profileData.firstName,
+        surname: profileData.lastName,
+        role: profileData.role,
+        verified: profileData.verified,
+        profilePicture: profileData.profilePicture,
+        createdAt: profileData.createdAt,
+        updatedAt: profileData.updatedAt,
       };
+
+      await AsyncStorage.setItem("user", JSON.stringify(userData));
+      setUser(userData);
+    } catch (error: any) {
+      console.error("Error refreshing user:", error);
+      if (error.response?.status === 401) {
+        await logout();
+      }
+      throw error; // Xətanı yuxarıya ötür
+    }
+  };
+
+  const login = async (email: string, password: string) => {
+    try {
+      console.log("AuthContext: Starting login process");
+      const response = await authAPI.login({ email, password });
+      console.log("AuthContext: Login response received");
+
+      // Получаем профиль пользователя после успешного логина
+      const profileData = await profileAPI.getProfile();
+
+      // Создаем объект пользователя
+      const userData: User = {
+        id: profileData.id,
+        email: profileData.email,
+        name: profileData.firstName,
+        surname: profileData.lastName,
+        role: profileData.role,
+        verified: profileData.verified,
+        profilePicture: profileData.profilePicture,
+        createdAt: profileData.createdAt,
+        updatedAt: profileData.updatedAt,
+      };
+
+      // Сохраняем пользователя в AsyncStorage
+      await AsyncStorage.setItem("user", JSON.stringify(userData));
+
+      setToken(response.accessToken);
+      setUser(userData);
+      setIsAuthenticated(true);
+
+      console.log("AuthContext: Login successful");
+    } catch (error: any) {
+      console.error("AuthContext: Login error:", error);
+      const errorMessage =
+        error.response?.data?.message || translations.loginFailed;
+      throw new Error(errorMessage);
     }
   };
 
   const logout = async () => {
     try {
-      await AsyncStorage.removeItem('token');
-      await AsyncStorage.removeItem('user');
+      const currentToken = await tokenManager.getToken();
+      // Token varsa logout API-ni çağır
+      if (currentToken && !isTokenExpired(currentToken)) {
+        await authAPI.logout();
+      }
+    } catch (error) {
+      console.error("Logout API error:", error);
+      // API xətası olsa belə, local logout et
+    } finally {
+      // Həmişə local logout et
+      await AsyncStorage.multiRemove(["user", "accessToken", "refreshToken"]);
+      await tokenManager.removeTokens();
       setToken(null);
       setUser(null);
       setIsAuthenticated(false);
-    } catch (error) {
-      console.error('Logout error:', error);
     }
   };
 
   return (
-    <AuthContext.Provider value={{ isAuthenticated, user, token, login, logout, loading }}>
+    <AuthContext.Provider
+      value={{
+        isAuthenticated,
+        user,
+        token,
+        login,
+        logout,
+        loading,
+        refreshUser, // Добавляем в value
+        updateUser, // Добавляем в value
+      }}
+    >
       {children}
     </AuthContext.Provider>
   );
@@ -144,7 +241,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 export const useAuth = () => {
   const context = useContext(AuthContext);
   if (context === undefined) {
-    throw new Error('useAuth must be used within an AuthProvider');
+    throw new Error("useAuth must be used within an AuthProvider");
   }
   return context;
-}; 
+};

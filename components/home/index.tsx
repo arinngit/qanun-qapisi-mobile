@@ -20,7 +20,7 @@ export default function HomeScreen() {
             <View style={styles.logo}>
               <Image
                 source={require("../../assets/images/qanun.png")}
-                style={{ width: 36, height: 36, resizeMode: "contain" }}
+                style={{ width: 36, height: 36, resizeMode: "contain", borderRadius: 20 }}
                 accessibilityLabel="qanun"
               />
             </View>
@@ -285,7 +285,7 @@ const styles = StyleSheet.create({
     width: 36,
     height: 36,
     backgroundColor: "#7313e8",
-    borderRadius: 10,
+    borderRadius: 20,
     justifyContent: "center",
     alignItems: "center",
     marginRight: 12,

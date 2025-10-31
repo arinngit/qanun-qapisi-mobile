@@ -1,7 +1,10 @@
 import { Ionicons } from "@expo/vector-icons";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useRouter } from "expo-router";
 import React, { useState } from "react";
 import {
+  ActivityIndicator,
+  Alert,
   Image,
   SafeAreaView,
   ScrollView,
@@ -11,14 +14,83 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
+import { authAPI } from "../../services/api";
 
 export default function Login() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [rememberMe, setRememberMe] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
-  const [selectedLanguage, setSelectedLanguage] = useState("az");
+  const [loading, setLoading] = useState(false);
   const router = useRouter();
+
+  const validateForm = () => {
+    if (!email.trim()) {
+      Alert.alert("Xəta", "E-poçt ünvanınızı daxil edin");
+      return false;
+    }
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) {
+      Alert.alert("Xəta", "Düzgün e-poçt ünvanı daxil edin");
+      return false;
+    }
+    if (!password) {
+      Alert.alert("Xəta", "Şifrənizi daxil edin");
+      return false;
+    }
+    return true;
+  };
+
+  const handleLogin = async () => {
+    if (!validateForm()) return;
+
+    setLoading(true);
+    try {
+      const response = await authAPI.login({
+        email: email.trim(),
+        password,
+      });
+
+      // Save tokens
+      await AsyncStorage.setItem("accessToken", response.accessToken);
+      await AsyncStorage.setItem("refreshToken", response.refreshToken);
+
+      if (rememberMe) {
+        await AsyncStorage.setItem("rememberedEmail", email.trim());
+      } else {
+        await AsyncStorage.removeItem("rememberedEmail");
+      }
+
+      Alert.alert("Uğurlu!", "Giriş uğurla tamamlandı", [
+        {
+          text: "OK",
+          onPress: () => router.replace("/(tabs)"),
+        },
+      ]);
+    } catch (error: any) {
+      let errorMessage = "Giriş zamanı xəta baş verdi";
+
+      if (error.response?.data?.message) {
+        errorMessage = error.response.data.message;
+      } else if (error.response?.status === 400) {
+        errorMessage = "E-poçt və ya şifrə yanlışdır";
+      } else if (error.response?.status === 401) {
+        errorMessage =
+          "E-poçt təsdiqlənməyib. Zəhmət olmasa e-poçtunuzu təsdiqləyin";
+      }
+
+      Alert.alert("Xəta", errorMessage);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleForgotPassword = () => {
+    router.push({
+      pathname: "/(auth)/reset-password",
+      params: { email: email.trim() },
+    });
+  };
 
   return (
     <SafeAreaView style={styles.container}>
@@ -27,7 +99,12 @@ export default function Login() {
           <View style={styles.logoContainer}>
             <Image
               source={require("../../assets/images/qanun.png")}
-              style={{width: 80, height: 80, resizeMode: "contain"}}
+              style={{
+                width: 80,
+                height: 80,
+                resizeMode: "contain",
+                borderRadius: 40,
+              }}
               accessibilityLabel="qanun"
             />
           </View>
@@ -60,6 +137,7 @@ export default function Login() {
                 onChangeText={setEmail}
                 keyboardType="email-address"
                 autoCapitalize="none"
+                editable={!loading}
               />
             </View>
           </View>
@@ -80,6 +158,7 @@ export default function Login() {
                 value={password}
                 onChangeText={setPassword}
                 secureTextEntry={!showPassword}
+                editable={!loading}
               />
               <TouchableOpacity onPress={() => setShowPassword(!showPassword)}>
                 <Ionicons
@@ -95,6 +174,7 @@ export default function Login() {
             <TouchableOpacity
               style={styles.checkboxContainer}
               onPress={() => setRememberMe(!rememberMe)}
+              disabled={loading}
             >
               <View
                 style={[styles.checkbox, rememberMe && styles.checkboxChecked]}
@@ -105,16 +185,21 @@ export default function Login() {
               </View>
               <Text style={styles.checkboxLabel}>Məni xatırla</Text>
             </TouchableOpacity>
-            <TouchableOpacity>
+            <TouchableOpacity onPress={handleForgotPassword} disabled={loading}>
               <Text style={styles.forgotPassword}>Şifrəni unutmusan?</Text>
             </TouchableOpacity>
           </View>
 
           <TouchableOpacity
-            style={styles.loginButton}
-            onPress={() => router.push("/(tabs)")}
+            style={[styles.loginButton, loading && styles.buttonDisabled]}
+            onPress={handleLogin}
+            disabled={loading}
           >
-            <Text style={styles.loginButtonText}>Daxil ol</Text>
+            {loading ? (
+              <ActivityIndicator color="#FFFFFF" />
+            ) : (
+              <Text style={styles.loginButtonText}>Daxil ol</Text>
+            )}
           </TouchableOpacity>
 
           <View style={styles.divider}>
@@ -125,48 +210,11 @@ export default function Login() {
 
           <View style={styles.signupContainer}>
             <Text style={styles.signupText}>Hesabınız yoxdur? </Text>
-            <TouchableOpacity onPress={() => router.push("/(auth)/signup")}>
+            <TouchableOpacity
+              onPress={() => router.push("/(auth)/signup")}
+              disabled={loading}
+            >
               <Text style={styles.signupLink}>Qeydiyyatdan keç</Text>
-            </TouchableOpacity>
-          </View>
-        </View>
-
-        <View style={styles.languageContainer}>
-          <Text style={styles.languageLabel}>Dil seçin</Text>
-          <View style={styles.languageButtons}>
-            <TouchableOpacity
-              style={[
-                styles.languageButton,
-                selectedLanguage === "az" && styles.languageButtonActive,
-              ]}
-              onPress={() => setSelectedLanguage("az")}
-            >
-              <Text style={styles.languageFlag}>🇦🇿</Text>
-              <Text
-                style={[
-                  styles.languageText,
-                  selectedLanguage === "az" && styles.languageTextActive,
-                ]}
-              >
-                Azərbaycan
-              </Text>
-            </TouchableOpacity>
-            <TouchableOpacity
-              style={[
-                styles.languageButton,
-                selectedLanguage === "en" && styles.languageButtonActive,
-              ]}
-              onPress={() => setSelectedLanguage("en")}
-            >
-              <Text style={styles.languageFlag}>🇺🇸</Text>
-              <Text
-                style={[
-                  styles.languageText,
-                  selectedLanguage === "en" && styles.languageTextActive,
-                ]}
-              >
-                English
-              </Text>
             </TouchableOpacity>
           </View>
         </View>
@@ -205,7 +253,7 @@ const styles = StyleSheet.create({
     width: 80,
     height: 80,
     backgroundColor: "#7313e8",
-    borderRadius: 20,
+    borderRadius: 40,
     justifyContent: "center",
     alignItems: "center",
     marginBottom: 16,
@@ -313,6 +361,9 @@ const styles = StyleSheet.create({
     alignItems: "center",
     marginBottom: 16,
   },
+  buttonDisabled: {
+    backgroundColor: "#B0BEC5",
+  },
   loginButtonText: {
     color: "#FFFFFF",
     fontSize: 16,
@@ -344,47 +395,6 @@ const styles = StyleSheet.create({
   },
   signupLink: {
     fontSize: 14,
-    color: "#7313e8",
-    fontWeight: "600",
-  },
-  languageContainer: {
-    marginBottom: 24,
-  },
-  languageLabel: {
-    fontSize: 14,
-    color: "#6B7280",
-    textAlign: "center",
-    marginBottom: 12,
-  },
-  languageButtons: {
-    flexDirection: "row",
-    justifyContent: "center",
-    gap: 12,
-  },
-  languageButton: {
-    flexDirection: "row",
-    alignItems: "center",
-    backgroundColor: "#F3F4F6",
-    paddingVertical: 10,
-    paddingHorizontal: 20,
-    borderRadius: 12,
-    borderWidth: 2,
-    borderColor: "transparent",
-  },
-  languageButtonActive: {
-    backgroundColor: "#EFF6FF",
-    borderColor: "#7313e8",
-  },
-  languageFlag: {
-    fontSize: 20,
-    marginRight: 8,
-  },
-  languageText: {
-    fontSize: 14,
-    color: "#6B7280",
-    fontWeight: "500",
-  },
-  languageTextActive: {
     color: "#7313e8",
     fontWeight: "600",
   },

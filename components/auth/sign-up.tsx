@@ -1,6 +1,10 @@
 import { Ionicons } from "@expo/vector-icons";
+import { useRouter } from "expo-router";
 import React, { useState } from "react";
 import {
+  ActivityIndicator,
+  Alert,
+  Image,
   SafeAreaView,
   ScrollView,
   StatusBar,
@@ -10,26 +14,150 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
-import { useRouter } from "expo-router";
+import { authAPI } from "@/services/api";
 
 export default function SignUpScreen() {
-  const [name, setName] = useState("");
-  const [surname, setSurname] = useState("");
+  const [firstName, setFirstName] = useState("");
+  const [lastName, setLastName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [agreeToTerms, setAgreeToTerms] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [passwordStrength, setPasswordStrength] = useState<any>(null);
   const router = useRouter();
 
-  const handleSignUp = () => {
-    console.log("Sign up:", {
-      name,
-      surname,
-      email,
-      password,
-      confirmPassword,
-    });
+  // Локальная функция для оценки силы пароля
+  const estimatePasswordStrength = (password: string) => {
+    let score = 0;
+    const suggestions = [];
+
+    // Длина пароля
+    if (password.length >= 8) score += 1;
+    if (password.length >= 12) score += 1;
+
+    // Наличие цифр
+    if (/\d/.test(password)) score += 1;
+
+    // Наличие букв в разных регистрах
+    if (/[a-z]/.test(password) && /[A-Z]/.test(password)) score += 1;
+
+    // Наличие специальных символов
+    if (/[!@#$%^&*(),.?":{}|<>]/.test(password)) score += 1;
+
+    const levels = ["Çox zəif", "Zəif", "Orta", "Güclü", "Çox güclü"];
+    const crackTimes = [
+      "Bir neçə saniyə",
+      "Bir neçə dəqiqə",
+      "Bir neçə saat",
+      "Bir neçə gün",
+      "Bir neçə il",
+    ];
+
+    return {
+      score,
+      level: levels[score] || "Zəif",
+      message: "Şifrənin gücü",
+      suggestions:
+        score < 3
+          ? [
+              "Şifrəni gücləndirmək üçün rəqəm, böyük hərf və xüsusi simvollar əlavə edin",
+            ]
+          : [],
+      crackTime: crackTimes[score] || "Bir neçə dəqiqə",
+    };
+  };
+
+  // Check password strength in real-time (только локальная проверка)
+  const handlePasswordChange = (text: string) => {
+    setPassword(text);
+
+    if (text.length >= 3) {
+      // Используем только локальную оценку
+      const localStrength = estimatePasswordStrength(text);
+      setPasswordStrength(localStrength);
+    } else {
+      setPasswordStrength(null);
+    }
+  };
+
+  const validateForm = () => {
+    if (!firstName.trim()) {
+      Alert.alert("Xəta", "Adınızı daxil edin");
+      return false;
+    }
+    if (!lastName.trim()) {
+      Alert.alert("Xəta", "Soyadınızı daxil edin");
+      return false;
+    }
+    if (!email.trim()) {
+      Alert.alert("Xəta", "E-poçt ünvanınızı daxil edin");
+      return false;
+    }
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) {
+      Alert.alert("Xəta", "Düzgün e-poçt ünvanı daxil edin");
+      return false;
+    }
+    if (password.length < 8) {
+      Alert.alert("Xəta", "Şifrə ən azı 8 simvoldan ibarət olmalıdır");
+      return false;
+    }
+    if (password !== confirmPassword) {
+      Alert.alert("Xəta", "Şifrələr uyğun gəlmir");
+      return false;
+    }
+    if (!agreeToTerms) {
+      Alert.alert("Xəta", "İstifadə şərtlərini qəbul etməlisiniz");
+      return false;
+    }
+    return true;
+  };
+
+  const handleSignUp = async () => {
+    if (!validateForm()) return;
+
+    setLoading(true);
+    try {
+      await authAPI.signup({
+        email: email.trim(),
+        password,
+        firstName: firstName.trim(),
+        lastName: lastName.trim(),
+      });
+
+      Alert.alert(
+        "Uğurlu!",
+        "Qeydiyyat tamamlandı. E-poçtunuza təsdiq kodu göndərildi.",
+        [
+          {
+            text: "OK",
+            onPress: () =>
+              router.push({
+                pathname: "/(auth)/verify-code",
+                params: { email: email.trim() },
+              }),
+          },
+        ]
+      );
+    } catch (error: any) {
+      console.error("Sign up error:", error);
+      const errorMessage =
+        error.response?.data?.message || "Qeydiyyat zamanı xəta baş verdi";
+      Alert.alert("Xəta", errorMessage);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const getPasswordStrengthColor = () => {
+    if (!passwordStrength) return "#E0E0E0";
+    const level = passwordStrength.level.toLowerCase();
+    if (level.includes("zəif")) return "#EF4444";
+    if (level.includes("orta")) return "#F59E0B";
+    if (level.includes("güclü")) return "#10B981";
+    return "#E0E0E0";
   };
 
   return (
@@ -39,7 +167,16 @@ export default function SignUpScreen() {
         {/* Header */}
         <View style={styles.header}>
           <View style={styles.logoContainer}>
-            <Ionicons name="scale-outline" size={24} color="#fff" />
+            <Image
+              source={require("../../assets/images/qanun.png")}
+              style={{
+                width: 40,
+                height: 40,
+                resizeMode: "contain",
+                borderRadius: 40,
+              }}
+              accessibilityLabel="qanun"
+            />
           </View>
           <Text style={styles.headerTitle}>Qanun Qapısı</Text>
         </View>
@@ -57,7 +194,7 @@ export default function SignUpScreen() {
 
         {/* Form */}
         <View style={styles.formContainer}>
-          {/* Name */}
+          {/* First Name */}
           <View style={styles.inputGroup}>
             <View style={styles.labelContainer}>
               <Text style={styles.label}>Ad</Text>
@@ -65,13 +202,14 @@ export default function SignUpScreen() {
             <TextInput
               style={styles.input}
               placeholder="Adınızı daxil edin"
-              value={name}
-              onChangeText={setName}
+              value={firstName}
+              onChangeText={setFirstName}
               placeholderTextColor="#999"
+              editable={!loading}
             />
           </View>
 
-          {/* Surname */}
+          {/* Last Name */}
           <View style={styles.inputGroup}>
             <View style={styles.labelContainer}>
               <Text style={styles.label}>Soyad</Text>
@@ -79,9 +217,10 @@ export default function SignUpScreen() {
             <TextInput
               style={styles.input}
               placeholder="Soyadınızı daxil edin"
-              value={surname}
-              onChangeText={setSurname}
+              value={lastName}
+              onChangeText={setLastName}
               placeholderTextColor="#999"
+              editable={!loading}
             />
           </View>
 
@@ -98,6 +237,7 @@ export default function SignUpScreen() {
               keyboardType="email-address"
               autoCapitalize="none"
               placeholderTextColor="#999"
+              editable={!loading}
             />
           </View>
 
@@ -111,9 +251,10 @@ export default function SignUpScreen() {
                 style={styles.passwordInput}
                 placeholder="Ən azı 8 simvol"
                 value={password}
-                onChangeText={setPassword}
+                onChangeText={handlePasswordChange}
                 secureTextEntry={!showPassword}
                 placeholderTextColor="#999"
+                editable={!loading}
               />
               <TouchableOpacity onPress={() => setShowPassword(!showPassword)}>
                 <Ionicons
@@ -123,7 +264,36 @@ export default function SignUpScreen() {
                 />
               </TouchableOpacity>
             </View>
-            <Text style={styles.passwordHint}>Şifrə gücü</Text>
+
+            {/* Password Strength Indicator */}
+            {passwordStrength && (
+              <View style={styles.strengthContainer}>
+                <View style={styles.strengthBar}>
+                  <View
+                    style={[
+                      styles.strengthFill,
+                      {
+                        width: `${(passwordStrength.score / 4) * 100}%`,
+                        backgroundColor: getPasswordStrengthColor(),
+                      },
+                    ]}
+                  />
+                </View>
+                <Text
+                  style={[
+                    styles.strengthText,
+                    { color: getPasswordStrengthColor() },
+                  ]}
+                >
+                  {passwordStrength.level} - {passwordStrength.crackTime}
+                </Text>
+                {passwordStrength.suggestions.length > 0 && (
+                  <Text style={styles.suggestionText}>
+                    {passwordStrength.suggestions[0]}
+                  </Text>
+                )}
+              </View>
+            )}
           </View>
 
           {/* Confirm Password */}
@@ -138,6 +308,7 @@ export default function SignUpScreen() {
               onChangeText={setConfirmPassword}
               secureTextEntry={!showPassword}
               placeholderTextColor="#999"
+              editable={!loading}
             />
           </View>
 
@@ -145,6 +316,7 @@ export default function SignUpScreen() {
           <TouchableOpacity
             style={styles.checkboxContainer}
             onPress={() => setAgreeToTerms(!agreeToTerms)}
+            disabled={loading}
           >
             <View
               style={[styles.checkbox, agreeToTerms && styles.checkboxChecked]}
@@ -163,37 +335,25 @@ export default function SignUpScreen() {
           <TouchableOpacity
             style={[
               styles.signUpButton,
-              !agreeToTerms && styles.buttonDisabled,
+              (!agreeToTerms || loading) && styles.buttonDisabled,
             ]}
             onPress={handleSignUp}
-            disabled={!agreeToTerms}
+            disabled={!agreeToTerms || loading}
           >
-            <Text style={styles.signUpButtonText}>Hesab Yarat →</Text>
+            {loading ? (
+              <ActivityIndicator color="#fff" />
+            ) : (
+              <Text style={styles.signUpButtonText}>Hesab Yarat →</Text>
+            )}
           </TouchableOpacity>
-
-          {/* Divider */}
-          <View style={styles.dividerContainer}>
-            <View style={styles.dividerLine} />
-            <Text style={styles.dividerText}>və ya</Text>
-            <View style={styles.dividerLine} />
-          </View>
-
-          {/* Social Buttons */}
-          <View style={styles.socialButtons}>
-            <TouchableOpacity style={styles.socialButton}>
-              <Ionicons name="logo-google" size={20} color="#DB4437" />
-              <Text style={styles.socialButtonText}>Google</Text>
-            </TouchableOpacity>
-            <TouchableOpacity style={styles.socialButton}>
-              <Ionicons name="logo-facebook" size={20} color="#1877F2" />
-              <Text style={styles.socialButtonText}>Facebook</Text>
-            </TouchableOpacity>
-          </View>
 
           {/* Sign In Link */}
           <View style={styles.signInContainer}>
             <Text style={styles.signInText}>Artıq hesabınız var? </Text>
-            <TouchableOpacity onPress={() => router.push("/(auth)/login")}>
+            <TouchableOpacity
+              onPress={() => router.push("/(auth)/login")}
+              disabled={loading}
+            >
               <Text style={styles.signInLink}>Giriş edin</Text>
             </TouchableOpacity>
           </View>
@@ -271,14 +431,11 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     paddingVertical: 12,
   },
-  backButton: {
-    padding: 8,
-  },
   logoContainer: {
     width: 40,
     height: 40,
-    borderRadius: 12,
-    backgroundColor: "#7313e8", // фиолетовый
+    borderRadius: 20,
+    backgroundColor: "#7313e8",
     alignItems: "center",
     justifyContent: "center",
     marginLeft: 8,
@@ -352,10 +509,28 @@ const styles = StyleSheet.create({
     paddingVertical: 14,
     fontSize: 16,
   },
-  passwordHint: {
+  strengthContainer: {
+    marginTop: 8,
+  },
+  strengthBar: {
+    height: 4,
+    backgroundColor: "#E0E0E0",
+    borderRadius: 2,
+    overflow: "hidden",
+  },
+  strengthFill: {
+    height: "100%",
+    borderRadius: 2,
+  },
+  strengthText: {
     fontSize: 12,
-    color: "#999",
     marginTop: 4,
+    fontWeight: "500",
+  },
+  suggestionText: {
+    fontSize: 11,
+    color: "#666",
+    marginTop: 2,
   },
   checkboxContainer: {
     flexDirection: "row",
@@ -366,14 +541,14 @@ const styles = StyleSheet.create({
     width: 20,
     height: 20,
     borderWidth: 2,
-    borderColor: "#7313e8", // фиолетовый
+    borderColor: "#7313e8",
     borderRadius: 4,
     alignItems: "center",
     justifyContent: "center",
     marginRight: 8,
   },
   checkboxChecked: {
-    backgroundColor: "#7313e8", // фиолетовый
+    backgroundColor: "#7313e8",
   },
   checkboxText: {
     fontSize: 13,
@@ -381,11 +556,11 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   link: {
-    color: "#7313e8", // фиолетовый
+    color: "#7313e8",
     fontWeight: "500",
   },
   signUpButton: {
-    backgroundColor: "#7313e8", // фиолетовый
+    backgroundColor: "#7313e8",
     borderRadius: 12,
     paddingVertical: 16,
     alignItems: "center",
@@ -400,43 +575,6 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: "600",
   },
-  dividerContainer: {
-    flexDirection: "row",
-    alignItems: "center",
-    marginVertical: 20,
-  },
-  dividerLine: {
-    flex: 1,
-    height: 1,
-    backgroundColor: "#E0E0E0",
-  },
-  dividerText: {
-    marginHorizontal: 16,
-    color: "#999",
-    fontSize: 14,
-  },
-  socialButtons: {
-    flexDirection: "row",
-    gap: 12,
-    marginBottom: 24,
-  },
-  socialButton: {
-    flex: 1,
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "center",
-    borderWidth: 1,
-    borderColor: "#E0E0E0",
-    borderRadius: 12,
-    paddingVertical: 12,
-    backgroundColor: "#fff",
-  },
-  socialButtonText: {
-    fontSize: 14,
-    fontWeight: "500",
-    color: "#333",
-    marginLeft: 8,
-  },
   signInContainer: {
     flexDirection: "row",
     justifyContent: "center",
@@ -449,7 +587,7 @@ const styles = StyleSheet.create({
   },
   signInLink: {
     fontSize: 14,
-    color: "#7313e8", // фиолетовый
+    color: "#7313e8",
     fontWeight: "600",
   },
   featuresSection: {

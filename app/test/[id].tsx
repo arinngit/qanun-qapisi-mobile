@@ -144,14 +144,6 @@ export default function TestDetailScreen() {
           </View>
 
           <View style={styles.infoCard}>
-            <View style={[styles.infoIcon, { backgroundColor: "#D1FAE5" }]}>
-              <Ionicons name="bar-chart-outline" size={24} color="#059669" />
-            </View>
-            <Text style={styles.infoValue}>Orta</Text>
-            <Text style={styles.infoLabel}>Çətinlik</Text>
-          </View>
-
-          <View style={styles.infoCard}>
             <View style={[styles.infoIcon, { backgroundColor: "#FEF3C7" }]}>
               <Ionicons name="people-outline" size={24} color="#D97706" />
             </View>
@@ -247,9 +239,6 @@ export default function TestDetailScreen() {
             Bu testi başlamazdan əvvəl aşağıdakıları nəzərə alın:
           </Text>
           <View style={styles.tipsList}>
-            <Text style={styles.tipItem}>
-              • Mülki Məcəllənin əsas müddəalarını oxuyun
-            </Text>
             <Text style={styles.tipItem}>• Sakit bir mühitdə test verin</Text>
             <Text style={styles.tipItem}>
               • İnternet bağlantınızın sabit olduğundan əmin olun
@@ -271,7 +260,6 @@ export default function TestDetailScreen() {
         <TouchableOpacity
           style={styles.startButton}
           onPress={() => {
-            // Navigate to quiz screen
             console.log("Start test");
           }}
         >

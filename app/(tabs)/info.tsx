@@ -56,7 +56,7 @@ export default function InfoScreen() {
       >
         {/* Gradient Header */}
         <LinearGradient
-          colors={[tintColor, `${tintColor}CC`, `${tintColor}99`]}
+          colors={["#7313e8", `#7313e8`, `#7313e8`]}
           style={styles.headerGradient}
           start={{ x: 0, y: 0 }}
           end={{ x: 1, y: 1 }}
@@ -88,7 +88,7 @@ export default function InfoScreen() {
             {/* Photo with gradient ring */}
             <View style={styles.photoWrapper}>
               <LinearGradient
-                colors={[tintColor, `${tintColor}80`, tintColor]}
+                colors={["#7313e8", `#7313e8`, "#7313e8"]}
                 style={styles.photoGradientRing}
                 start={{ x: 0, y: 0 }}
                 end={{ x: 1, y: 1 }}
@@ -121,7 +121,7 @@ export default function InfoScreen() {
 
               {/* Status Badge */}
               <View
-                style={[styles.statusBadge, { backgroundColor: "#4CAF50" }]}
+                style={[styles.statusBadge, { backgroundColor: "#7313e8" }]}
               >
                 <Ionicons name="checkmark-circle" size={16} color="#fff" />
               </View>
@@ -135,8 +135,8 @@ export default function InfoScreen() {
             <View
               style={[styles.roleBadge, { backgroundColor: `${tintColor}15` }]}
             >
-              <Ionicons name="briefcase-outline" size={14} color={tintColor} />
-              <ThemedText style={[styles.roleText, { color: tintColor }]}>
+              <Ionicons name="briefcase-outline" size={14} color={"#7313e8"} />
+              <ThemedText style={[styles.roleText, { color: "#7313e8" }]}>
                 Professor
               </ThemedText>
             </View>
@@ -152,7 +152,7 @@ export default function InfoScreen() {
               onPress={() => handleCall(professorData.phone)}
             >
               <LinearGradient
-                colors={["#4CAF50", "#45a049"]}
+                colors={["#7313e8", "#7313e8"]}
                 style={styles.quickActionIconContainer}
                 start={{ x: 0, y: 0 }}
                 end={{ x: 1, y: 1 }}
@@ -170,7 +170,7 @@ export default function InfoScreen() {
               onPress={handleEmail}
             >
               <LinearGradient
-                colors={["#2196F3", "#1976D2"]}
+                colors={["#7313e8", "#7313e8"]}
                 style={styles.quickActionIconContainer}
                 start={{ x: 0, y: 0 }}
                 end={{ x: 1, y: 1 }}
@@ -188,7 +188,7 @@ export default function InfoScreen() {
               onPress={() => handleCall(professorData.phone2)}
             >
               <LinearGradient
-                colors={["#FF9800", "#F57C00"]}
+                colors={["#7313e8", "#7313e8"]}
                 style={styles.quickActionIconContainer}
                 start={{ x: 0, y: 0 }}
                 end={{ x: 1, y: 1 }}
@@ -225,10 +225,10 @@ export default function InfoScreen() {
                 <View
                   style={[
                     styles.contactIconContainer,
-                    { backgroundColor: "#4CAF5015" },
+                    { backgroundColor: "#7313e8" },
                   ]}
                 >
-                  <Ionicons name="call" size={22} color="#4CAF50" />
+                  <Ionicons name="call" size={22} color="#fff" />
                 </View>
                 <View style={styles.contactInfo}>
                   <ThemedText style={styles.contactLabel}>
@@ -241,10 +241,10 @@ export default function InfoScreen() {
                 <View
                   style={[
                     styles.actionButton,
-                    { backgroundColor: "#4CAF5015" },
+                    { backgroundColor: "#7313e8" },
                   ]}
                 >
-                  <Ionicons name="arrow-forward" size={18} color="#4CAF50" />
+                  <Ionicons name="arrow-forward" size={18} color="#fff" />
                 </View>
               </TouchableOpacity>
 
@@ -259,10 +259,10 @@ export default function InfoScreen() {
                 <View
                   style={[
                     styles.contactIconContainer,
-                    { backgroundColor: "#FF980015" },
+                    { backgroundColor: "#7313e8" },
                   ]}
                 >
-                  <Ionicons name="phone-portrait" size={22} color="#FF9800" />
+                  <Ionicons name="phone-portrait" size={22} color="#fff" />
                 </View>
                 <View style={styles.contactInfo}>
                   <ThemedText style={styles.contactLabel}>
@@ -275,10 +275,10 @@ export default function InfoScreen() {
                 <View
                   style={[
                     styles.actionButton,
-                    { backgroundColor: "#FF980015" },
+                    { backgroundColor: "#7313e8" },
                   ]}
                 >
-                  <Ionicons name="arrow-forward" size={18} color="#FF9800" />
+                  <Ionicons name="arrow-forward" size={18} color="#fff" />
                 </View>
               </TouchableOpacity>
 
@@ -290,10 +290,10 @@ export default function InfoScreen() {
                 <View
                   style={[
                     styles.contactIconContainer,
-                    { backgroundColor: "#2196F315" },
+                    { backgroundColor: "#7313e8" },
                   ]}
                 >
-                  <Ionicons name="mail" size={22} color="#2196F3" />
+                  <Ionicons name="mail" size={22} color="#fff" />
                 </View>
                 <View style={styles.contactInfo}>
                   <ThemedText style={styles.contactLabel}>
@@ -306,10 +306,10 @@ export default function InfoScreen() {
                 <View
                   style={[
                     styles.actionButton,
-                    { backgroundColor: "#2196F315" },
+                    { backgroundColor: "#7313e8" },
                   ]}
                 >
-                  <Ionicons name="arrow-forward" size={18} color="#2196F3" />
+                  <Ionicons name="arrow-forward" size={18} color="#fff" />
                 </View>
               </TouchableOpacity>
             </View>
