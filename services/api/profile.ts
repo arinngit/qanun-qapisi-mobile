@@ -1,14 +1,17 @@
 import { api } from './config';
 
-// Profile Types
+// Profile Types (matches backend ProfileResponse exactly)
 export interface ProfileResponse {
   id: string;
   email: string;
   firstName: string;
   lastName: string;
-  role: string;
+  dateOfBirth: string | null;
+  profilePictureUrl: string | null;
+  isPremium: boolean;
   verified: boolean;
-  profilePicture?: string;
+  role: string;
+  lastLoginAt: string | null;
   createdAt: string;
   updatedAt: string;
 }

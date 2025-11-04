@@ -12,7 +12,7 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
-import { authAPI } from "../../services/api";
+import { authAPI, profileAPI } from "../../services/api";
 
 export default function VerifyScreen() {
   const params = useLocalSearchParams();
@@ -22,7 +22,7 @@ export default function VerifyScreen() {
   const [code, setCode] = useState(["", "", "", "", "", ""]);
   const [loading, setLoading] = useState(false);
   const [resending, setResending] = useState(false);
-  const inputRefs = useRef<Array<TextInput | null>>([]);
+  const inputRefs = useRef<(TextInput | null)[]>([]);
 
   // Инициализируем refs массив
   React.useEffect(() => {
@@ -75,6 +75,27 @@ export default function VerifyScreen() {
       // Save tokens
       await AsyncStorage.setItem("accessToken", response.accessToken);
       await AsyncStorage.setItem("refreshToken", response.refreshToken);
+
+      // Fetch and save user profile data (important for verified status)
+      try {
+        const profileData = await profileAPI.getProfile();
+        const userData = {
+          id: profileData.id,
+          email: profileData.email,
+          firstName: profileData.firstName,
+          lastName: profileData.lastName,
+          role: profileData.role,
+          verified: profileData.verified,
+          profilePicture: profileData.profilePictureUrl || undefined,
+          isPremium: profileData.isPremium,
+          createdAt: profileData.createdAt,
+          updatedAt: profileData.updatedAt,
+        };
+        await AsyncStorage.setItem("user", JSON.stringify(userData));
+      } catch (profileError) {
+        console.error("Error fetching profile after verification:", profileError);
+        // Continue anyway, auth context will fetch it
+      }
 
       Alert.alert("Təbriklər!", "E-poçtunuz uğurla təsdiqləndi", [
         {

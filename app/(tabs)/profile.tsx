@@ -1,11 +1,12 @@
 import { ThemedText } from "@/components/theme/themed-text";
 import { translations } from "@/constants/translations";
 import { useAuth } from "@/context/auth-context";
+import { useLanguage } from "@/context/language-context";
+import { useTheme } from "@/context/theme-context";
 import { useThemeColor } from "@/hooks/use-theme-color";
 import { profileAPI } from "@/services/api";
 import { Ionicons } from "@expo/vector-icons";
 import * as ImagePicker from "expo-image-picker";
-import { LinearGradient } from "expo-linear-gradient";
 import { router } from "expo-router";
 import React, { useState } from "react";
 import {
@@ -18,13 +19,18 @@ import {
   RefreshControl,
   ScrollView,
   StyleSheet,
+  Switch,
+  Text,
   TextInput,
   TouchableOpacity,
   View,
 } from "react-native";
+import PremiumRequestModal from "@/components/premium/PremiumRequestModal";
 
 export default function Profile() {
   const { user, logout, refreshUser, updateUser } = useAuth();
+  const { language, setLanguage, t } = useLanguage();
+  const { themeMode, isDark, colors, setThemeMode } = useTheme();
   const tintColor = useThemeColor({}, "tint");
   const backgroundColor = useThemeColor({}, "background");
   const textColor = useThemeColor({}, "text");
@@ -36,10 +42,11 @@ export default function Profile() {
   const [changePasswordModal, setChangePasswordModal] = useState(false);
   const [changeEmailModal, setChangeEmailModal] = useState(false);
   const [verifyEmailModal, setVerifyEmailModal] = useState(false);
+  const [premiumRequestModal, setPremiumRequestModal] = useState(false);
 
   // Form states
-  const [firstName, setFirstName] = useState(user?.name || "");
-  const [lastName, setLastName] = useState(user?.surname || "");
+  const [firstName, setFirstName] = useState(user?.firstName || "");
+  const [lastName, setLastName] = useState(user?.lastName || "");
   const [currentPassword, setCurrentPassword] = useState("");
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
@@ -82,8 +89,8 @@ export default function Profile() {
   };
 
   const handleEditProfile = () => {
-    setFirstName(user?.name || "");
-    setLastName(user?.surname || "");
+    setFirstName(user?.firstName || "");
+    setLastName(user?.lastName || "");
     setEditProfileModal(true);
   };
 
@@ -102,8 +109,8 @@ export default function Profile() {
 
       // Update local user state
       updateUser({
-        name: firstName.trim(),
-        surname: lastName.trim(),
+        firstName: firstName.trim(),
+        lastName: lastName.trim(),
       });
 
       Alert.alert("Uğurlu", "Profil məlumatları yeniləndi");
@@ -245,7 +252,7 @@ export default function Profile() {
       }
 
       const result = await ImagePicker.launchImageLibraryAsync({
-        mediaTypes: ImagePicker.MediaTypeOptions.Images,
+        mediaTypes: ['images'],
         allowsEditing: true,
         aspect: [1, 1],
         quality: 0.8,
@@ -333,7 +340,7 @@ export default function Profile() {
   return (
     <>
       <ScrollView
-        style={[styles.container, { backgroundColor }]}
+        style={[styles.container, { backgroundColor: "#f5f5f5" }]}
         refreshControl={
           <RefreshControl
             refreshing={refreshing}
@@ -342,20 +349,15 @@ export default function Profile() {
           />
         }
       >
-        {/* Header with gradient */}
-        <LinearGradient
-          colors={["#7313e8", "#8a2de8"]}
-          style={styles.headerGradient}
-          start={{ x: 0, y: 0 }}
-          end={{ x: 1, y: 1 }}
-        >
+        {/* Header with light background */}
+        <View style={styles.headerLight}>
           <View style={styles.headerContent}>
             {/* Avatar with ring */}
             <View style={styles.avatarWrapper}>
               <View
                 style={[
                   styles.avatarRing,
-                  { borderColor: "rgba(255,255,255,0.3)" },
+                  { borderColor: "#7313e8" },
                 ]}
               >
                 <View style={styles.avatarContainer}>
@@ -365,7 +367,7 @@ export default function Profile() {
                       style={styles.avatarImage}
                     />
                   ) : (
-                    <Ionicons name="person-circle" size={90} color="#fff" />
+                    <Ionicons name="person-circle" size={90} color="#7313e8" />
                   )}
                 </View>
               </View>
@@ -391,31 +393,10 @@ export default function Profile() {
               )}
             </View>
 
-            <ThemedText type="title" style={styles.name}>
-              {user ? `${user.name} ${user.surname}` : translations.user}
+            <ThemedText type="title" style={styles.nameLight}>
+              {user ? `${user.firstName} ${user.lastName}` : translations.user}
             </ThemedText>
-            <ThemedText style={styles.email}>{user?.email}</ThemedText>
-
-            <View style={styles.verificationBadge}>
-              <Ionicons
-                name={user?.verified ? "checkmark-circle" : "time-outline"}
-                size={16}
-                color="#fff"
-              />
-              <ThemedText style={styles.verificationText}>
-                {user?.verified ? "Təsdiqlənmiş" : "Təsdiqlənməmiş"}
-              </ThemedText>
-            </View>
-
-            {user?.role && (
-              <View style={styles.roleBadge}>
-                <ThemedText style={styles.roleText}>
-                  {user.role === "USER"
-                    ? "İstifadəçi"
-                    : user.role.toLowerCase()}
-                </ThemedText>
-              </View>
-            )}
+            <ThemedText style={styles.emailLight}>{user?.email}</ThemedText>
 
             <TouchableOpacity
               style={styles.editProfileButton}
@@ -427,30 +408,55 @@ export default function Profile() {
               </ThemedText>
             </TouchableOpacity>
           </View>
-        </LinearGradient>
+        </View>
 
         {/* Statistics cards */}
         <View style={styles.statsContainer}>
-          <View style={[styles.statCard, { backgroundColor }]}>
-            <Ionicons name="calendar-outline" size={24} color={tintColor} />
+          <View style={[styles.statCard, { backgroundColor: "#fff" }]}>
+            <Ionicons name="calendar-outline" size={24} color="#7313e8" />
             <ThemedText type="subtitle" style={styles.statNumber}>
               {user ? formatDate(user.createdAt) : "-"}
             </ThemedText>
             <ThemedText style={styles.statLabel}>Qeydiyyat Tarixi</ThemedText>
           </View>
 
-          <View style={[styles.statCard, { backgroundColor }]}>
+          <View style={[styles.statCard, { backgroundColor: "#fff" }]}>
             <Ionicons
-              name="shield-checkmark-outline"
+              name={user?.isPremium ? "star" : "star-outline"}
               size={24}
-              color={tintColor}
+              color={user?.isPremium ? "#F59E0B" : "#9CA3AF"}
             />
             <ThemedText type="subtitle" style={styles.statNumber}>
-              {user?.verified ? "Bəli" : "Xeyr"}
+              {user?.isPremium ? "Premium" : "Standart"}
             </ThemedText>
-            <ThemedText style={styles.statLabel}>E-poçt Təsdiqli</ThemedText>
+            <ThemedText style={styles.statLabel}>Abunəlik</ThemedText>
           </View>
         </View>
+
+        {/* Premium Request Button - Only for non-premium users */}
+        {!user?.isPremium && (
+          <View style={styles.premiumSection}>
+            <TouchableOpacity
+              style={styles.premiumButton}
+              onPress={() => setPremiumRequestModal(true)}
+            >
+              <View style={styles.premiumButtonContent}>
+                <View style={styles.premiumIconContainer}>
+                  <Ionicons name="star" size={24} color="#F59E0B" />
+                </View>
+                <View style={styles.premiumTextContainer}>
+                  <ThemedText style={styles.premiumButtonTitle}>
+                    Premium Abunəlik
+                  </ThemedText>
+                  <ThemedText style={styles.premiumButtonSubtitle}>
+                    Bütün testlərə giriş əldə edin
+                  </ThemedText>
+                </View>
+                <Ionicons name="chevron-forward" size={20} color="#9CA3AF" />
+              </View>
+            </TouchableOpacity>
+          </View>
+        )}
 
         {/* Settings section */}
         <View style={styles.section}>
@@ -458,11 +464,11 @@ export default function Profile() {
             Tənzimləmələr
           </ThemedText>
 
-          <View style={[styles.menuCard, { backgroundColor }]}>
+          <View style={[styles.menuCard, { backgroundColor: "#fff" }]}>
             <TouchableOpacity
               style={[
                 styles.menuItem,
-                { borderBottomColor: `${borderColor}20` },
+                { borderBottomColor: "#E5E7EB" },
               ]}
               onPress={handleEditProfile}
             >
@@ -474,13 +480,13 @@ export default function Profile() {
               <ThemedText style={styles.menuText}>
                 Profil Məlumatları
               </ThemedText>
-              <Ionicons name="chevron-forward" size={20} color={borderColor} />
+              <Ionicons name="chevron-forward" size={20} color="#9CA3AF" />
             </TouchableOpacity>
 
             <TouchableOpacity
               style={[
                 styles.menuItem,
-                { borderBottomColor: `${borderColor}20` },
+                { borderBottomColor: "#E5E7EB" },
               ]}
               onPress={handleChangePassword}
             >
@@ -490,13 +496,13 @@ export default function Profile() {
                 <Ionicons name="lock-closed-outline" size={22} color="#fff" />
               </View>
               <ThemedText style={styles.menuText}>Şifrəni Dəyiş</ThemedText>
-              <Ionicons name="chevron-forward" size={20} color={borderColor} />
+              <Ionicons name="chevron-forward" size={20} color="#9CA3AF" />
             </TouchableOpacity>
 
             <TouchableOpacity
               style={[
                 styles.menuItem,
-                { borderBottomColor: `${borderColor}20` },
+                { borderBottomColor: "#E5E7EB" },
               ]}
               onPress={handleChangeEmail}
             >
@@ -506,11 +512,14 @@ export default function Profile() {
                 <Ionicons name="mail-outline" size={22} color="#fff" />
               </View>
               <ThemedText style={styles.menuText}>E-poçtu Dəyiş</ThemedText>
-              <Ionicons name="chevron-forward" size={20} color={borderColor} />
+              <Ionicons name="chevron-forward" size={20} color="#9CA3AF" />
             </TouchableOpacity>
 
             <TouchableOpacity
-              style={styles.menuItem}
+              style={[
+                styles.menuItem,
+                { borderBottomColor: "#E5E7EB" },
+              ]}
               onPress={() =>
                 Alert.alert(
                   "Xəbərdarlıq",
@@ -524,7 +533,50 @@ export default function Profile() {
                 <Ionicons name="notifications-outline" size={22} color="#fff" />
               </View>
               <ThemedText style={styles.menuText}>Bildirişlər</ThemedText>
-              <Ionicons name="chevron-forward" size={20} color={borderColor} />
+              <Ionicons name="chevron-forward" size={20} color="#9CA3AF" />
+            </TouchableOpacity>
+
+            {/* Dark Mode Toggle */}
+            <View
+              style={[
+                styles.menuItem,
+                { borderBottomColor: "#E5E7EB" },
+              ]}
+            >
+              <View
+                style={[styles.iconContainer, { backgroundColor: "#7313e8" }]}
+              >
+                <Ionicons name={isDark ? "moon" : "sunny"} size={22} color="#fff" />
+              </View>
+              <ThemedText style={styles.menuText}>
+                {isDark ? t.lightMode : t.darkMode}
+              </ThemedText>
+              <Switch
+                value={isDark}
+                onValueChange={(value) => setThemeMode(value ? 'dark' : 'light')}
+                trackColor={{ false: '#D1D5DB', true: '#7313e8' }}
+                thumbColor="#fff"
+                ios_backgroundColor="#D1D5DB"
+              />
+            </View>
+
+            {/* Language Selector */}
+            <TouchableOpacity
+              style={styles.menuItem}
+              onPress={() => setLanguage(language === 'az' ? 'en' : 'az')}
+            >
+              <View
+                style={[styles.iconContainer, { backgroundColor: "#7313e8" }]}
+              >
+                <Ionicons name="language-outline" size={22} color="#fff" />
+              </View>
+              <ThemedText style={styles.menuText}>{t.language}</ThemedText>
+              <View style={styles.languageBadge}>
+                <Text style={styles.languageText}>
+                  {language === 'az' ? 'AZ' : 'EN'}
+                </Text>
+              </View>
+              <Ionicons name="chevron-forward" size={20} color="#9CA3AF" />
             </TouchableOpacity>
           </View>
         </View>
@@ -535,11 +587,11 @@ export default function Profile() {
             Əlavə
           </ThemedText>
 
-          <View style={[styles.menuCard, { backgroundColor }]}>
+          <View style={[styles.menuCard, { backgroundColor: "#fff" }]}>
             <TouchableOpacity
               style={[
                 styles.menuItem,
-                { borderBottomColor: `${borderColor}20` },
+                { borderBottomColor: "#E5E7EB" },
               ]}
               onPress={() =>
                 Alert.alert(
@@ -554,13 +606,13 @@ export default function Profile() {
                 <Ionicons name="help-circle-outline" size={22} color={"#fff"} />
               </View>
               <ThemedText style={styles.menuText}>Kömək və Dəstək</ThemedText>
-              <Ionicons name="chevron-forward" size={20} color={borderColor} />
+              <Ionicons name="chevron-forward" size={20} color="#9CA3AF" />
             </TouchableOpacity>
 
             <TouchableOpacity
               style={[
                 styles.menuItem,
-                { borderBottomColor: `${borderColor}20` },
+                { borderBottomColor: "#E5E7EB" },
               ]}
               onPress={() =>
                 Alert.alert(
@@ -579,19 +631,19 @@ export default function Profile() {
                 />
               </View>
               <ThemedText style={styles.menuText}>Tətbiq Haqqında</ThemedText>
-              <Ionicons name="chevron-forward" size={20} color={borderColor} />
+              <Ionicons name="chevron-forward" size={20} color="#9CA3AF" />
             </TouchableOpacity>
 
             <TouchableOpacity style={styles.menuItem} onPress={handleLogout}>
               <View
-                style={[styles.iconContainer, { backgroundColor: "#FF3B3015" }]}
+                style={[styles.iconContainer, { backgroundColor: "#FEE2E2" }]}
               >
-                <Ionicons name="log-out-outline" size={22} color="#FF3B30" />
+                <Ionicons name="log-out-outline" size={22} color="#EF4444" />
               </View>
-              <ThemedText style={[styles.menuText, { color: "#FF3B30" }]}>
+              <ThemedText style={[styles.menuText, { color: "#EF4444" }]}>
                 {translations.logout}
               </ThemedText>
-              <Ionicons name="chevron-forward" size={20} color="#FF3B30" />
+              <Ionicons name="chevron-forward" size={20} color="#EF4444" />
             </TouchableOpacity>
           </View>
         </View>
@@ -612,13 +664,13 @@ export default function Profile() {
           behavior={Platform.OS === "ios" ? "padding" : "height"}
           style={styles.modalOverlay}
         >
-          <View style={[styles.modalContent, { backgroundColor }]}>
+          <View style={[styles.modalContent, { backgroundColor: "#fff" }]}>
             <View style={styles.modalHeader}>
               <ThemedText type="subtitle" style={styles.modalTitle}>
                 Profili Redaktə Et
               </ThemedText>
               <TouchableOpacity onPress={() => setEditProfileModal(false)}>
-                <Ionicons name="close" size={24} color={textColor} />
+                <Ionicons name="close" size={24} color="#111827" />
               </TouchableOpacity>
             </View>
 
@@ -627,24 +679,24 @@ export default function Profile() {
               <TextInput
                 style={[
                   styles.input,
-                  { backgroundColor: `${borderColor}10`, color: textColor },
+                  { backgroundColor: "#F3F4F6", color: "#111827" },
                 ]}
                 value={firstName}
                 onChangeText={setFirstName}
                 placeholder="Adınızı daxil edin"
-                placeholderTextColor={`${textColor}60`}
+                placeholderTextColor="#9CA3AF"
               />
 
               <ThemedText style={styles.inputLabel}>Soyad</ThemedText>
               <TextInput
                 style={[
                   styles.input,
-                  { backgroundColor: `${borderColor}10`, color: textColor },
+                  { backgroundColor: "#F3F4F6", color: "#111827" },
                 ]}
                 value={lastName}
                 onChangeText={setLastName}
                 placeholder="Soyadınızı daxil edin"
-                placeholderTextColor={`${textColor}60`}
+                placeholderTextColor="#9CA3AF"
               />
 
               <TouchableOpacity
@@ -679,13 +731,13 @@ export default function Profile() {
           behavior={Platform.OS === "ios" ? "padding" : "height"}
           style={styles.modalOverlay}
         >
-          <View style={[styles.modalContent, { backgroundColor }]}>
+          <View style={[styles.modalContent, { backgroundColor: "#fff" }]}>
             <View style={styles.modalHeader}>
               <ThemedText type="subtitle" style={styles.modalTitle}>
                 Şifrəni Dəyiş
               </ThemedText>
               <TouchableOpacity onPress={() => setChangePasswordModal(false)}>
-                <Ionicons name="close" size={24} color={textColor} />
+                <Ionicons name="close" size={24} color="#111827" />
               </TouchableOpacity>
             </View>
 
@@ -694,12 +746,12 @@ export default function Profile() {
               <TextInput
                 style={[
                   styles.input,
-                  { backgroundColor: `${borderColor}10`, color: textColor },
+                  { backgroundColor: "#F3F4F6", color: "#111827" },
                 ]}
                 value={currentPassword}
                 onChangeText={setCurrentPassword}
                 placeholder="Cari şifrənizi daxil edin"
-                placeholderTextColor={`${textColor}60`}
+                placeholderTextColor="#9CA3AF"
                 secureTextEntry
               />
 
@@ -707,12 +759,12 @@ export default function Profile() {
               <TextInput
                 style={[
                   styles.input,
-                  { backgroundColor: `${borderColor}10`, color: textColor },
+                  { backgroundColor: "#F3F4F6", color: "#111827" },
                 ]}
                 value={newPassword}
                 onChangeText={setNewPassword}
                 placeholder="Yeni şifrənizi daxil edin"
-                placeholderTextColor={`${textColor}60`}
+                placeholderTextColor="#9CA3AF"
                 secureTextEntry
               />
 
@@ -722,12 +774,12 @@ export default function Profile() {
               <TextInput
                 style={[
                   styles.input,
-                  { backgroundColor: `${borderColor}10`, color: textColor },
+                  { backgroundColor: "#F3F4F6", color: "#111827" },
                 ]}
                 value={confirmPassword}
                 onChangeText={setConfirmPassword}
                 placeholder="Yeni şifrəni təkrar daxil edin"
-                placeholderTextColor={`${textColor}60`}
+                placeholderTextColor="#9CA3AF"
                 secureTextEntry
               />
 
@@ -763,13 +815,13 @@ export default function Profile() {
           behavior={Platform.OS === "ios" ? "padding" : "height"}
           style={styles.modalOverlay}
         >
-          <View style={[styles.modalContent, { backgroundColor }]}>
+          <View style={[styles.modalContent, { backgroundColor: "#fff" }]}>
             <View style={styles.modalHeader}>
               <ThemedText type="subtitle" style={styles.modalTitle}>
                 E-poçtu Dəyiş
               </ThemedText>
               <TouchableOpacity onPress={() => setChangeEmailModal(false)}>
-                <Ionicons name="close" size={24} color={textColor} />
+                <Ionicons name="close" size={24} color="#111827" />
               </TouchableOpacity>
             </View>
 
@@ -780,12 +832,12 @@ export default function Profile() {
               <TextInput
                 style={[
                   styles.input,
-                  { backgroundColor: `${borderColor}10`, color: textColor },
+                  { backgroundColor: "#F3F4F6", color: "#111827" },
                 ]}
                 value={newEmail}
                 onChangeText={setNewEmail}
                 placeholder="Yeni e-poçt ünvanınızı daxil edin"
-                placeholderTextColor={`${textColor}60`}
+                placeholderTextColor="#9CA3AF"
                 keyboardType="email-address"
                 autoCapitalize="none"
               />
@@ -826,13 +878,13 @@ export default function Profile() {
           behavior={Platform.OS === "ios" ? "padding" : "height"}
           style={styles.modalOverlay}
         >
-          <View style={[styles.modalContent, { backgroundColor }]}>
+          <View style={[styles.modalContent, { backgroundColor: "#fff" }]}>
             <View style={styles.modalHeader}>
               <ThemedText type="subtitle" style={styles.modalTitle}>
                 E-poçtu Təsdiqlə
               </ThemedText>
               <TouchableOpacity onPress={() => setVerifyEmailModal(false)}>
-                <Ionicons name="close" size={24} color={textColor} />
+                <Ionicons name="close" size={24} color="#111827" />
               </TouchableOpacity>
             </View>
 
@@ -841,12 +893,12 @@ export default function Profile() {
               <TextInput
                 style={[
                   styles.input,
-                  { backgroundColor: `${borderColor}10`, color: textColor },
+                  { backgroundColor: "#F3F4F6", color: "#111827" },
                 ]}
                 value={verificationCode}
                 onChangeText={setVerificationCode}
                 placeholder="6 rəqəmli kodu daxil edin"
-                placeholderTextColor={`${textColor}60`}
+                placeholderTextColor="#9CA3AF"
                 keyboardType="number-pad"
                 maxLength={6}
               />
@@ -875,6 +927,12 @@ export default function Profile() {
           </View>
         </KeyboardAvoidingView>
       </Modal>
+
+      {/* Premium Request Modal */}
+      <PremiumRequestModal
+        visible={premiumRequestModal}
+        onClose={() => setPremiumRequestModal(false)}
+      />
     </>
   );
 }
@@ -883,9 +941,10 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
   },
-  headerGradient: {
+  headerLight: {
     paddingTop: 60,
     paddingBottom: 40,
+    backgroundColor: "#fff",
     borderBottomLeftRadius: 30,
     borderBottomRightRadius: 30,
   },
@@ -903,13 +962,13 @@ const styles = StyleSheet.create({
     borderWidth: 3,
     justifyContent: "center",
     alignItems: "center",
-    backgroundColor: "rgba(255,255,255,0.1)",
+    backgroundColor: "#f5f5f5",
   },
   avatarContainer: {
     width: 100,
     height: 100,
     borderRadius: 50,
-    backgroundColor: "rgba(255,255,255,0.2)",
+    backgroundColor: "#fff",
     justifyContent: "center",
     alignItems: "center",
     overflow: "hidden",
@@ -951,10 +1010,21 @@ const styles = StyleSheet.create({
     color: "#fff",
     marginBottom: 6,
   },
+  nameLight: {
+    fontSize: 26,
+    fontWeight: "bold",
+    color: "#111827",
+    marginBottom: 6,
+  },
   email: {
     fontSize: 15,
     color: "rgba(255,255,255,0.85)",
     marginBottom: 8,
+  },
+  emailLight: {
+    fontSize: 15,
+    color: "#6B7280",
+    marginBottom: 16,
   },
   verificationBadge: {
     flexDirection: "row",
@@ -1028,10 +1098,11 @@ const styles = StyleSheet.create({
     marginTop: 8,
     marginBottom: 4,
     textAlign: "center",
+    color: "#111827",
   },
   statLabel: {
     fontSize: 11,
-    opacity: 0.6,
+    color: "#6B7280",
     textAlign: "center",
   },
   section: {
@@ -1043,6 +1114,7 @@ const styles = StyleSheet.create({
     fontWeight: "600",
     marginBottom: 12,
     paddingLeft: 4,
+    color: "#111827",
   },
   menuCard: {
     borderRadius: 16,
@@ -1072,6 +1144,19 @@ const styles = StyleSheet.create({
     flex: 1,
     fontSize: 16,
     fontWeight: "500",
+    color: "#111827",
+  },
+  languageBadge: {
+    backgroundColor: "#7313e8",
+    paddingHorizontal: 10,
+    paddingVertical: 4,
+    borderRadius: 12,
+    marginRight: 8,
+  },
+  languageText: {
+    color: "#fff",
+    fontSize: 12,
+    fontWeight: "600",
   },
   footer: {
     alignItems: "center",
@@ -1079,7 +1164,7 @@ const styles = StyleSheet.create({
   },
   footerText: {
     fontSize: 12,
-    opacity: 0.4,
+    color: "#9CA3AF",
   },
   // Modal Styles
   modalOverlay: {
@@ -1105,6 +1190,7 @@ const styles = StyleSheet.create({
   modalTitle: {
     fontSize: 18,
     fontWeight: "600",
+    color: "#111827",
   },
   modalBody: {
     paddingHorizontal: 20,
@@ -1115,6 +1201,7 @@ const styles = StyleSheet.create({
     fontWeight: "500",
     marginBottom: 8,
     marginTop: 12,
+    color: "#111827",
   },
   input: {
     borderRadius: 12,
@@ -1126,7 +1213,7 @@ const styles = StyleSheet.create({
   },
   infoText: {
     fontSize: 13,
-    opacity: 0.6,
+    color: "#6B7280",
     marginTop: 12,
     marginBottom: 8,
     lineHeight: 18,
@@ -1145,5 +1232,50 @@ const styles = StyleSheet.create({
     color: "#fff",
     fontSize: 16,
     fontWeight: "600",
+  },
+  // Premium Button Styles
+  premiumSection: {
+    paddingHorizontal: 20,
+    marginBottom: 24,
+  },
+  premiumButton: {
+    backgroundColor: "#fff",
+    borderRadius: 16,
+    overflow: "hidden",
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.08,
+    shadowRadius: 8,
+    elevation: 3,
+    borderWidth: 2,
+    borderColor: "#F59E0B",
+  },
+  premiumButtonContent: {
+    flexDirection: "row",
+    alignItems: "center",
+    paddingVertical: 16,
+    paddingHorizontal: 16,
+  },
+  premiumIconContainer: {
+    width: 48,
+    height: 48,
+    borderRadius: 24,
+    backgroundColor: "#FEF3C7",
+    justifyContent: "center",
+    alignItems: "center",
+    marginRight: 12,
+  },
+  premiumTextContainer: {
+    flex: 1,
+  },
+  premiumButtonTitle: {
+    fontSize: 16,
+    fontWeight: "600",
+    color: "#111827",
+    marginBottom: 2,
+  },
+  premiumButtonSubtitle: {
+    fontSize: 13,
+    color: "#6B7280",
   },
 });

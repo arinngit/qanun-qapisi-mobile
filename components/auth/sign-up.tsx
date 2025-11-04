@@ -15,8 +15,10 @@ import {
   View,
 } from "react-native";
 import { authAPI } from "@/services/api";
+import { useLanguage } from "@/context/language-context";
 
 export default function SignUpScreen() {
+  const { language, setLanguage, t } = useLanguage();
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
   const [email, setEmail] = useState("");
@@ -127,20 +129,10 @@ export default function SignUpScreen() {
         lastName: lastName.trim(),
       });
 
-      Alert.alert(
-        "Uğurlu!",
-        "Qeydiyyat tamamlandı. E-poçtunuza təsdiq kodu göndərildi.",
-        [
-          {
-            text: "OK",
-            onPress: () =>
               router.push({
                 pathname: "/(auth)/verify-code",
                 params: { email: email.trim() },
-              }),
-          },
-        ]
-      );
+      });
     } catch (error: any) {
       console.error("Sign up error:", error);
       const errorMessage =
@@ -331,6 +323,38 @@ export default function SignUpScreen() {
             </Text>
           </TouchableOpacity>
 
+          {/* Language Selector */}
+          <View style={styles.languageContainer}>
+            <TouchableOpacity
+              style={[
+                styles.languageButton,
+                language === 'az' && styles.languageButtonActive,
+              ]}
+              onPress={() => setLanguage('az')}
+            >
+              <Text style={[
+                styles.languageButtonText,
+                language === 'az' && styles.languageButtonTextActive,
+              ]}>
+                Azərbaycanca
+              </Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              style={[
+                styles.languageButton,
+                language === 'en' && styles.languageButtonActive,
+              ]}
+              onPress={() => setLanguage('en')}
+            >
+              <Text style={[
+                styles.languageButtonText,
+                language === 'en' && styles.languageButtonTextActive,
+              ]}>
+                English
+              </Text>
+            </TouchableOpacity>
+          </View>
+
           {/* Sign Up Button */}
           <TouchableOpacity
             style={[
@@ -343,7 +367,7 @@ export default function SignUpScreen() {
             {loading ? (
               <ActivityIndicator color="#fff" />
             ) : (
-              <Text style={styles.signUpButtonText}>Hesab Yarat →</Text>
+              <Text style={styles.signUpButtonText}>{t.createAccount} →</Text>
             )}
           </TouchableOpacity>
 
@@ -558,6 +582,33 @@ const styles = StyleSheet.create({
   link: {
     color: "#7313e8",
     fontWeight: "500",
+  },
+  languageContainer: {
+    flexDirection: "row",
+    gap: 12,
+    marginBottom: 20,
+  },
+  languageButton: {
+    flex: 1,
+    paddingVertical: 12,
+    paddingHorizontal: 16,
+    borderRadius: 12,
+    borderWidth: 2,
+    borderColor: "#E5E7EB",
+    backgroundColor: "#fff",
+    alignItems: "center",
+  },
+  languageButtonActive: {
+    borderColor: "#7313e8",
+    backgroundColor: "#F3E8FF",
+  },
+  languageButtonText: {
+    fontSize: 14,
+    fontWeight: "600",
+    color: "#6B7280",
+  },
+  languageButtonTextActive: {
+    color: "#7313e8",
   },
   signUpButton: {
     backgroundColor: "#7313e8",

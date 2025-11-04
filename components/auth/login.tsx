@@ -15,8 +15,13 @@ import {
   View,
 } from "react-native";
 import { authAPI } from "../../services/api";
+import { getDeviceId } from "../../utils/deviceId";
+import { useLanguage } from "../../context/language-context";
+import { useTheme } from "../../context/theme-context";
 
 export default function Login() {
+  const { t } = useLanguage();
+  const { colors, isDark } = useTheme();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [rememberMe, setRememberMe] = useState(false);
@@ -26,16 +31,16 @@ export default function Login() {
 
   const validateForm = () => {
     if (!email.trim()) {
-      Alert.alert("Xəta", "E-poçt ünvanınızı daxil edin");
+      Alert.alert(t.error, t.enterYourEmail);
       return false;
     }
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!emailRegex.test(email)) {
-      Alert.alert("Xəta", "Düzgün e-poçt ünvanı daxil edin");
+      Alert.alert(t.error, t.invalidEmail);
       return false;
     }
     if (!password) {
-      Alert.alert("Xəta", "Şifrənizi daxil edin");
+      Alert.alert(t.error, t.enterPassword);
       return false;
     }
     return true;
@@ -46,9 +51,13 @@ export default function Login() {
 
     setLoading(true);
     try {
+      // Get device ID
+      const deviceId = await getDeviceId();
+      
       const response = await authAPI.login({
         email: email.trim(),
         password,
+        deviceId,
       });
 
       // Save tokens
@@ -61,25 +70,19 @@ export default function Login() {
         await AsyncStorage.removeItem("rememberedEmail");
       }
 
-      Alert.alert("Uğurlu!", "Giriş uğurla tamamlandı", [
-        {
-          text: "OK",
-          onPress: () => router.replace("/(tabs)"),
-        },
-      ]);
+      router.replace("/(tabs)");
     } catch (error: any) {
-      let errorMessage = "Giriş zamanı xəta baş verdi";
+      let errorMessage = t.loginFailed;
 
       if (error.response?.data?.message) {
         errorMessage = error.response.data.message;
       } else if (error.response?.status === 400) {
-        errorMessage = "E-poçt və ya şifrə yanlışdır";
+        errorMessage = t.invalidCredentials;
       } else if (error.response?.status === 401) {
-        errorMessage =
-          "E-poçt təsdiqlənməyib. Zəhmət olmasa e-poçtunuzu təsdiqləyin";
+        errorMessage = t.emailNotVerified;
       }
 
-      Alert.alert("Xəta", errorMessage);
+      Alert.alert(t.error, errorMessage);
     } finally {
       setLoading(false);
     }

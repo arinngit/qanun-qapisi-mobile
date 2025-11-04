@@ -1,13 +1,21 @@
-import axios from "axios";
+import axios, { AxiosInstance } from "axios";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { API_CONFIG } from "@/config/api";
 import { AuthError, ValidationError } from "../utils/errors";
 import { translations } from "@/constants/translations";
 import { ExceptionHandler } from "@/utils/exception-handler";
 
+interface PremiumRequest {
+  id: string;
+  userId: string;
+  status: string;
+  requestedDate: string;
+  [key: string]: any;
+}
+
 class ApiService {
   private baseUrl: string;
-  private axiosInstance: typeof axios;
+  private axiosInstance: AxiosInstance;
 
   constructor() {
     this.baseUrl = API_CONFIG.BASE_URL;
@@ -53,7 +61,7 @@ class ApiService {
 
   async login(email: string, password: string) {
     try {
-      const response = await this.post("/api/auth/login", { email, password });
+      const response = await this.post<any>("/api/auth/login", { email, password });
 
       if (!response.token || !response.user) {
         return { success: false, message: "Login failed" };
@@ -491,16 +499,16 @@ class ApiService {
 
       // Format the result data using the answer data directly from the response
       const formattedResult = {
-        ...response,
+        ...(response as any),
         questions:
-          response.questions?.map((q) => ({
+          (response as any).questions?.map((q: any) => ({
             questionId: q.questionId,
             questionText: q.questionText,
             options: q.options,
             correctOptionIndex: q.correctOptionIndex,
           })) || [],
         answers:
-          response.answers?.map((answer) => {
+          (response as any).answers?.map((answer: any) => {
             // Calculate isCorrect by comparing selectedOptionIndex with correctOptionIndex
             const isCorrect =
               answer.selectedOptionIndex === answer.correctOptionIndex;

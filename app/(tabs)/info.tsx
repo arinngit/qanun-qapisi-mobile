@@ -2,7 +2,6 @@ import { ThemedText } from "@/components/theme/themed-text";
 import { translations } from "@/constants/translations";
 import { useThemeColor } from "@/hooks/use-theme-color";
 import { Ionicons } from "@expo/vector-icons";
-import { LinearGradient } from "expo-linear-gradient";
 import React from "react";
 import {
   Alert,
@@ -48,52 +47,25 @@ export default function InfoScreen() {
   };
 
   return (
-    <View style={[styles.safeArea, { backgroundColor }]}>
+    <View style={[styles.safeArea, { backgroundColor: "#f5f5f5" }]}>
       <ScrollView
         style={styles.container}
         showsVerticalScrollIndicator={false}
         bounces={false}
       >
-        {/* Gradient Header */}
-        <LinearGradient
-          colors={["#7313e8", `#7313e8`, `#7313e8`]}
-          style={styles.headerGradient}
-          start={{ x: 0, y: 0 }}
-          end={{ x: 1, y: 1 }}
-        >
-          <View style={styles.headerContent}>
-            <Ionicons
-              name="school-outline"
-              size={40}
-              color="#fff"
-              style={styles.headerIcon}
-            />
-            <ThemedText type="title" style={styles.headerTitle}>
-              {translations.professorInfo}
-            </ThemedText>
-            <ThemedText style={styles.headerSubtitle}>
-              Əlaqə məlumatları
-            </ThemedText>
-          </View>
-        </LinearGradient>
 
         <View style={styles.content}>
           {/* Professor Card with Photo */}
           <View
             style={[
               styles.professorCard,
-              { backgroundColor: cardBackgroundColor },
+              { backgroundColor: "#fff" },
             ]}
           >
-            {/* Photo with gradient ring */}
+            {/* Photo with simple ring */}
             <View style={styles.photoWrapper}>
-              <LinearGradient
-                colors={["#7313e8", `#7313e8`, "#7313e8"]}
-                style={styles.photoGradientRing}
-                start={{ x: 0, y: 0 }}
-                end={{ x: 1, y: 1 }}
-              >
-                <View style={[styles.photoInnerRing, { backgroundColor }]}>
+              <View style={styles.photoRing}>
+                <View style={styles.photoContainer}>
                   {!imageError ? (
                     <Image
                       source={
@@ -117,13 +89,13 @@ export default function InfoScreen() {
                     </View>
                   )}
                 </View>
-              </LinearGradient>
+              </View>
 
               {/* Status Badge */}
               <View
                 style={[styles.statusBadge, { backgroundColor: "#7313e8" }]}
               >
-                <Ionicons name="checkmark-circle" size={16} color="#fff" />
+                <Ionicons name="checkmark-circle" size={16} color="#000" />
               </View>
             </View>
 
@@ -131,15 +103,6 @@ export default function InfoScreen() {
             <ThemedText type="title" style={styles.professorName}>
               {professorData.name}
             </ThemedText>
-
-            <View
-              style={[styles.roleBadge, { backgroundColor: `${tintColor}15` }]}
-            >
-              <Ionicons name="briefcase-outline" size={14} color={"#7313e8"} />
-              <ThemedText style={[styles.roleText, { color: "#7313e8" }]}>
-                Professor
-              </ThemedText>
-            </View>
           </View>
 
           {/* Quick Actions */}
@@ -147,54 +110,39 @@ export default function InfoScreen() {
             <TouchableOpacity
               style={[
                 styles.quickActionCard,
-                { backgroundColor: cardBackgroundColor },
+                { backgroundColor: "#fff" },
               ]}
               onPress={() => handleCall(professorData.phone)}
             >
-              <LinearGradient
-                colors={["#7313e8", "#7313e8"]}
-                style={styles.quickActionIconContainer}
-                start={{ x: 0, y: 0 }}
-                end={{ x: 1, y: 1 }}
-              >
+              <View style={[styles.quickActionIconContainer, { backgroundColor: "#7313e8" }]}>
                 <Ionicons name="call" size={24} color="#fff" />
-              </LinearGradient>
+              </View>
               <ThemedText style={styles.quickActionLabel}>Zəng et</ThemedText>
             </TouchableOpacity>
 
             <TouchableOpacity
               style={[
                 styles.quickActionCard,
-                { backgroundColor: cardBackgroundColor },
+                { backgroundColor: "#fff" },
               ]}
               onPress={handleEmail}
             >
-              <LinearGradient
-                colors={["#7313e8", "#7313e8"]}
-                style={styles.quickActionIconContainer}
-                start={{ x: 0, y: 0 }}
-                end={{ x: 1, y: 1 }}
-              >
+              <View style={[styles.quickActionIconContainer, { backgroundColor: "#7313e8" }]}>
                 <Ionicons name="mail" size={24} color="#fff" />
-              </LinearGradient>
+              </View>
               <ThemedText style={styles.quickActionLabel}>E-poçt</ThemedText>
             </TouchableOpacity>
 
             <TouchableOpacity
               style={[
                 styles.quickActionCard,
-                { backgroundColor: cardBackgroundColor },
+                { backgroundColor: "#fff" },
               ]}
               onPress={() => handleCall(professorData.phone2)}
             >
-              <LinearGradient
-                colors={["#7313e8", "#7313e8"]}
-                style={styles.quickActionIconContainer}
-                start={{ x: 0, y: 0 }}
-                end={{ x: 1, y: 1 }}
-              >
+              <View style={[styles.quickActionIconContainer, { backgroundColor: "#7313e8" }]}>
                 <Ionicons name="chatbubbles" size={24} color="#fff" />
-              </LinearGradient>
+              </View>
               <ThemedText style={styles.quickActionLabel}>Mesaj</ThemedText>
             </TouchableOpacity>
           </View>
@@ -202,7 +150,7 @@ export default function InfoScreen() {
           {/* Contact Details Section */}
           <View style={styles.sectionContainer}>
             <View style={styles.sectionHeader}>
-              <Ionicons name="information-circle" size={24} color={tintColor} />
+              <Ionicons name="information-circle" size={24} color="#7313e8" />
               <ThemedText type="subtitle" style={styles.sectionTitle}>
                 Əlaqə məlumatları
               </ThemedText>
@@ -211,14 +159,14 @@ export default function InfoScreen() {
             <View
               style={[
                 styles.contactCard,
-                { backgroundColor: cardBackgroundColor },
+                { backgroundColor: "#fff" },
               ]}
             >
               {/* Phone 1 */}
               <TouchableOpacity
                 style={[
                   styles.contactItem,
-                  { borderBottomColor: `${borderColor}20` },
+                  { borderBottomColor: "#E5E7EB" },
                 ]}
                 onPress={() => handleCall(professorData.phone)}
               >
@@ -252,7 +200,7 @@ export default function InfoScreen() {
               <TouchableOpacity
                 style={[
                   styles.contactItem,
-                  { borderBottomColor: `${borderColor}20` },
+                  { borderBottomColor: "#E5E7EB" },
                 ]}
                 onPress={() => handleCall(professorData.phone2)}
               >
@@ -370,7 +318,7 @@ const styles = StyleSheet.create({
   },
   content: {
     padding: 20,
-    marginTop: -20,
+    marginTop: 60,
   },
   professorCard: {
     borderRadius: 20,
@@ -387,26 +335,29 @@ const styles = StyleSheet.create({
     position: "relative",
     marginBottom: 16,
   },
-  photoGradientRing: {
+  photoRing: {
     width: 140,
     height: 140,
     borderRadius: 70,
-    padding: 4,
+    borderWidth: 3,
+    borderColor: "#7313e8",
     justifyContent: "center",
     alignItems: "center",
+    backgroundColor: "#f5f5f5",
   },
-  photoInnerRing: {
+  photoContainer: {
     width: 132,
     height: 132,
     borderRadius: 66,
-    padding: 3,
     justifyContent: "center",
     alignItems: "center",
+    overflow: "hidden",
+    backgroundColor: "#fff",
   },
   professorPhoto: {
-    width: 126,
-    height: 126,
-    borderRadius: 63,
+    width: 132,
+    height: 132,
+    borderRadius: 66,
   },
   photoPlaceholder: {
     justifyContent: "center",
@@ -429,6 +380,7 @@ const styles = StyleSheet.create({
     fontWeight: "bold",
     marginBottom: 12,
     textAlign: "center",
+    color: "#111827",
   },
   roleBadge: {
     flexDirection: "row",
@@ -470,6 +422,7 @@ const styles = StyleSheet.create({
   quickActionLabel: {
     fontSize: 13,
     fontWeight: "600",
+    color: "#111827",
   },
   sectionContainer: {
     marginBottom: 20,
@@ -483,6 +436,7 @@ const styles = StyleSheet.create({
   sectionTitle: {
     fontSize: 18,
     fontWeight: "600",
+    color: "#111827",
   },
   contactCard: {
     borderRadius: 16,
@@ -512,12 +466,13 @@ const styles = StyleSheet.create({
   },
   contactLabel: {
     fontSize: 13,
-    opacity: 0.7,
+    color: "#6B7280",
     marginBottom: 4,
   },
   contactValue: {
     fontSize: 16,
     fontWeight: "600",
+    color: "#111827",
   },
   actionButton: {
     width: 36,
@@ -538,5 +493,6 @@ const styles = StyleSheet.create({
     flex: 1,
     fontSize: 14,
     lineHeight: 20,
+    color: "#111827",
   },
 });

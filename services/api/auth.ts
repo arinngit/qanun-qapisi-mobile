@@ -16,6 +16,7 @@ export interface VerifyRequest {
 export interface LoginRequest {
   email: string;
   password: string;
+  deviceId: string;
 }
 
 export interface AuthResponse {

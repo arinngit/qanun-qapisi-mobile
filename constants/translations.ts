@@ -57,7 +57,6 @@ export const translations = {
     "Testlər bölməsinə daxil olun və istədiyiniz testi seçin. Hər bir sual üçün bir cavab seçin və testi tamamladıqdan sonra nəticələrinizi görə bilərsiniz.",
 
   // Profile
-  profile: "Profil",
   settings: "Parametrlər",
   notifications: "Bildirişlər",
   language: "Dil",
@@ -159,7 +158,6 @@ export const translations = {
   testTitle: "Test başlığı",
   testDescription: "Test təsviri",
   questionText: "Sual mətni",
-  correctAnswer: "Düzgün cavab",
   removeQuestion: "Sualı sil",
   addOption: "Seçim əlavə et",
   removeOption: "Seçimi sil",
@@ -208,7 +206,6 @@ export const translations = {
   userAlreadyExists:
     "Bu e-poçt artıq qeydiyyatdan keçib. Zəhmət olmasa daxil olmağı sınayın.",
   goToLogin: "Daxil olmaq",
-  info: "Məlumat",
   generalError: "Xəta baş verdi. Zəhmət olmasa yenidən cəhd edin.",
   networkError: "İnternet bağlantınızı yoxlayın və yenidən cəhd edin",
   serverError: "Server xətası. Zəhmət olmasa daha sonra yenidən cəhd edin",
@@ -258,32 +255,15 @@ export const translations = {
   premiumRequestSubmitted:
     "Premium sorğunuz uğurla göndərildi. Administrator tezliklə sorğunuzu nəzərdən keçirəcək.",
   pendingPremiumRequest: "Sizin artıq gözləyən premium sorğunuz var",
-  failedToSubmitPremiumRequest: "Premium sorğusu göndərilmədi",
   failedToLoadTestResults: "Test nəticələri yüklənərkən xəta baş verdi",
   failedToHandleRequest: "Sorğunu emal etmək mümkün olmadı",
   failedToConnectToApi:
     "API-ə qoşulmaq mümkün olmadı. Zəhmət olmasa bağlantınızı yoxlayın və yenidən cəhd edin.",
   failedToFetchTests: "Testləri yükləmək mümkün olmadı",
   failedToCreateTest: "Test yaradılarkən xəta baş verdi",
-  failedToDeleteTest: "Test silinərkən xəta baş verdi",
   failedToLoadTest:
     "Test yüklənərkən xəta baş verdi. Zəhmət olmasa yenidən cəhd edin.",
   failedToSubmitTest: "Test təqdim edilərkən xəta baş verdi",
-  failedToLoadTests: "Testlər yüklənərkən xəta baş verdi",
-  failedToFetchRequests: "Premium sorğuları yükləmək mümkün olmadı",
-  failedToApproveRequest: "Sorğunu təsdiqləmək mümkün olmadı",
-  failedToRejectRequest: "Sorğunu rədd etmək mümkün olmadı",
-  loginFailed: "Daxil olmaq mümkün olmadı",
-  signupFailed: "Qeydiyyatdan keçmək mümkün olmadı",
-  verificationFailed: "Kod təsdiqlənmədi. Yenidən cəhd edin.",
-  resendVerificationFailed:
-    "Təsdiq e-poçtu yenidən göndərilmədi. Yenidən cəhd edin.",
-  emailNotVerified: "Daxil olmadan əvvəl e-poçtunuzu təsdiqləyin.",
-  fillAllFields: "Bütün sahələri doldurun",
-  pleaseEnter: "Xahiş edirik daxil edin",
-  pleaseFillQuestionsCorrectly:
-    "Xahiş edirik bütün sualları və cavabları düzgün doldurun",
-  provideRejectReason: "Rədd etmə səbəbini daxil edin",
   pleaseCheckConnection:
     "Zəhmət olmasa internet bağlantınızı yoxlayın və yenidən cəhd edin",
   pleaseTryAgain: "Zəhmət olmasa yenidən cəhd edin",

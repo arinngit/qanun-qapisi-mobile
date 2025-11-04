@@ -1,5 +1,5 @@
 import { Ionicons } from "@expo/vector-icons";
-import React from "react";
+import React, { useState, useEffect } from "react";
 import {
   SafeAreaView,
   ScrollView,
@@ -7,13 +7,160 @@ import {
   Text,
   TouchableOpacity,
   View,
-  Image
+  Image,
+  ActivityIndicator,
+  RefreshControl,
 } from "react-native";
+import { useRouter } from "expo-router";
+import { useAuth } from "../../context/auth-context";
+import { testsAPI, TestResponse, TestAttemptResponse } from "../../services/api";
+import { handleApiError, showSuccess } from "../../utils/errorHandler";
 
 export default function HomeScreen() {
+  const router = useRouter();
+  const { user } = useAuth();
+  
+  const [loading, setLoading] = useState(true);
+  const [refreshing, setRefreshing] = useState(false);
+  const [recentTests, setRecentTests] = useState<TestResponse[]>([]);
+  const [attemptsByTest, setAttemptsByTest] = useState<Map<string, TestAttemptResponse>>(new Map());
+  const [stats, setStats] = useState({
+    completed: 0,
+    inProgress: 0,
+    totalScore: 0,
+  });
+
+  useEffect(() => {
+    loadData();
+  }, []);
+
+  const loadData = async () => {
+    try {
+      // Fetch recent published tests
+      const testsResponse = await testsAPI.getTests({ page: 0, size: 10, sortBy: "publishedAt", sortDir: "desc" });
+      const tests = testsResponse.content;
+      setRecentTests(tests.slice(0, 3)); // Take first 3 for display
+
+      // Fetch attempts for each test to determine status
+      const attemptsMap = new Map<string, TestAttemptResponse>();
+      let completedCount = 0;
+      let inProgressCount = 0;
+      let totalScore = 0;
+
+      for (const test of tests) {
+        try {
+          const attempts = await testsAPI.getTestAttempts(test.id);
+          if (attempts && attempts.length > 0) {
+            // Get the most recent attempt
+            const latestAttempt = attempts[0];
+            attemptsMap.set(test.id, latestAttempt);
+            
+            if (latestAttempt.status === "COMPLETED") {
+              completedCount++;
+              totalScore += latestAttempt.totalScore;
+            } else if (latestAttempt.status === "IN_PROGRESS") {
+              inProgressCount++;
+            }
+          }
+        } catch (error) {
+          // Test not attempted yet, continue
+        }
+      }
+
+      setAttemptsByTest(attemptsMap);
+      setStats({
+        completed: completedCount,
+        inProgress: inProgressCount,
+        totalScore,
+      });
+    } catch (error: any) {
+      handleApiError(error, "Ana səhifə məlumatlarını yükləmək mümkün olmadı");
+    } finally {
+      setLoading(false);
+      setRefreshing(false);
+    }
+  };
+
+  const onRefresh = () => {
+    setRefreshing(true);
+    loadData();
+  };
+
+  const getTestStatus = (testId: string) => {
+    const attempt = attemptsByTest.get(testId);
+    if (!attempt) {
+      return { status: "NOT_STARTED", color: "#9CA3AF", text: "Başlanmayıb" };
+    }
+    if (attempt.status === "COMPLETED") {
+      return { status: "COMPLETED", color: "#10B981", text: "Tamamlandı" };
+    }
+    return { status: "IN_PROGRESS", color: "#F59E0B", text: "Yarımçıq" };
+  };
+
+  const handleTestPress = async (testId: string) => {
+    const attempt = attemptsByTest.get(testId);
+    if (!attempt) {
+      // Start new test
+      try {
+        // First fetch full test details
+        const testDetails = await testsAPI.getTestById(testId);
+        const newAttempt = await testsAPI.startTest(testId);
+        
+        // Save test data to AsyncStorage
+        const AsyncStorage = require("@react-native-async-storage/async-storage").default;
+        const storageKey = `test_attempt_${newAttempt.id}`;
+        await AsyncStorage.setItem(
+          storageKey,
+          JSON.stringify({ test: testDetails, answers: {} })
+        );
+        
+        router.push(`/test/take/${newAttempt.id}` as any);
+      } catch (error: any) {
+        handleApiError(error, "Testi başlatmaq mümkün olmadı");
+      }
+    } else if (attempt.status === "COMPLETED") {
+      // View results
+      router.push(`/test/results/${attempt.id}` as any);
+    } else {
+      // Continue test
+      router.push(`/test/take/${attempt.id}` as any);
+    }
+  };
+
+  const handleQuickAction = (action: string) => {
+    switch (action) {
+      case "new-test":
+        router.push("/(tabs)/tests");
+        break;
+      case "results":
+        router.push("/(tabs)/tests");
+        break;
+      case "bookmarks":
+        router.push("/bookmarks" as any);
+        break;
+      case "teacher":
+        router.push("/(tabs)/info");
+        break;
+    }
+  };
+
+  if (loading) {
+    return (
+      <SafeAreaView style={styles.container}>
+        <View style={styles.loadingContainer}>
+          <ActivityIndicator size="large" color="#7313e8" />
+        </View>
+      </SafeAreaView>
+    );
+  }
   return (
     <SafeAreaView style={styles.container}>
-      <ScrollView showsVerticalScrollIndicator={false}>
+      <ScrollView 
+        showsVerticalScrollIndicator={false}
+        refreshControl={
+          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} colors={["#7313e8"]} />
+        }
+      >
         {/* Header */}
         <View style={styles.header}>
           <View style={styles.headerLeft}>
@@ -34,14 +181,18 @@ export default function HomeScreen() {
         {/* Premium Banner */}
         <View style={styles.premiumBanner}>
           <View>
-            <Text style={styles.bannerTitle}>Xoş gəlmisiniz, Aynur!</Text>
+            <Text style={styles.bannerTitle}>
+              Xoş gəlmisiniz, {user?.firstName || "İstifadəçi"}!
+            </Text>
             <Text style={styles.bannerSubtitle}>
               Hazırlığınızı davam etdirin
             </Text>
           </View>
-          <View style={styles.premiumBadge}>
-            <Text style={styles.premiumText}>Premium</Text>
-          </View>
+          {user?.isPremium && (
+            <View style={styles.premiumBadge}>
+              <Text style={styles.premiumText}>Premium</Text>
+            </View>
+          )}
         </View>
 
         {/* Stats Cards */}
@@ -50,7 +201,7 @@ export default function HomeScreen() {
             <View style={[styles.statIcon, { backgroundColor: "#D1FAE5" }]}>
               <Ionicons name="checkmark" size={24} color="#10B981" />
             </View>
-            <Text style={styles.statNumber}>24</Text>
+            <Text style={styles.statNumber}>{stats.completed}</Text>
             <Text style={styles.statLabel}>Tamamlanan</Text>
           </View>
 
@@ -58,7 +209,7 @@ export default function HomeScreen() {
             <View style={[styles.statIcon, { backgroundColor: "#DBEAFE" }]}>
               <Ionicons name="time-outline" size={24} color="#3B82F6" />
             </View>
-            <Text style={styles.statNumber}>8</Text>
+            <Text style={styles.statNumber}>{stats.inProgress}</Text>
             <Text style={styles.statLabel}>Gözləyən</Text>
           </View>
 
@@ -66,7 +217,7 @@ export default function HomeScreen() {
             <View style={[styles.statIcon, { backgroundColor: "#FEF3C7" }]}>
               <Ionicons name="trophy" size={24} color="#F59E0B" />
             </View>
-            <Text style={styles.statNumber}>892</Text>
+            <Text style={styles.statNumber}>{stats.totalScore}</Text>
             <Text style={styles.statLabel}>Xal</Text>
           </View>
         </View>
@@ -75,146 +226,86 @@ export default function HomeScreen() {
         <View style={styles.section}>
           <View style={styles.sectionHeader}>
             <Text style={styles.sectionTitle}>Son Testlər</Text>
-            <TouchableOpacity>
+            <TouchableOpacity onPress={() => router.push("/(tabs)/tests")}>
               <Text style={styles.seeAllButton}>Hamısını gör</Text>
             </TouchableOpacity>
           </View>
 
-          {/* Test Card 1 */}
-          <View style={styles.testCard}>
-            <View style={styles.testHeader}>
-              <Text style={styles.testTitle}>Mülki Hüquq Əsasları</Text>
-              <View style={styles.premiumLabel}>
-                <Text style={styles.premiumLabelText}>Premium</Text>
-              </View>
+          {recentTests.length === 0 ? (
+            <View style={styles.emptyState}>
+              <Ionicons name="document-text-outline" size={48} color="#9CA3AF" />
+              <Text style={styles.emptyStateText}>Hələ test yoxdur</Text>
             </View>
-            <Text style={styles.testDescription}>
-              Mülki hüququn əsas prinsipləri və qaydaları
-            </Text>
-            <View style={styles.testMeta}>
-              <View style={styles.metaItem}>
-                <Ionicons
-                  name="help-circle-outline"
-                  size={14}
-                  color="#6B7280"
-                />
-                <Text style={styles.metaText}>25 sual</Text>
-              </View>
-              <View style={styles.metaItem}>
-                <Ionicons name="star-outline" size={14} color="#6B7280" />
-                <Text style={styles.metaText}>100 xal</Text>
-              </View>
-              <View style={styles.metaItem}>
-                <Ionicons name="time-outline" size={14} color="#6B7280" />
-                <Text style={styles.metaText}>45 dəq</Text>
-              </View>
-            </View>
-            <View style={styles.testFooter}>
-              <View style={styles.statusBadge}>
-                <View
-                  style={[styles.statusDot, { backgroundColor: "#10B981" }]}
-                />
-                <Text style={[styles.statusText, { color: "#10B981" }]}>
-                  Tamamlandı
-                </Text>
-              </View>
-              <TouchableOpacity style={styles.secondaryButton}>
-                <Text style={styles.secondaryButtonText}>Nəticələr</Text>
-              </TouchableOpacity>
-            </View>
-          </View>
+          ) : (
+            recentTests.map((test) => {
+              const status = getTestStatus(test.id);
+              const attempt = attemptsByTest.get(test.id);
 
-          {/* Test Card 2 */}
-          <View style={styles.testCard}>
-            <View style={styles.testHeader}>
-              <Text style={styles.testTitle}>Cinayət Hüququ</Text>
-            </View>
-            <Text style={styles.testDescription}>
-              Cinayət hüququnun əsas anlayışları
-            </Text>
-            <View style={styles.testMeta}>
-              <View style={styles.metaItem}>
-                <Ionicons
-                  name="help-circle-outline"
-                  size={14}
-                  color="#6B7280"
-                />
-                <Text style={styles.metaText}>30 sual</Text>
-              </View>
-              <View style={styles.metaItem}>
-                <Ionicons name="star-outline" size={14} color="#6B7280" />
-                <Text style={styles.metaText}>120 xal</Text>
-              </View>
-              <View style={styles.metaItem}>
-                <Ionicons name="time-outline" size={14} color="#6B7280" />
-                <Text style={styles.metaText}>60 dəq</Text>
-              </View>
-            </View>
-            <View style={styles.testFooter}>
-              <View style={styles.statusBadge}>
-                <View
-                  style={[styles.statusDot, { backgroundColor: "#F59E0B" }]}
-                />
-                <Text style={[styles.statusText, { color: "#F59E0B" }]}>
-                  Yarımçıq
-                </Text>
-              </View>
-              <TouchableOpacity style={styles.primaryButton}>
-                <Text style={styles.primaryButtonText}>Davam et</Text>
-              </TouchableOpacity>
-            </View>
-          </View>
-
-          {/* Test Card 3 */}
-          <View style={styles.testCard}>
-            <View style={styles.testHeader}>
-              <Text style={styles.testTitle}>Konstitusiya Hüququ</Text>
-              <View style={styles.premiumLabel}>
-                <Text style={styles.premiumLabelText}>Premium</Text>
-              </View>
-            </View>
-            <Text style={styles.testDescription}>
-              Konstitusiya və dövlət quruluşu
-            </Text>
-            <View style={styles.testMeta}>
-              <View style={styles.metaItem}>
-                <Ionicons
-                  name="help-circle-outline"
-                  size={14}
-                  color="#6B7280"
-                />
-                <Text style={styles.metaText}>20 sual</Text>
-              </View>
-              <View style={styles.metaItem}>
-                <Ionicons name="star-outline" size={14} color="#6B7280" />
-                <Text style={styles.metaText}>80 xal</Text>
-              </View>
-              <View style={styles.metaItem}>
-                <Ionicons name="time-outline" size={14} color="#6B7280" />
-                <Text style={styles.metaText}>35 dəq</Text>
-              </View>
-            </View>
-            <View style={styles.testFooter}>
-              <View style={styles.statusBadge}>
-                <View
-                  style={[styles.statusDot, { backgroundColor: "#9CA3AF" }]}
-                />
-                <Text style={[styles.statusText, { color: "#6B7280" }]}>
-                  Başlanmayıb
-                </Text>
-              </View>
-              <TouchableOpacity style={styles.primaryButton}>
-                <Text style={styles.primaryButtonText}>Başla</Text>
-              </TouchableOpacity>
-            </View>
-          </View>
+              return (
+                <View key={test.id} style={styles.testCard}>
+                  <TouchableOpacity onPress={() => router.push(`/test/${test.id}` as any)}>
+                    <View style={styles.testHeader}>
+                      <Text style={styles.testTitle}>{test.title}</Text>
+                      {test.isPremium && (
+                        <View style={styles.premiumLabel}>
+                          <Text style={styles.premiumLabelText}>Premium</Text>
+                        </View>
+                      )}
+                    </View>
+                    <Text style={styles.testDescription} numberOfLines={2}>
+                      {test.description}
+                    </Text>
+                    <View style={styles.testMeta}>
+                      <View style={styles.metaItem}>
+                        <Ionicons
+                          name="help-circle-outline"
+                          size={14}
+                          color="#6B7280"
+                        />
+                        <Text style={styles.metaText}>{test.questionCount} sual</Text>
+                      </View>
+                      <View style={styles.metaItem}>
+                        <Ionicons name="star-outline" size={14} color="#6B7280" />
+                        <Text style={styles.metaText}>{test.totalPossibleScore} xal</Text>
+                      </View>
+                      <View style={styles.metaItem}>
+                        <Ionicons name="time-outline" size={14} color="#6B7280" />
+                        <Text style={styles.metaText}>{test.estimatedMinutes} dəq</Text>
+                      </View>
+                    </View>
+                    <View style={styles.testFooter}>
+                      <View style={styles.statusBadge}>
+                        <View
+                          style={[styles.statusDot, { backgroundColor: status.color }]}
+                        />
+                        <Text style={[styles.statusText, { color: status.color }]}>
+                          {status.text}
+                        </Text>
+                      </View>
+                      <TouchableOpacity 
+                        style={status.status === "COMPLETED" ? styles.secondaryButton : styles.primaryButton}
+                        onPress={() => handleTestPress(test.id)}
+                      >
+                        <Text style={status.status === "COMPLETED" ? styles.secondaryButtonText : styles.primaryButtonText}>
+                          {status.status === "COMPLETED" ? "Nəticələr" : status.status === "IN_PROGRESS" ? "Davam et" : "Başla"}
+                        </Text>
+                      </TouchableOpacity>
+                    </View>
+                  </TouchableOpacity>
+                </View>
+              );
+            })
+          )}
         </View>
 
         {/* Quick Actions Section */}
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>Tez Əməliyyatlar</Text>
           <View style={styles.quickActionsGrid}>
-            <TouchableOpacity style={styles.quickActionCard}>
+            <TouchableOpacity 
+              style={styles.quickActionCard}
+              onPress={() => handleQuickAction("new-test")}
+            >
               <View
                 style={[styles.quickActionIcon, { backgroundColor: "#DBEAFE" }]}
               >
@@ -226,7 +317,10 @@ export default function HomeScreen() {
               </Text>
             </TouchableOpacity>
 
-            <TouchableOpacity style={styles.quickActionCard}>
+            <TouchableOpacity 
+              style={styles.quickActionCard}
+              onPress={() => handleQuickAction("results")}
+            >
               <View
                 style={[styles.quickActionIcon, { backgroundColor: "#D1FAE5" }]}
               >
@@ -238,7 +332,10 @@ export default function HomeScreen() {
               </Text>
             </TouchableOpacity>
 
-            <TouchableOpacity style={styles.quickActionCard}>
+            <TouchableOpacity 
+              style={styles.quickActionCard}
+              onPress={() => handleQuickAction("bookmarks")}
+            >
               <View
                 style={[styles.quickActionIcon, { backgroundColor: "#FEF3C7" }]}
               >
@@ -248,7 +345,10 @@ export default function HomeScreen() {
               <Text style={styles.quickActionSubtitle}>Saxlanmış testlər</Text>
             </TouchableOpacity>
 
-            <TouchableOpacity style={styles.quickActionCard}>
+            <TouchableOpacity 
+              style={styles.quickActionCard}
+              onPress={() => handleQuickAction("teacher")}
+            >
               <View
                 style={[styles.quickActionIcon, { backgroundColor: "#E9D5FF" }]}
               >
@@ -498,5 +598,19 @@ const styles = StyleSheet.create({
   quickActionSubtitle: {
     fontSize: 12,
     color: "#6B7280",
+  },
+  loadingContainer: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  emptyState: {
+    alignItems: "center",
+    paddingVertical: 40,
+  },
+  emptyStateText: {
+    fontSize: 16,
+    color: "#6B7280",
+    marginTop: 12,
   },
 });

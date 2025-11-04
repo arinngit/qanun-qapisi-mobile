@@ -1,27 +1,20 @@
 import { authAPI, profileAPI, tokenManager } from "@/services/api";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import { jwtDecode } from "jwt-decode";
-import React, { createContext, useContext, useEffect, useState } from "react";
+import React, { createContext, useContext, useEffect, useState, useCallback } from "react";
 import { translations } from "../constants/translations";
 
-// Обновите интерфейс User для совместимости с ProfileResponse
+// Match ProfileResponse interface exactly
 interface User {
   id: string;
   email: string;
-  name: string;
-  surname: string;
+  firstName: string;
+  lastName: string;
   role: string;
-  verified?: boolean;
+  verified: boolean;
   profilePicture?: string;
+  isPremium?: boolean;
   createdAt?: string;
   updatedAt?: string;
-}
-
-interface DecodedToken {
-  exp: number;
-  "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/nameidentifier": string;
-  "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/emailaddress": string;
-  "http://schemas.microsoft.com/ws/2008/06/identity/claims/role": string;
 }
 
 interface AuthContextType {
@@ -31,8 +24,8 @@ interface AuthContextType {
   login: (email: string, password: string) => Promise<void>;
   logout: () => Promise<void>;
   loading: boolean;
-  refreshUser: () => Promise<void>; // Добавляем эту функцию
-  updateUser: (userData: Partial<User>) => void; // И эту
+  refreshUser: () => Promise<void>;
+  updateUser: (userData: Partial<User>) => void;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -49,74 +42,28 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
     checkAuth();
   }, []);
 
-  const decodeToken = (token: string): DecodedToken => {
-    try {
-      return jwtDecode<DecodedToken>(token);
-    } catch (error) {
-      console.error("Error decoding token:", error);
-      throw new Error("Invalid token");
-    }
-  };
-
-  const isTokenExpired = (token: string): boolean => {
-    try {
-      const decoded = decodeToken(token);
-      return decoded.exp * 1000 < Date.now();
-    } catch {
-      return true;
-    }
-  };
-
-  const extractUserFromToken = (token: string): User => {
-    const decoded = decodeToken(token);
-    return {
-      id: decoded[
-        "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/nameidentifier"
-      ],
-      email:
-        decoded[
-          "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/emailaddress"
-        ],
-      role: decoded[
-        "http://schemas.microsoft.com/ws/2008/06/identity/claims/role"
-      ],
-      name: "",
-      surname: "",
-    };
-  };
-
-  // Функция для обновления пользователя в состоянии
-  const updateUser = (userData: Partial<User>) => {
-    if (user) {
-      const updatedUser = { ...user, ...userData };
-      setUser(updatedUser);
-      AsyncStorage.setItem("user", JSON.stringify(updatedUser));
-    }
-  };
-
-  // auth-context.tsx faylında aşağıdakı dəyişiklikləri edin
-
+  // Check if token exists and load cached user
   const checkAuth = async () => {
     try {
       const storedToken = await tokenManager.getToken();
       const storedUser = await AsyncStorage.getItem("user");
 
-      if (storedToken && !isTokenExpired(storedToken)) {
+      if (storedToken) {
         setToken(storedToken);
 
-        // Əvvəlcə storedUser istifadə et, sonra refresh et
+        // Use cached user for immediate UI rendering
         if (storedUser) {
           const userData = JSON.parse(storedUser);
           setUser(userData);
           setIsAuthenticated(true);
         }
 
-        // Background-da user məlumatlarını yenilə
+        // Refresh user data in background
         try {
           await refreshUser();
         } catch (refreshError) {
           console.error("Background refresh failed:", refreshError);
-          // Əsas auth-u pozma
+          // Don't break auth flow if refresh fails
         }
       } else {
         await logout();
@@ -129,24 +76,27 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
     }
   };
 
-  const refreshUser = async (): Promise<void> => {
+  // Refresh user data from backend
+  const refreshUser = useCallback(async (): Promise<void> => {
     try {
       const currentToken = await tokenManager.getToken();
-      if (!currentToken || isTokenExpired(currentToken)) {
+      if (!currentToken) {
         await logout();
         return;
       }
 
       const profileData = await profileAPI.getProfile();
 
+      // Map ProfileResponse to User interface
       const userData: User = {
         id: profileData.id,
         email: profileData.email,
-        name: profileData.firstName,
-        surname: profileData.lastName,
+        firstName: profileData.firstName,
+        lastName: profileData.lastName,
         role: profileData.role,
         verified: profileData.verified,
-        profilePicture: profileData.profilePicture,
+        profilePicture: profileData.profilePictureUrl || undefined,
+        isPremium: profileData.isPremium,
         createdAt: profileData.createdAt,
         updatedAt: profileData.updatedAt,
       };
@@ -158,33 +108,48 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
       if (error.response?.status === 401) {
         await logout();
       }
-      throw error; // Xətanı yuxarıya ötür
+      throw error;
     }
-  };
+  }, []);
 
+  // Update user in local state
+  const updateUser = useCallback((userData: Partial<User>) => {
+    setUser((prevUser) => {
+      if (!prevUser) return null;
+      
+      const updatedUser = { ...prevUser, ...userData };
+      AsyncStorage.setItem("user", JSON.stringify(updatedUser)).catch((err) =>
+        console.error("Error saving updated user:", err)
+      );
+      return updatedUser;
+    });
+  }, []);
+
+  // Login with email and password
   const login = async (email: string, password: string) => {
     try {
       console.log("AuthContext: Starting login process");
       const response = await authAPI.login({ email, password });
       console.log("AuthContext: Login response received");
 
-      // Получаем профиль пользователя после успешного логина
+      // Fetch user profile after successful login
       const profileData = await profileAPI.getProfile();
 
-      // Создаем объект пользователя
+      // Create user object
       const userData: User = {
         id: profileData.id,
         email: profileData.email,
-        name: profileData.firstName,
-        surname: profileData.lastName,
+        firstName: profileData.firstName,
+        lastName: profileData.lastName,
         role: profileData.role,
         verified: profileData.verified,
-        profilePicture: profileData.profilePicture,
+        profilePicture: profileData.profilePictureUrl || undefined,
+        isPremium: profileData.isPremium,
         createdAt: profileData.createdAt,
         updatedAt: profileData.updatedAt,
       };
 
-      // Сохраняем пользователя в AsyncStorage
+      // Save to AsyncStorage
       await AsyncStorage.setItem("user", JSON.stringify(userData));
 
       setToken(response.accessToken);
@@ -200,18 +165,19 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
     }
   };
 
+  // Logout and clear all data
   const logout = async () => {
     try {
       const currentToken = await tokenManager.getToken();
-      // Token varsa logout API-ni çağır
-      if (currentToken && !isTokenExpired(currentToken)) {
+      // Call logout API if token exists
+      if (currentToken) {
         await authAPI.logout();
       }
     } catch (error) {
       console.error("Logout API error:", error);
-      // API xətası olsa belə, local logout et
+      // Continue with local logout even if API fails
     } finally {
-      // Həmişə local logout et
+      // Always clear local data
       await AsyncStorage.multiRemove(["user", "accessToken", "refreshToken"]);
       await tokenManager.removeTokens();
       setToken(null);
@@ -229,8 +195,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
         login,
         logout,
         loading,
-        refreshUser, // Добавляем в value
-        updateUser, // Добавляем в value
+        refreshUser,
+        updateUser,
       }}
     >
       {children}
