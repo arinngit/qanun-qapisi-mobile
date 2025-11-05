@@ -1,7 +1,14 @@
 import { authAPI, profileAPI, tokenManager } from "@/services/api";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import React, { createContext, useContext, useEffect, useState, useCallback } from "react";
+import React, {
+  createContext,
+  useCallback,
+  useContext,
+  useEffect,
+  useState,
+} from "react";
 import { translations } from "../constants/translations";
+import { getDeviceId } from "../utils/deviceId";
 
 // Match ProfileResponse interface exactly
 interface User {
@@ -116,7 +123,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
   const updateUser = useCallback((userData: Partial<User>) => {
     setUser((prevUser) => {
       if (!prevUser) return null;
-      
+
       const updatedUser = { ...prevUser, ...userData };
       AsyncStorage.setItem("user", JSON.stringify(updatedUser)).catch((err) =>
         console.error("Error saving updated user:", err)
@@ -129,7 +136,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
   const login = async (email: string, password: string) => {
     try {
       console.log("AuthContext: Starting login process");
-      const response = await authAPI.login({ email, password });
+      const deviceId = await getDeviceId();
+      const response = await authAPI.login({ email, password, deviceId });
       console.log("AuthContext: Login response received");
 
       // Fetch user profile after successful login

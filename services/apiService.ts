@@ -1,9 +1,8 @@
-import axios, { AxiosInstance } from "axios";
-import AsyncStorage from "@react-native-async-storage/async-storage";
-import { API_CONFIG } from "@/config/api";
-import { AuthError, ValidationError } from "../utils/errors";
-import { translations } from "@/constants/translations";
+import { tokenManager } from "@/services/api";
+import { API_BASE_URL } from "@/services/api/config";
 import { ExceptionHandler } from "@/utils/exception-handler";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import axios, { AxiosInstance } from "axios";
 
 interface PremiumRequest {
   id: string;
@@ -18,7 +17,7 @@ class ApiService {
   private axiosInstance: AxiosInstance;
 
   constructor() {
-    this.baseUrl = API_CONFIG.BASE_URL;
+    this.baseUrl = API_BASE_URL;
     this.axiosInstance = axios.create({
       baseURL: this.baseUrl,
       headers: {
@@ -30,7 +29,7 @@ class ApiService {
   }
 
   private async getHeaders() {
-    const token = await AsyncStorage.getItem("token");
+    const token = await tokenManager.getToken();
     return {
       "Content-Type": "application/json",
       Accept: "application/json",
@@ -61,7 +60,10 @@ class ApiService {
 
   async login(email: string, password: string) {
     try {
-      const response = await this.post<any>("/api/auth/login", { email, password });
+      const response = await this.post<any>("/api/auth/login", {
+        email,
+        password,
+      });
 
       if (!response.token || !response.user) {
         return { success: false, message: "Login failed" };
@@ -195,7 +197,7 @@ class ApiService {
       console.log("Request headers:", headers);
 
       // Check if user is authenticated
-      const token = await AsyncStorage.getItem("token");
+      const token = await tokenManager.getToken();
       if (!token) {
         throw new Error("Authentication required. Please log in as an admin.");
       }
@@ -658,12 +660,12 @@ class ApiService {
 
   // Premium Request Methods
   async createPremiumRequest(): Promise<void> {
-    const url = `${API_CONFIG.BASE_URL}/api/PremiumRequest/request`;
+    const url = `${API_BASE_URL}/api/PremiumRequest/request`;
     console.log("Submitting premium request to:", url);
     const response = await fetch(url, {
       method: "POST",
       headers: {
-        Authorization: `Bearer ${await AsyncStorage.getItem("token")}`,
+        Authorization: `Bearer ${await tokenManager.getToken()}`,
         "Content-Type": "application/json",
       },
     });
@@ -684,11 +686,11 @@ class ApiService {
   }
 
   async getPremiumRequests(): Promise<PremiumRequest[]> {
-    const url = `${API_CONFIG.BASE_URL}/api/PremiumRequest/requests`;
+    const url = `${API_BASE_URL}/api/PremiumRequest/requests`;
     console.log("Fetching premium requests from:", url);
 
     try {
-      const token = await AsyncStorage.getItem("token");
+      const token = await tokenManager.getToken();
       console.log("Using token:", token ? "Token exists" : "No token found");
 
       const response = await fetch(url, {
@@ -720,11 +722,11 @@ class ApiService {
 
   async approvePremiumRequest(requestId: string): Promise<void> {
     const response = await fetch(
-      `${API_CONFIG.BASE_URL}/api/PremiumRequest/${requestId}/approve`,
+      `${API_BASE_URL}/api/PremiumRequest/${requestId}/approve`,
       {
         method: "POST",
         headers: {
-          Authorization: `Bearer ${await AsyncStorage.getItem("token")}`,
+          Authorization: `Bearer ${await tokenManager.getToken()}`,
           "Content-Type": "application/json",
         },
       }
@@ -738,11 +740,11 @@ class ApiService {
 
   async rejectPremiumRequest(requestId: string, reason: string): Promise<void> {
     const response = await fetch(
-      `${API_CONFIG.BASE_URL}/api/PremiumRequest/${requestId}/reject`,
+      `${API_BASE_URL}/api/PremiumRequest/${requestId}/reject`,
       {
         method: "POST",
         headers: {
-          Authorization: `Bearer ${await AsyncStorage.getItem("token")}`,
+          Authorization: `Bearer ${await tokenManager.getToken()}`,
           "Content-Type": "application/json",
         },
         body: JSON.stringify({ reason }),

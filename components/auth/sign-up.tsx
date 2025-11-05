@@ -1,3 +1,5 @@
+import { useLanguage } from "@/context/language-context";
+import { authAPI } from "@/services/api";
 import { Ionicons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
 import React, { useState } from "react";
@@ -14,8 +16,6 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
-import { authAPI } from "@/services/api";
-import { useLanguage } from "@/context/language-context";
 
 export default function SignUpScreen() {
   const { language, setLanguage, t } = useLanguage();
@@ -129,9 +129,9 @@ export default function SignUpScreen() {
         lastName: lastName.trim(),
       });
 
-              router.push({
-                pathname: "/(auth)/verify-code",
-                params: { email: email.trim() },
+      router.push({
+        pathname: "/(auth)/verify-code",
+        params: { email: email.trim() },
       });
     } catch (error: any) {
       console.error("Sign up error:", error);
@@ -155,7 +155,7 @@ export default function SignUpScreen() {
   return (
     <SafeAreaView style={styles.container}>
       <StatusBar barStyle="dark-content" />
-      <ScrollView showsVerticalScrollIndicator={false}>
+      <ScrollView showsVerticalScrollIndicator={false} bounces={false}>
         {/* Header */}
         <View style={styles.header}>
           <View style={styles.logoContainer}>
@@ -223,7 +223,7 @@ export default function SignUpScreen() {
             </View>
             <TextInput
               style={styles.input}
-              placeholder="ornek@email.com"
+              placeholder="email@example.com"
               value={email}
               onChangeText={setEmail}
               keyboardType="email-address"
@@ -328,28 +328,32 @@ export default function SignUpScreen() {
             <TouchableOpacity
               style={[
                 styles.languageButton,
-                language === 'az' && styles.languageButtonActive,
+                language === "az" && styles.languageButtonActive,
               ]}
-              onPress={() => setLanguage('az')}
+              onPress={() => setLanguage("az")}
             >
-              <Text style={[
-                styles.languageButtonText,
-                language === 'az' && styles.languageButtonTextActive,
-              ]}>
+              <Text
+                style={[
+                  styles.languageButtonText,
+                  language === "az" && styles.languageButtonTextActive,
+                ]}
+              >
                 Azərbaycanca
               </Text>
             </TouchableOpacity>
             <TouchableOpacity
               style={[
                 styles.languageButton,
-                language === 'en' && styles.languageButtonActive,
+                language === "en" && styles.languageButtonActive,
               ]}
-              onPress={() => setLanguage('en')}
+              onPress={() => setLanguage("en")}
             >
-              <Text style={[
-                styles.languageButtonText,
-                language === 'en' && styles.languageButtonTextActive,
-              ]}>
+              <Text
+                style={[
+                  styles.languageButtonText,
+                  language === "en" && styles.languageButtonTextActive,
+                ]}
+              >
                 English
               </Text>
             </TouchableOpacity>

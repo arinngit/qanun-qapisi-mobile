@@ -14,14 +14,14 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
-import { authAPI } from "../../services/api";
-import { getDeviceId } from "../../utils/deviceId";
+import { useAuth } from "../../context/auth-context";
 import { useLanguage } from "../../context/language-context";
 import { useTheme } from "../../context/theme-context";
 
 export default function Login() {
   const { t } = useLanguage();
   const { colors, isDark } = useTheme();
+  const { login: loginWithContext } = useAuth();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [rememberMe, setRememberMe] = useState(false);
@@ -51,18 +51,8 @@ export default function Login() {
 
     setLoading(true);
     try {
-      // Get device ID
-      const deviceId = await getDeviceId();
-      
-      const response = await authAPI.login({
-        email: email.trim(),
-        password,
-        deviceId,
-      });
-
-      // Save tokens
-      await AsyncStorage.setItem("accessToken", response.accessToken);
-      await AsyncStorage.setItem("refreshToken", response.refreshToken);
+      // Delegate auth flow to context (handles tokens + profile)
+      await loginWithContext(email.trim(), password);
 
       if (rememberMe) {
         await AsyncStorage.setItem("rememberedEmail", email.trim());
@@ -80,6 +70,8 @@ export default function Login() {
         errorMessage = t.invalidCredentials;
       } else if (error.response?.status === 401) {
         errorMessage = t.emailNotVerified;
+      } else if (error instanceof Error && error.message) {
+        errorMessage = error.message;
       }
 
       Alert.alert(t.error, errorMessage);

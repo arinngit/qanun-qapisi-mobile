@@ -1,36 +1,43 @@
-import { Stack } from 'expo-router';
+import { Redirect, Stack } from "expo-router";
+import { useAuth } from "../../context/auth-context";
 
 export default function AuthLayout() {
+  const { isAuthenticated, loading } = useAuth();
+
+  if (!loading && isAuthenticated) {
+    return <Redirect href="/(tabs)" />;
+  }
+
   return (
     <Stack>
       <Stack.Screen
         name="login"
         options={{
-          title: 'Login',
+          title: "Login",
           headerShown: false,
         }}
       />
       <Stack.Screen
         name="signup"
         options={{
-          title: 'Sign Up',
+          title: "Sign Up",
           headerShown: false,
         }}
       />
       <Stack.Screen
         name="verify-code"
         options={{
-          title: 'Verify',
+          title: "Verify",
           headerShown: false,
         }}
       />
       <Stack.Screen
-        name="resed-password"
+        name="reset-password"
         options={{
-          title: 'Resed',
+          title: "Reset Password",
           headerShown: false,
         }}
       />
     </Stack>
   );
-} 
+}
