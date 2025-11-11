@@ -1,17 +1,21 @@
 import { Ionicons } from "@expo/vector-icons";
 import { useLocalSearchParams, useRouter } from "expo-router";
-import React, { useState, useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import {
+  ActivityIndicator,
+  Image,
   SafeAreaView,
   ScrollView,
   StyleSheet,
   Text,
   TouchableOpacity,
   View,
-  ActivityIndicator,
 } from "react-native";
-import { testsAPI, TestResultResponse, QuestionResultResponse } from "../../../services/api";
-import { Image } from "react-native";
+import {
+  QuestionResultResponse,
+  TestResultResponse,
+  testsAPI,
+} from "../../../services/api";
 
 export default function TestResultsScreen() {
   const router = useRouter();
@@ -19,7 +23,9 @@ export default function TestResultsScreen() {
 
   const [results, setResults] = useState<TestResultResponse | null>(null);
   const [loading, setLoading] = useState(true);
-  const [expandedQuestions, setExpandedQuestions] = useState<Set<string>>(new Set());
+  const [expandedQuestions, setExpandedQuestions] = useState<Set<string>>(
+    new Set()
+  );
 
   useEffect(() => {
     loadResults();
@@ -59,7 +65,10 @@ export default function TestResultsScreen() {
     router.replace("/(tabs)/tests");
   };
 
-  const getAnswerText = (questionResult: QuestionResultResponse, answerId: string): string => {
+  const getAnswerText = (
+    questionResult: QuestionResultResponse,
+    answerId: string
+  ): string => {
     const answer = questionResult.allAnswers.find((a) => a.id === answerId);
     return answer?.answerText || "Naməlum cavab";
   };
@@ -85,8 +94,12 @@ export default function TestResultsScreen() {
     );
   }
 
-  const percentage = Math.round((results.totalScore / results.maxPossibleScore) * 100);
-  const correctCount = results.questionResults.filter((q) => q.isCorrect).length;
+  const percentage = Math.round(
+    (results.totalScore / results.maxPossibleScore) * 100
+  );
+  const correctCount = results.questionResults.filter(
+    (q) => q.isCorrect
+  ).length;
 
   return (
     <SafeAreaView style={styles.container}>
@@ -96,9 +109,9 @@ export default function TestResultsScreen() {
           <Ionicons name="close" size={24} color="#111827" />
         </TouchableOpacity>
         <Text style={styles.headerTitle}>Test Nəticələri</Text>
-        <TouchableOpacity style={styles.shareButton}>
+        {/* <TouchableOpacity style={styles.shareButton}>
           <Ionicons name="share-outline" size={24} color="#111827" />
-        </TouchableOpacity>
+        </TouchableOpacity> */}
       </View>
 
       <ScrollView showsVerticalScrollIndicator={false}>
@@ -154,14 +167,21 @@ export default function TestResultsScreen() {
           {results.questionResults
             .sort((a, b) => a.orderIndex - b.orderIndex)
             .map((questionResult, index) => {
-              const isExpanded = expandedQuestions.has(questionResult.questionId);
+              const isExpanded = expandedQuestions.has(
+                questionResult.questionId
+              );
 
               return (
-                <View key={questionResult.questionId} style={styles.questionCard}>
+                <View
+                  key={questionResult.questionId}
+                  style={styles.questionCard}
+                >
                   {/* Question Header */}
                   <TouchableOpacity
                     style={styles.questionHeader}
-                    onPress={() => toggleQuestionExpanded(questionResult.questionId)}
+                    onPress={() =>
+                      toggleQuestionExpanded(questionResult.questionId)
+                    }
                   >
                     <View style={styles.questionHeaderLeft}>
                       <View
@@ -172,10 +192,15 @@ export default function TestResultsScreen() {
                             : styles.questionNumberIncorrect,
                         ]}
                       >
-                        <Text style={styles.questionNumberText}>{index + 1}</Text>
+                        <Text style={styles.questionNumberText}>
+                          {index + 1}
+                        </Text>
                       </View>
                       <View style={styles.questionHeaderInfo}>
-                        <Text style={styles.questionTitle} numberOfLines={isExpanded ? undefined : 2}>
+                        <Text
+                          style={styles.questionTitle}
+                          numberOfLines={isExpanded ? undefined : 2}
+                        >
                           {questionResult.questionText}
                         </Text>
                         <View style={styles.questionMeta}>
@@ -190,7 +215,8 @@ export default function TestResultsScreen() {
                             {questionResult.isCorrect ? "Doğru" : "Səhv"}
                           </Text>
                           <Text style={styles.questionScore}>
-                            {questionResult.scoreEarned} / {questionResult.score} xal
+                            {questionResult.scoreEarned} /{" "}
+                            {questionResult.score} xal
                           </Text>
                         </View>
                       </View>
@@ -219,47 +245,79 @@ export default function TestResultsScreen() {
                       {/* User's Answer */}
                       {questionResult.questionType === "OPEN_TEXT" ? (
                         <View style={styles.answerSection}>
-                          <Text style={styles.answerSectionTitle}>Sizin cavabınız:</Text>
+                          <Text style={styles.answerSectionTitle}>
+                            Sizin cavabınız:
+                          </Text>
                           <View style={styles.openAnswerBox}>
                             <Text style={styles.openAnswerText}>
-                              {questionResult.openTextAnswer || "Cavab verilməyib"}
+                              {questionResult.openTextAnswer ||
+                                "Cavab verilməyib"}
                             </Text>
                           </View>
-                          
-                          {!questionResult.isCorrect && questionResult.correctAnswer && (
-                            <>
-                              <Text style={[styles.answerSectionTitle, { marginTop: 12 }]}>
-                                Doğru cavab:
-                              </Text>
-                              <View style={[styles.openAnswerBox, styles.correctAnswerBox]}>
-                                <Text style={styles.correctAnswerText}>
-                                  {questionResult.correctAnswer}
+
+                          {!questionResult.isCorrect &&
+                            questionResult.correctAnswer && (
+                              <>
+                                <Text
+                                  style={[
+                                    styles.answerSectionTitle,
+                                    { marginTop: 12 },
+                                  ]}
+                                >
+                                  Doğru cavab:
                                 </Text>
-                              </View>
-                            </>
-                          )}
+                                <View
+                                  style={[
+                                    styles.openAnswerBox,
+                                    styles.correctAnswerBox,
+                                  ]}
+                                >
+                                  <Text style={styles.correctAnswerText}>
+                                    {questionResult.correctAnswer}
+                                  </Text>
+                                </View>
+                              </>
+                            )}
                         </View>
                       ) : (
                         <View style={styles.answerSection}>
-                          <Text style={styles.answerSectionTitle}>Cavablar:</Text>
+                          <Text style={styles.answerSectionTitle}>
+                            Cavablar:
+                          </Text>
                           {questionResult.allAnswers.map((answer) => {
-                            const isSelected = questionResult.selectedAnswerIds?.includes(answer.id);
-                            const isCorrect = questionResult.correctAnswerIds?.includes(answer.id);
+                            const isSelected =
+                              questionResult.selectedAnswerIds?.includes(
+                                answer.id
+                              );
+                            const isCorrect =
+                              questionResult.correctAnswerIds?.includes(
+                                answer.id
+                              );
 
                             return (
                               <View
                                 key={answer.id}
                                 style={[
                                   styles.answerOption,
-                                  isSelected && isCorrect && styles.answerOptionCorrect,
-                                  isSelected && !isCorrect && styles.answerOptionIncorrect,
-                                  !isSelected && isCorrect && styles.answerOptionMissed,
+                                  isSelected &&
+                                    isCorrect &&
+                                    styles.answerOptionCorrect,
+                                  isSelected &&
+                                    !isCorrect &&
+                                    styles.answerOptionIncorrect,
+                                  !isSelected &&
+                                    isCorrect &&
+                                    styles.answerOptionMissed,
                                 ]}
                               >
                                 <View style={styles.answerOptionLeft}>
                                   {isSelected && (
                                     <Ionicons
-                                      name={isCorrect ? "checkmark-circle" : "close-circle"}
+                                      name={
+                                        isCorrect
+                                          ? "checkmark-circle"
+                                          : "close-circle"
+                                      }
                                       size={20}
                                       color={isCorrect ? "#10B981" : "#EF4444"}
                                     />
@@ -277,7 +335,8 @@ export default function TestResultsScreen() {
                                   <Text
                                     style={[
                                       styles.answerOptionText,
-                                      (isSelected || isCorrect) && styles.answerOptionTextBold,
+                                      (isSelected || isCorrect) &&
+                                        styles.answerOptionTextBold,
                                     ]}
                                   >
                                     {answer.answerText}
@@ -300,10 +359,16 @@ export default function TestResultsScreen() {
 
       {/* Bottom Actions */}
       <View style={styles.bottomActions}>
-        <TouchableOpacity style={styles.secondaryButton} onPress={handleBackToTests}>
+        <TouchableOpacity
+          style={styles.secondaryButton}
+          onPress={handleBackToTests}
+        >
           <Text style={styles.secondaryButtonText}>Testlərə qayıt</Text>
         </TouchableOpacity>
-        <TouchableOpacity style={styles.primaryButton} onPress={handleRetakeTest}>
+        <TouchableOpacity
+          style={styles.primaryButton}
+          onPress={handleRetakeTest}
+        >
           <Ionicons name="refresh" size={18} color="#fff" />
           <Text style={styles.primaryButtonText}>Yenidən</Text>
         </TouchableOpacity>
@@ -640,4 +705,3 @@ const styles = StyleSheet.create({
     color: "#FFFFFF",
   },
 });
-

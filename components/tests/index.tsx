@@ -1,18 +1,18 @@
 import { Ionicons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
-import React, { useState, useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import {
+  ActivityIndicator,
   FlatList,
+  Modal,
+  RefreshControl,
   SafeAreaView,
   StyleSheet,
   Text,
   TouchableOpacity,
   View,
-  ActivityIndicator,
-  RefreshControl,
-  Modal,
 } from "react-native";
-import { testsAPI, TestResponse } from "../../services/api";
+import { TestResponse, testsAPI } from "../../services/api";
 import { handleApiError } from "../../utils/errorHandler";
 
 interface FilterItem {
@@ -59,7 +59,7 @@ export default function TestScreen() {
       }
 
       const currentPage = reset ? 0 : page;
-      
+
       // Build filter params
       const params: any = {
         page: currentPage,
@@ -75,13 +75,13 @@ export default function TestScreen() {
       }
 
       const response = await testsAPI.getTests(params);
-      
+
       if (reset) {
         setTests(response.content);
       } else {
         setTests((prev) => [...prev, ...response.content]);
       }
-      
+
       setTotalPages(response.totalPages);
       setTotalElements(response.totalElements);
       setPage(currentPage);
@@ -108,7 +108,7 @@ export default function TestScreen() {
   };
 
   const handleFilterSelect = (filterId: string) => {
-      setSelectedFilter(filterId);
+    setSelectedFilter(filterId);
   };
 
   const handleSortSelect = (sortOption: SortBy) => {
@@ -117,17 +117,29 @@ export default function TestScreen() {
   };
 
   const getSortLabel = () => {
-    const option = sortOptions.find(opt => opt.id === sortBy);
+    const option = sortOptions.find((opt) => opt.id === sortBy);
     return option ? option.label : "Sırala";
   };
 
   const formatDate = (dateString: string) => {
     const date = new Date(dateString);
     const months = [
-      "Yanvar", "Fevral", "Mart", "Aprel", "May", "İyun",
-      "İyul", "Avqust", "Sentyabr", "Oktyabr", "Noyabr", "Dekabr"
+      "Yanvar",
+      "Fevral",
+      "Mart",
+      "Aprel",
+      "May",
+      "İyun",
+      "İyul",
+      "Avqust",
+      "Sentyabr",
+      "Oktyabr",
+      "Noyabr",
+      "Dekabr",
     ];
-    return `Nəşr tarixi: ${date.getDate()} ${months[date.getMonth()]} ${date.getFullYear()}`;
+    return `Nəşr tarixi: ${date.getDate()} ${
+      months[date.getMonth()]
+    } ${date.getFullYear()}`;
   };
 
   // Оптимизированный компонент карточки
@@ -164,7 +176,9 @@ export default function TestScreen() {
       <View style={styles.testFooter}>
         <View style={styles.publishDate}>
           <Ionicons name="calendar-outline" size={14} color="#9CA3AF" />
-          <Text style={styles.publishDateText}>{formatDate(item.publishedAt)}</Text>
+          <Text style={styles.publishDateText}>
+            {formatDate(item.publishedAt)}
+          </Text>
         </View>
       </View>
 
@@ -188,18 +202,10 @@ export default function TestScreen() {
 
     return (
       <TouchableOpacity
-        style={[
-          styles.filterButton,
-          isActive && styles.filterButtonActive,
-        ]}
+        style={[styles.filterButton, isActive && styles.filterButtonActive]}
         onPress={() => handleFilterSelect(item.id)}
       >
-        <Text
-          style={[
-            styles.filterText,
-            isActive && styles.filterTextActive,
-          ]}
-        >
+        <Text style={[styles.filterText, isActive && styles.filterTextActive]}>
           {item.label}
         </Text>
       </TouchableOpacity>
@@ -270,7 +276,11 @@ export default function TestScreen() {
               <Ionicons name="search" size={24} color="#111827" />
             </TouchableOpacity>
             <TouchableOpacity style={styles.iconButton}>
-              <Ionicons name="notifications-outline" size={24} color="#111827" />
+              <Ionicons
+                name="notifications-outline"
+                size={24}
+                color="#111827"
+              />
             </TouchableOpacity>
           </View>
         </View>
@@ -287,13 +297,13 @@ export default function TestScreen() {
       <View style={styles.header}>
         <Text style={styles.headerTitle}>Testlər</Text>
         <View style={styles.headerRight}>
-          <TouchableOpacity 
+          <TouchableOpacity
             style={styles.iconButton}
             onPress={() => setSortModalVisible(true)}
           >
             <Ionicons name="swap-vertical" size={24} color="#111827" />
           </TouchableOpacity>
-          <TouchableOpacity 
+          <TouchableOpacity
             style={styles.iconButton}
             onPress={() => router.push("/search" as any)}
           >
@@ -335,7 +345,7 @@ export default function TestScreen() {
         animationType="fade"
         onRequestClose={() => setSortModalVisible(false)}
       >
-        <TouchableOpacity 
+        <TouchableOpacity
           style={styles.modalOverlay}
           activeOpacity={1}
           onPress={() => setSortModalVisible(false)}
@@ -354,7 +364,11 @@ export default function TestScreen() {
                 onPress={() => handleSortSelect(option.id as SortBy)}
               >
                 <View style={styles.sortOptionLeft}>
-                  <Ionicons name={option.icon as any} size={20} color="#7313e8" />
+                  <Ionicons
+                    name={option.icon as any}
+                    size={20}
+                    color="#7313e8"
+                  />
                   <Text style={styles.sortOptionText}>{option.label}</Text>
                 </View>
                 {sortBy === option.id && (

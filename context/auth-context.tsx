@@ -10,7 +10,6 @@ import React, {
 import { translations } from "../constants/translations";
 import { getDeviceId } from "../utils/deviceId";
 
-// Match ProfileResponse interface exactly
 interface User {
   id: string;
   email: string;
@@ -49,7 +48,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
     checkAuth();
   }, []);
 
-  // Check if token exists and load cached user
   const checkAuth = async () => {
     try {
       const storedToken = await tokenManager.getToken();
@@ -58,19 +56,16 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
       if (storedToken) {
         setToken(storedToken);
 
-        // Use cached user for immediate UI rendering
         if (storedUser) {
           const userData = JSON.parse(storedUser);
           setUser(userData);
           setIsAuthenticated(true);
         }
 
-        // Refresh user data in background
         try {
           await refreshUser();
         } catch (refreshError) {
           console.error("Background refresh failed:", refreshError);
-          // Don't break auth flow if refresh fails
         }
       } else {
         await logout();
@@ -83,7 +78,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
     }
   };
 
-  // Refresh user data from backend
   const refreshUser = useCallback(async (): Promise<void> => {
     try {
       const currentToken = await tokenManager.getToken();
@@ -94,7 +88,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
 
       const profileData = await profileAPI.getProfile();
 
-      // Map ProfileResponse to User interface
       const userData: User = {
         id: profileData.id,
         email: profileData.email,
@@ -119,7 +112,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
     }
   }, []);
 
-  // Update user in local state
   const updateUser = useCallback((userData: Partial<User>) => {
     setUser((prevUser) => {
       if (!prevUser) return null;
@@ -132,7 +124,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
     });
   }, []);
 
-  // Login with email and password
   const login = async (email: string, password: string) => {
     try {
       console.log("AuthContext: Starting login process");
@@ -140,10 +131,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
       const response = await authAPI.login({ email, password, deviceId });
       console.log("AuthContext: Login response received");
 
-      // Fetch user profile after successful login
       const profileData = await profileAPI.getProfile();
 
-      // Create user object
       const userData: User = {
         id: profileData.id,
         email: profileData.email,
@@ -157,7 +146,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
         updatedAt: profileData.updatedAt,
       };
 
-      // Save to AsyncStorage
       await AsyncStorage.setItem("user", JSON.stringify(userData));
 
       setToken(response.accessToken);
@@ -173,19 +161,15 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
     }
   };
 
-  // Logout and clear all data
   const logout = async () => {
     try {
       const currentToken = await tokenManager.getToken();
-      // Call logout API if token exists
       if (currentToken) {
         await authAPI.logout();
       }
     } catch (error) {
       console.error("Logout API error:", error);
-      // Continue with local logout even if API fails
     } finally {
-      // Always clear local data
       await AsyncStorage.multiRemove(["user", "accessToken", "refreshToken"]);
       await tokenManager.removeTokens();
       setToken(null);

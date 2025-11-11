@@ -51,7 +51,6 @@ export default function Login() {
 
     setLoading(true);
     try {
-      // Delegate auth flow to context (handles tokens + profile)
       await loginWithContext(email.trim(), password);
 
       if (rememberMe) {

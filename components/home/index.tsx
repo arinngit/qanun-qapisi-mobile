@@ -1,29 +1,35 @@
 import { Ionicons } from "@expo/vector-icons";
-import React, { useState, useEffect } from "react";
+import { useRouter } from "expo-router";
+import React, { useEffect, useState } from "react";
 import {
+  ActivityIndicator,
+  Image,
+  RefreshControl,
   SafeAreaView,
   ScrollView,
   StyleSheet,
   Text,
   TouchableOpacity,
   View,
-  Image,
-  ActivityIndicator,
-  RefreshControl,
 } from "react-native";
-import { useRouter } from "expo-router";
 import { useAuth } from "../../context/auth-context";
-import { testsAPI, TestResponse, TestAttemptResponse } from "../../services/api";
-import { handleApiError, showSuccess } from "../../utils/errorHandler";
+import {
+  TestAttemptResponse,
+  TestResponse,
+  testsAPI,
+} from "../../services/api";
+import { handleApiError } from "../../utils/errorHandler";
 
 export default function HomeScreen() {
   const router = useRouter();
   const { user } = useAuth();
-  
+
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [recentTests, setRecentTests] = useState<TestResponse[]>([]);
-  const [attemptsByTest, setAttemptsByTest] = useState<Map<string, TestAttemptResponse>>(new Map());
+  const [attemptsByTest, setAttemptsByTest] = useState<
+    Map<string, TestAttemptResponse>
+  >(new Map());
   const [stats, setStats] = useState({
     completed: 0,
     inProgress: 0,
@@ -37,7 +43,12 @@ export default function HomeScreen() {
   const loadData = async () => {
     try {
       // Fetch recent published tests
-      const testsResponse = await testsAPI.getTests({ page: 0, size: 10, sortBy: "publishedAt", sortDir: "desc" });
+      const testsResponse = await testsAPI.getTests({
+        page: 0,
+        size: 10,
+        sortBy: "publishedAt",
+        sortDir: "desc",
+      });
       const tests = testsResponse.content;
       setRecentTests(tests.slice(0, 3)); // Take first 3 for display
 
@@ -54,7 +65,7 @@ export default function HomeScreen() {
             // Get the most recent attempt
             const latestAttempt = attempts[0];
             attemptsMap.set(test.id, latestAttempt);
-            
+
             if (latestAttempt.status === "COMPLETED") {
               completedCount++;
               totalScore += latestAttempt.totalScore;
@@ -105,15 +116,16 @@ export default function HomeScreen() {
         // First fetch full test details
         const testDetails = await testsAPI.getTestById(testId);
         const newAttempt = await testsAPI.startTest(testId);
-        
+
         // Save test data to AsyncStorage
-        const AsyncStorage = require("@react-native-async-storage/async-storage").default;
+        const AsyncStorage =
+          require("@react-native-async-storage/async-storage").default;
         const storageKey = `test_attempt_${newAttempt.id}`;
         await AsyncStorage.setItem(
           storageKey,
           JSON.stringify({ test: testDetails, answers: {} })
         );
-        
+
         router.push(`/test/take/${newAttempt.id}` as any);
       } catch (error: any) {
         handleApiError(error, "Testi başlatmaq mümkün olmadı");
@@ -155,10 +167,14 @@ export default function HomeScreen() {
   }
   return (
     <SafeAreaView style={styles.container}>
-      <ScrollView 
+      <ScrollView
         showsVerticalScrollIndicator={false}
         refreshControl={
-          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} colors={["#7313e8"]} />
+          <RefreshControl
+            refreshing={refreshing}
+            onRefresh={onRefresh}
+            colors={["#7313e8"]}
+          />
         }
       >
         {/* Header */}
@@ -167,15 +183,20 @@ export default function HomeScreen() {
             <View style={styles.logo}>
               <Image
                 source={require("../../assets/images/qanun.png")}
-                style={{ width: 36, height: 36, resizeMode: "contain", borderRadius: 20 }}
+                style={{
+                  width: 36,
+                  height: 36,
+                  resizeMode: "contain",
+                  borderRadius: 20,
+                }}
                 accessibilityLabel="qanun"
               />
             </View>
             <Text style={styles.headerTitle}>Qanun Qapısı</Text>
           </View>
-          <TouchableOpacity>
+          {/* <TouchableOpacity>
             <Ionicons name="notifications-outline" size={24} color="#111827" />
-          </TouchableOpacity>
+          </TouchableOpacity> */}
         </View>
 
         {/* Premium Banner */}
@@ -233,7 +254,11 @@ export default function HomeScreen() {
 
           {recentTests.length === 0 ? (
             <View style={styles.emptyState}>
-              <Ionicons name="document-text-outline" size={48} color="#9CA3AF" />
+              <Ionicons
+                name="document-text-outline"
+                size={48}
+                color="#9CA3AF"
+              />
               <Text style={styles.emptyStateText}>Hələ test yoxdur</Text>
             </View>
           ) : (
@@ -243,7 +268,9 @@ export default function HomeScreen() {
 
               return (
                 <View key={test.id} style={styles.testCard}>
-                  <TouchableOpacity onPress={() => router.push(`/test/${test.id}` as any)}>
+                  <TouchableOpacity
+                    onPress={() => router.push(`/test/${test.id}` as any)}
+                  >
                     <View style={styles.testHeader}>
                       <Text style={styles.testTitle}>{test.title}</Text>
                       {test.isPremium && (
@@ -262,32 +289,65 @@ export default function HomeScreen() {
                           size={14}
                           color="#6B7280"
                         />
-                        <Text style={styles.metaText}>{test.questionCount} sual</Text>
+                        <Text style={styles.metaText}>
+                          {test.questionCount} sual
+                        </Text>
                       </View>
                       <View style={styles.metaItem}>
-                        <Ionicons name="star-outline" size={14} color="#6B7280" />
-                        <Text style={styles.metaText}>{test.totalPossibleScore} xal</Text>
+                        <Ionicons
+                          name="star-outline"
+                          size={14}
+                          color="#6B7280"
+                        />
+                        <Text style={styles.metaText}>
+                          {test.totalPossibleScore} xal
+                        </Text>
                       </View>
                       <View style={styles.metaItem}>
-                        <Ionicons name="time-outline" size={14} color="#6B7280" />
-                        <Text style={styles.metaText}>{test.estimatedMinutes} dəq</Text>
+                        <Ionicons
+                          name="time-outline"
+                          size={14}
+                          color="#6B7280"
+                        />
+                        <Text style={styles.metaText}>
+                          {test.estimatedMinutes} dəq
+                        </Text>
                       </View>
                     </View>
                     <View style={styles.testFooter}>
                       <View style={styles.statusBadge}>
                         <View
-                          style={[styles.statusDot, { backgroundColor: status.color }]}
+                          style={[
+                            styles.statusDot,
+                            { backgroundColor: status.color },
+                          ]}
                         />
-                        <Text style={[styles.statusText, { color: status.color }]}>
+                        <Text
+                          style={[styles.statusText, { color: status.color }]}
+                        >
                           {status.text}
                         </Text>
                       </View>
-                      <TouchableOpacity 
-                        style={status.status === "COMPLETED" ? styles.secondaryButton : styles.primaryButton}
+                      <TouchableOpacity
+                        style={
+                          status.status === "COMPLETED"
+                            ? styles.secondaryButton
+                            : styles.primaryButton
+                        }
                         onPress={() => handleTestPress(test.id)}
                       >
-                        <Text style={status.status === "COMPLETED" ? styles.secondaryButtonText : styles.primaryButtonText}>
-                          {status.status === "COMPLETED" ? "Nəticələr" : status.status === "IN_PROGRESS" ? "Davam et" : "Başla"}
+                        <Text
+                          style={
+                            status.status === "COMPLETED"
+                              ? styles.secondaryButtonText
+                              : styles.primaryButtonText
+                          }
+                        >
+                          {status.status === "COMPLETED"
+                            ? "Nəticələr"
+                            : status.status === "IN_PROGRESS"
+                            ? "Davam et"
+                            : "Başla"}
                         </Text>
                       </TouchableOpacity>
                     </View>
@@ -302,7 +362,7 @@ export default function HomeScreen() {
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>Tez Əməliyyatlar</Text>
           <View style={styles.quickActionsGrid}>
-            <TouchableOpacity 
+            <TouchableOpacity
               style={styles.quickActionCard}
               onPress={() => handleQuickAction("new-test")}
             >
@@ -317,7 +377,7 @@ export default function HomeScreen() {
               </Text>
             </TouchableOpacity>
 
-            <TouchableOpacity 
+            <TouchableOpacity
               style={styles.quickActionCard}
               onPress={() => handleQuickAction("results")}
             >
@@ -332,7 +392,7 @@ export default function HomeScreen() {
               </Text>
             </TouchableOpacity>
 
-            <TouchableOpacity 
+            <TouchableOpacity
               style={styles.quickActionCard}
               onPress={() => handleQuickAction("bookmarks")}
             >
@@ -345,7 +405,7 @@ export default function HomeScreen() {
               <Text style={styles.quickActionSubtitle}>Saxlanmış testlər</Text>
             </TouchableOpacity>
 
-            <TouchableOpacity 
+            <TouchableOpacity
               style={styles.quickActionCard}
               onPress={() => handleQuickAction("teacher")}
             >

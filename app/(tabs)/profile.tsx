@@ -1,3 +1,5 @@
+import GBottomSheet from "@/components/common/GBottomSheet";
+import PremiumRequestModal from "@/components/premium/PremiumRequestModal";
 import { ThemedText } from "@/components/theme/themed-text";
 import { translations } from "@/constants/translations";
 import { useAuth } from "@/context/auth-context";
@@ -13,19 +15,13 @@ import {
   ActivityIndicator,
   Alert,
   Image,
-  KeyboardAvoidingView,
-  Modal,
-  Platform,
   RefreshControl,
   ScrollView,
   StyleSheet,
-  Switch,
-  Text,
   TextInput,
   TouchableOpacity,
   View,
 } from "react-native";
-import PremiumRequestModal from "@/components/premium/PremiumRequestModal";
 
 export default function Profile() {
   const { user, logout, refreshUser, updateUser } = useAuth();
@@ -37,14 +33,12 @@ export default function Profile() {
   const borderColor = useThemeColor({}, "icon");
   const [refreshing, setRefreshing] = useState(false);
 
-  // Modal states
   const [editProfileModal, setEditProfileModal] = useState(false);
   const [changePasswordModal, setChangePasswordModal] = useState(false);
   const [changeEmailModal, setChangeEmailModal] = useState(false);
   const [verifyEmailModal, setVerifyEmailModal] = useState(false);
   const [premiumRequestModal, setPremiumRequestModal] = useState(false);
 
-  // Form states
   const [firstName, setFirstName] = useState(user?.firstName || "");
   const [lastName, setLastName] = useState(user?.lastName || "");
   const [currentPassword, setCurrentPassword] = useState("");
@@ -107,7 +101,6 @@ export default function Profile() {
         lastName: lastName.trim(),
       });
 
-      // Update local user state
       updateUser({
         firstName: firstName.trim(),
         lastName: lastName.trim(),
@@ -252,7 +245,7 @@ export default function Profile() {
       }
 
       const result = await ImagePicker.launchImageLibraryAsync({
-        mediaTypes: ['images'],
+        mediaTypes: ["images"],
         allowsEditing: true,
         aspect: [1, 1],
         quality: 0.8,
@@ -341,6 +334,7 @@ export default function Profile() {
     <>
       <ScrollView
         style={[styles.container, { backgroundColor: "#f5f5f5" }]}
+        showsVerticalScrollIndicator={false}
         refreshControl={
           <RefreshControl
             refreshing={refreshing}
@@ -354,12 +348,7 @@ export default function Profile() {
           <View style={styles.headerContent}>
             {/* Avatar with ring */}
             <View style={styles.avatarWrapper}>
-              <View
-                style={[
-                  styles.avatarRing,
-                  { borderColor: "#7313e8" },
-                ]}
-              >
+              <View style={[styles.avatarRing, { borderColor: "#7313e8" }]}>
                 <View style={styles.avatarContainer}>
                   {user?.profilePicture ? (
                     <Image
@@ -468,7 +457,7 @@ export default function Profile() {
             <TouchableOpacity
               style={[
                 styles.menuItem,
-                { borderBottomColor: "#E5E7EB" },
+                { borderBottomColor: "#E5E7EB", borderBottomWidth: 1 },
               ]}
               onPress={handleEditProfile}
             >
@@ -486,7 +475,7 @@ export default function Profile() {
             <TouchableOpacity
               style={[
                 styles.menuItem,
-                { borderBottomColor: "#E5E7EB" },
+                { borderBottomColor: "#E5E7EB", borderBottomWidth: 1 },
               ]}
               onPress={handleChangePassword}
             >
@@ -502,7 +491,7 @@ export default function Profile() {
             <TouchableOpacity
               style={[
                 styles.menuItem,
-                { borderBottomColor: "#E5E7EB" },
+                { borderBottomColor: "#E5E7EB", borderBottomWidth: 1 },
               ]}
               onPress={handleChangeEmail}
             >
@@ -515,10 +504,10 @@ export default function Profile() {
               <Ionicons name="chevron-forward" size={20} color="#9CA3AF" />
             </TouchableOpacity>
 
-            <TouchableOpacity
+            {/* <TouchableOpacity
               style={[
                 styles.menuItem,
-                { borderBottomColor: "#E5E7EB" },
+                { borderBottomColor: "#E5E7EB", borderBottomWidth: 1 },
               ]}
               onPress={() =>
                 Alert.alert(
@@ -534,36 +523,42 @@ export default function Profile() {
               </View>
               <ThemedText style={styles.menuText}>Bildirişlər</ThemedText>
               <Ionicons name="chevron-forward" size={20} color="#9CA3AF" />
-            </TouchableOpacity>
+            </TouchableOpacity> */}
 
             {/* Dark Mode Toggle */}
-            <View
+            {/* <View
               style={[
                 styles.menuItem,
-                { borderBottomColor: "#E5E7EB" },
+                { borderBottomColor: "#E5E7EB", borderBottomWidth: 1 },
               ]}
             >
               <View
                 style={[styles.iconContainer, { backgroundColor: "#7313e8" }]}
               >
-                <Ionicons name={isDark ? "moon" : "sunny"} size={22} color="#fff" />
+                <Ionicons
+                  name={isDark ? "moon" : "sunny"}
+                  size={22}
+                  color="#fff"
+                />
               </View>
               <ThemedText style={styles.menuText}>
                 {isDark ? t.lightMode : t.darkMode}
               </ThemedText>
               <Switch
                 value={isDark}
-                onValueChange={(value) => setThemeMode(value ? 'dark' : 'light')}
-                trackColor={{ false: '#D1D5DB', true: '#7313e8' }}
+                onValueChange={(value) =>
+                  setThemeMode(value ? "dark" : "light")
+                }
+                trackColor={{ false: "#D1D5DB", true: "#7313e8" }}
                 thumbColor="#fff"
                 ios_backgroundColor="#D1D5DB"
               />
-            </View>
+            </View> */}
 
             {/* Language Selector */}
-            <TouchableOpacity
+            {/* <TouchableOpacity
               style={styles.menuItem}
-              onPress={() => setLanguage(language === 'az' ? 'en' : 'az')}
+              onPress={() => setLanguage(language === "az" ? "en" : "az")}
             >
               <View
                 style={[styles.iconContainer, { backgroundColor: "#7313e8" }]}
@@ -573,11 +568,11 @@ export default function Profile() {
               <ThemedText style={styles.menuText}>{t.language}</ThemedText>
               <View style={styles.languageBadge}>
                 <Text style={styles.languageText}>
-                  {language === 'az' ? 'AZ' : 'EN'}
+                  {language === "az" ? "AZ" : "EN"}
                 </Text>
               </View>
               <Ionicons name="chevron-forward" size={20} color="#9CA3AF" />
-            </TouchableOpacity>
+            </TouchableOpacity> */}
           </View>
         </View>
 
@@ -591,7 +586,7 @@ export default function Profile() {
             <TouchableOpacity
               style={[
                 styles.menuItem,
-                { borderBottomColor: "#E5E7EB" },
+                { borderBottomColor: "#E5E7EB", borderBottomWidth: 1 },
               ]}
               onPress={() =>
                 Alert.alert(
@@ -612,7 +607,7 @@ export default function Profile() {
             <TouchableOpacity
               style={[
                 styles.menuItem,
-                { borderBottomColor: "#E5E7EB" },
+                { borderBottomColor: "#E5E7EB", borderBottomWidth: 1 },
               ]}
               onPress={() =>
                 Alert.alert(
@@ -653,280 +648,226 @@ export default function Profile() {
         </View>
       </ScrollView>
 
-      {/* Edit Profile Modal */}
-      <Modal
+      {/* Edit Profile BottomSheet */}
+      <GBottomSheet
         visible={editProfileModal}
-        transparent
-        animationType="slide"
-        onRequestClose={() => setEditProfileModal(false)}
+        onClose={() => setEditProfileModal(false)}
+        title="Profili Redaktə Et"
+        type="form"
       >
-        <KeyboardAvoidingView
-          behavior={Platform.OS === "ios" ? "padding" : "height"}
-          style={styles.modalOverlay}
-        >
-          <View style={[styles.modalContent, { backgroundColor: "#fff" }]}>
-            <View style={styles.modalHeader}>
-              <ThemedText type="subtitle" style={styles.modalTitle}>
-                Profili Redaktə Et
+        <View style={styles.modalBody}>
+          <ThemedText style={styles.inputLabel}>Ad</ThemedText>
+          <TextInput
+            style={[
+              styles.input,
+              {
+                backgroundColor: colors.backgroundSecondary,
+                color: colors.text,
+                borderColor: colors.border,
+              },
+            ]}
+            value={firstName}
+            onChangeText={setFirstName}
+            placeholder="Adınızı daxil edin"
+            placeholderTextColor={colors.placeholder}
+          />
+
+          <ThemedText style={styles.inputLabel}>Soyad</ThemedText>
+          <TextInput
+            style={[
+              styles.input,
+              {
+                backgroundColor: colors.backgroundSecondary,
+                color: colors.text,
+                borderColor: colors.border,
+              },
+            ]}
+            value={lastName}
+            onChangeText={setLastName}
+            placeholder="Soyadınızı daxil edin"
+            placeholderTextColor={colors.placeholder}
+          />
+
+          <TouchableOpacity
+            style={[styles.modalButton, loading && styles.modalButtonDisabled]}
+            onPress={handleUpdateProfile}
+            disabled={loading}
+          >
+            {loading ? (
+              <ActivityIndicator color="#fff" />
+            ) : (
+              <ThemedText style={styles.modalButtonText}>
+                Yadda saxla
               </ThemedText>
-              <TouchableOpacity onPress={() => setEditProfileModal(false)}>
-                <Ionicons name="close" size={24} color="#111827" />
-              </TouchableOpacity>
-            </View>
+            )}
+          </TouchableOpacity>
+        </View>
+      </GBottomSheet>
 
-            <View style={styles.modalBody}>
-              <ThemedText style={styles.inputLabel}>Ad</ThemedText>
-              <TextInput
-                style={[
-                  styles.input,
-                  { backgroundColor: "#F3F4F6", color: "#111827" },
-                ]}
-                value={firstName}
-                onChangeText={setFirstName}
-                placeholder="Adınızı daxil edin"
-                placeholderTextColor="#9CA3AF"
-              />
-
-              <ThemedText style={styles.inputLabel}>Soyad</ThemedText>
-              <TextInput
-                style={[
-                  styles.input,
-                  { backgroundColor: "#F3F4F6", color: "#111827" },
-                ]}
-                value={lastName}
-                onChangeText={setLastName}
-                placeholder="Soyadınızı daxil edin"
-                placeholderTextColor="#9CA3AF"
-              />
-
-              <TouchableOpacity
-                style={[
-                  styles.modalButton,
-                  loading && styles.modalButtonDisabled,
-                ]}
-                onPress={handleUpdateProfile}
-                disabled={loading}
-              >
-                {loading ? (
-                  <ActivityIndicator color="#fff" />
-                ) : (
-                  <ThemedText style={styles.modalButtonText}>
-                    Yadda saxla
-                  </ThemedText>
-                )}
-              </TouchableOpacity>
-            </View>
-          </View>
-        </KeyboardAvoidingView>
-      </Modal>
-
-      {/* Change Password Modal */}
-      <Modal
+      {/* Change Password BottomSheet */}
+      <GBottomSheet
         visible={changePasswordModal}
-        transparent
-        animationType="slide"
-        onRequestClose={() => setChangePasswordModal(false)}
+        onClose={() => setChangePasswordModal(false)}
+        title="Şifrəni Dəyiş"
+        type="form"
       >
-        <KeyboardAvoidingView
-          behavior={Platform.OS === "ios" ? "padding" : "height"}
-          style={styles.modalOverlay}
-        >
-          <View style={[styles.modalContent, { backgroundColor: "#fff" }]}>
-            <View style={styles.modalHeader}>
-              <ThemedText type="subtitle" style={styles.modalTitle}>
+        <View style={styles.modalBody}>
+          <ThemedText style={styles.inputLabel}>Cari Şifrə</ThemedText>
+          <TextInput
+            style={[
+              styles.input,
+              {
+                backgroundColor: colors.backgroundSecondary,
+                color: colors.text,
+                borderColor: colors.border,
+              },
+            ]}
+            value={currentPassword}
+            onChangeText={setCurrentPassword}
+            placeholder="Cari şifrənizi daxil edin"
+            placeholderTextColor={colors.placeholder}
+            secureTextEntry
+          />
+
+          <ThemedText style={styles.inputLabel}>Yeni Şifrə</ThemedText>
+          <TextInput
+            style={[
+              styles.input,
+              {
+                backgroundColor: colors.backgroundSecondary,
+                color: colors.text,
+                borderColor: colors.border,
+              },
+            ]}
+            value={newPassword}
+            onChangeText={setNewPassword}
+            placeholder="Yeni şifrənizi daxil edin"
+            placeholderTextColor={colors.placeholder}
+            secureTextEntry
+          />
+
+          <ThemedText style={styles.inputLabel}>Şifrəni Təsdiqlə</ThemedText>
+          <TextInput
+            style={[
+              styles.input,
+              {
+                backgroundColor: colors.backgroundSecondary,
+                color: colors.text,
+                borderColor: colors.border,
+              },
+            ]}
+            value={confirmPassword}
+            onChangeText={setConfirmPassword}
+            placeholder="Yeni şifrəni təkrar daxil edin"
+            placeholderTextColor={colors.placeholder}
+            secureTextEntry
+          />
+
+          <TouchableOpacity
+            style={[styles.modalButton, loading && styles.modalButtonDisabled]}
+            onPress={handleSubmitPasswordChange}
+            disabled={loading}
+          >
+            {loading ? (
+              <ActivityIndicator color="#fff" />
+            ) : (
+              <ThemedText style={styles.modalButtonText}>
                 Şifrəni Dəyiş
               </ThemedText>
-              <TouchableOpacity onPress={() => setChangePasswordModal(false)}>
-                <Ionicons name="close" size={24} color="#111827" />
-              </TouchableOpacity>
-            </View>
+            )}
+          </TouchableOpacity>
+        </View>
+      </GBottomSheet>
 
-            <View style={styles.modalBody}>
-              <ThemedText style={styles.inputLabel}>Cari Şifrə</ThemedText>
-              <TextInput
-                style={[
-                  styles.input,
-                  { backgroundColor: "#F3F4F6", color: "#111827" },
-                ]}
-                value={currentPassword}
-                onChangeText={setCurrentPassword}
-                placeholder="Cari şifrənizi daxil edin"
-                placeholderTextColor="#9CA3AF"
-                secureTextEntry
-              />
-
-              <ThemedText style={styles.inputLabel}>Yeni Şifrə</ThemedText>
-              <TextInput
-                style={[
-                  styles.input,
-                  { backgroundColor: "#F3F4F6", color: "#111827" },
-                ]}
-                value={newPassword}
-                onChangeText={setNewPassword}
-                placeholder="Yeni şifrənizi daxil edin"
-                placeholderTextColor="#9CA3AF"
-                secureTextEntry
-              />
-
-              <ThemedText style={styles.inputLabel}>
-                Şifrəni Təsdiqlə
-              </ThemedText>
-              <TextInput
-                style={[
-                  styles.input,
-                  { backgroundColor: "#F3F4F6", color: "#111827" },
-                ]}
-                value={confirmPassword}
-                onChangeText={setConfirmPassword}
-                placeholder="Yeni şifrəni təkrar daxil edin"
-                placeholderTextColor="#9CA3AF"
-                secureTextEntry
-              />
-
-              <TouchableOpacity
-                style={[
-                  styles.modalButton,
-                  loading && styles.modalButtonDisabled,
-                ]}
-                onPress={handleSubmitPasswordChange}
-                disabled={loading}
-              >
-                {loading ? (
-                  <ActivityIndicator color="#fff" />
-                ) : (
-                  <ThemedText style={styles.modalButtonText}>
-                    Şifrəni Dəyiş
-                  </ThemedText>
-                )}
-              </TouchableOpacity>
-            </View>
-          </View>
-        </KeyboardAvoidingView>
-      </Modal>
-
-      {/* Change Email Modal */}
-      <Modal
+      {/* Change Email BottomSheet */}
+      <GBottomSheet
         visible={changeEmailModal}
-        transparent
-        animationType="slide"
-        onRequestClose={() => setChangeEmailModal(false)}
+        onClose={() => setChangeEmailModal(false)}
+        title="E-poçtu Dəyiş"
+        type="form"
       >
-        <KeyboardAvoidingView
-          behavior={Platform.OS === "ios" ? "padding" : "height"}
-          style={styles.modalOverlay}
-        >
-          <View style={[styles.modalContent, { backgroundColor: "#fff" }]}>
-            <View style={styles.modalHeader}>
-              <ThemedText type="subtitle" style={styles.modalTitle}>
-                E-poçtu Dəyiş
+        <View style={styles.modalBody}>
+          <ThemedText style={styles.inputLabel}>Yeni E-poçt Ünvanı</ThemedText>
+          <TextInput
+            style={[
+              styles.input,
+              {
+                backgroundColor: colors.backgroundSecondary,
+                color: colors.text,
+                borderColor: colors.border,
+              },
+            ]}
+            value={newEmail}
+            onChangeText={setNewEmail}
+            placeholder="Yeni e-poçt ünvanınızı daxil edin"
+            placeholderTextColor={colors.placeholder}
+            keyboardType="email-address"
+            autoCapitalize="none"
+          />
+
+          <ThemedText style={styles.infoText}>
+            Təsdiq kodu yeni e-poçt ünvanınıza göndəriləcək
+          </ThemedText>
+
+          <TouchableOpacity
+            style={[styles.modalButton, loading && styles.modalButtonDisabled]}
+            onPress={handleRequestEmailChange}
+            disabled={loading}
+          >
+            {loading ? (
+              <ActivityIndicator color="#fff" />
+            ) : (
+              <ThemedText style={styles.modalButtonText}>
+                Təsdiq Kodu Göndər
               </ThemedText>
-              <TouchableOpacity onPress={() => setChangeEmailModal(false)}>
-                <Ionicons name="close" size={24} color="#111827" />
-              </TouchableOpacity>
-            </View>
+            )}
+          </TouchableOpacity>
+        </View>
+      </GBottomSheet>
 
-            <View style={styles.modalBody}>
-              <ThemedText style={styles.inputLabel}>
-                Yeni E-poçt Ünvanı
-              </ThemedText>
-              <TextInput
-                style={[
-                  styles.input,
-                  { backgroundColor: "#F3F4F6", color: "#111827" },
-                ]}
-                value={newEmail}
-                onChangeText={setNewEmail}
-                placeholder="Yeni e-poçt ünvanınızı daxil edin"
-                placeholderTextColor="#9CA3AF"
-                keyboardType="email-address"
-                autoCapitalize="none"
-              />
-
-              <ThemedText style={styles.infoText}>
-                Təsdiq kodu yeni e-poçt ünvanınıza göndəriləcək
-              </ThemedText>
-
-              <TouchableOpacity
-                style={[
-                  styles.modalButton,
-                  loading && styles.modalButtonDisabled,
-                ]}
-                onPress={handleRequestEmailChange}
-                disabled={loading}
-              >
-                {loading ? (
-                  <ActivityIndicator color="#fff" />
-                ) : (
-                  <ThemedText style={styles.modalButtonText}>
-                    Təsdiq Kodu Göndər
-                  </ThemedText>
-                )}
-              </TouchableOpacity>
-            </View>
-          </View>
-        </KeyboardAvoidingView>
-      </Modal>
-
-      {/* Verify Email Change Modal */}
-      <Modal
+      {/* Verify Email Change BottomSheet */}
+      <GBottomSheet
         visible={verifyEmailModal}
-        transparent
-        animationType="slide"
-        onRequestClose={() => setVerifyEmailModal(false)}
+        onClose={() => setVerifyEmailModal(false)}
+        title="E-poçtu Təsdiqlə"
+        type="form"
       >
-        <KeyboardAvoidingView
-          behavior={Platform.OS === "ios" ? "padding" : "height"}
-          style={styles.modalOverlay}
-        >
-          <View style={[styles.modalContent, { backgroundColor: "#fff" }]}>
-            <View style={styles.modalHeader}>
-              <ThemedText type="subtitle" style={styles.modalTitle}>
-                E-poçtu Təsdiqlə
-              </ThemedText>
-              <TouchableOpacity onPress={() => setVerifyEmailModal(false)}>
-                <Ionicons name="close" size={24} color="#111827" />
-              </TouchableOpacity>
-            </View>
+        <View style={styles.modalBody}>
+          <ThemedText style={styles.inputLabel}>Təsdiq Kodu</ThemedText>
+          <TextInput
+            style={[
+              styles.input,
+              {
+                backgroundColor: colors.backgroundSecondary,
+                color: colors.text,
+                borderColor: colors.border,
+              },
+            ]}
+            value={verificationCode}
+            onChangeText={setVerificationCode}
+            placeholder="6 rəqəmli kodu daxil edin"
+            placeholderTextColor={colors.placeholder}
+            keyboardType="number-pad"
+            maxLength={6}
+          />
 
-            <View style={styles.modalBody}>
-              <ThemedText style={styles.inputLabel}>Təsdiq Kodu</ThemedText>
-              <TextInput
-                style={[
-                  styles.input,
-                  { backgroundColor: "#F3F4F6", color: "#111827" },
-                ]}
-                value={verificationCode}
-                onChangeText={setVerificationCode}
-                placeholder="6 rəqəmli kodu daxil edin"
-                placeholderTextColor="#9CA3AF"
-                keyboardType="number-pad"
-                maxLength={6}
-              />
+          <ThemedText style={styles.infoText}>
+            {newEmail} ünvanına göndərilən təsdiq kodunu daxil edin
+          </ThemedText>
 
-              <ThemedText style={styles.infoText}>
-                {newEmail} ünvanına göndərilən təsdiq kodunu daxil edin
-              </ThemedText>
-
-              <TouchableOpacity
-                style={[
-                  styles.modalButton,
-                  loading && styles.modalButtonDisabled,
-                ]}
-                onPress={handleVerifyEmailChange}
-                disabled={loading}
-              >
-                {loading ? (
-                  <ActivityIndicator color="#fff" />
-                ) : (
-                  <ThemedText style={styles.modalButtonText}>
-                    Təsdiqlə
-                  </ThemedText>
-                )}
-              </TouchableOpacity>
-            </View>
-          </View>
-        </KeyboardAvoidingView>
-      </Modal>
+          <TouchableOpacity
+            style={[styles.modalButton, loading && styles.modalButtonDisabled]}
+            onPress={handleVerifyEmailChange}
+            disabled={loading}
+          >
+            {loading ? (
+              <ActivityIndicator color="#fff" />
+            ) : (
+              <ThemedText style={styles.modalButtonText}>Təsdiqlə</ThemedText>
+            )}
+          </TouchableOpacity>
+        </View>
+      </GBottomSheet>
 
       {/* Premium Request Modal */}
       <PremiumRequestModal
@@ -1130,7 +1071,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
     paddingVertical: 16,
     paddingHorizontal: 16,
-    borderBottomWidth: 1,
+    borderBottomWidth: 0,
   },
   iconContainer: {
     width: 42,
@@ -1160,13 +1101,12 @@ const styles = StyleSheet.create({
   },
   footer: {
     alignItems: "center",
-    paddingVertical: 30,
+    paddingBottom: 20,
   },
   footerText: {
     fontSize: 12,
     color: "#9CA3AF",
   },
-  // Modal Styles
   modalOverlay: {
     flex: 1,
     backgroundColor: "rgba(0,0,0,0.5)",
@@ -1233,7 +1173,6 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: "600",
   },
-  // Premium Button Styles
   premiumSection: {
     paddingHorizontal: 20,
     marginBottom: 24,

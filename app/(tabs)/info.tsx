@@ -53,15 +53,9 @@ export default function InfoScreen() {
         showsVerticalScrollIndicator={false}
         bounces={false}
       >
-
         <View style={styles.content}>
           {/* Professor Card with Photo */}
-          <View
-            style={[
-              styles.professorCard,
-              { backgroundColor: "#fff" },
-            ]}
-          >
+          <View style={[styles.professorCard, { backgroundColor: "#fff" }]}>
             {/* Photo with simple ring */}
             <View style={styles.photoWrapper}>
               <View style={styles.photoRing}>
@@ -108,39 +102,45 @@ export default function InfoScreen() {
           {/* Quick Actions */}
           <View style={styles.quickActionsContainer}>
             <TouchableOpacity
-              style={[
-                styles.quickActionCard,
-                { backgroundColor: "#fff" },
-              ]}
+              style={[styles.quickActionCard, { backgroundColor: "#fff" }]}
               onPress={() => handleCall(professorData.phone)}
             >
-              <View style={[styles.quickActionIconContainer, { backgroundColor: "#7313e8" }]}>
+              <View
+                style={[
+                  styles.quickActionIconContainer,
+                  { backgroundColor: "#7313e8" },
+                ]}
+              >
                 <Ionicons name="call" size={24} color="#fff" />
               </View>
               <ThemedText style={styles.quickActionLabel}>Zəng et</ThemedText>
             </TouchableOpacity>
 
             <TouchableOpacity
-              style={[
-                styles.quickActionCard,
-                { backgroundColor: "#fff" },
-              ]}
+              style={[styles.quickActionCard, { backgroundColor: "#fff" }]}
               onPress={handleEmail}
             >
-              <View style={[styles.quickActionIconContainer, { backgroundColor: "#7313e8" }]}>
+              <View
+                style={[
+                  styles.quickActionIconContainer,
+                  { backgroundColor: "#7313e8" },
+                ]}
+              >
                 <Ionicons name="mail" size={24} color="#fff" />
               </View>
               <ThemedText style={styles.quickActionLabel}>E-poçt</ThemedText>
             </TouchableOpacity>
 
             <TouchableOpacity
-              style={[
-                styles.quickActionCard,
-                { backgroundColor: "#fff" },
-              ]}
+              style={[styles.quickActionCard, { backgroundColor: "#fff" }]}
               onPress={() => handleCall(professorData.phone2)}
             >
-              <View style={[styles.quickActionIconContainer, { backgroundColor: "#7313e8" }]}>
+              <View
+                style={[
+                  styles.quickActionIconContainer,
+                  { backgroundColor: "#7313e8" },
+                ]}
+              >
                 <Ionicons name="chatbubbles" size={24} color="#fff" />
               </View>
               <ThemedText style={styles.quickActionLabel}>Mesaj</ThemedText>
@@ -156,18 +156,10 @@ export default function InfoScreen() {
               </ThemedText>
             </View>
 
-            <View
-              style={[
-                styles.contactCard,
-                { backgroundColor: "#fff" },
-              ]}
-            >
+            <View style={[styles.contactCard, { backgroundColor: "#fff" }]}>
               {/* Phone 1 */}
               <TouchableOpacity
-                style={[
-                  styles.contactItem,
-                  { borderBottomColor: "#E5E7EB" },
-                ]}
+                style={[styles.contactItem, { borderBottomColor: "#E5E7EB" }]}
                 onPress={() => handleCall(professorData.phone)}
               >
                 <View
@@ -187,10 +179,7 @@ export default function InfoScreen() {
                   </ThemedText>
                 </View>
                 <View
-                  style={[
-                    styles.actionButton,
-                    { backgroundColor: "#7313e8" },
-                  ]}
+                  style={[styles.actionButton, { backgroundColor: "#7313e8" }]}
                 >
                   <Ionicons name="arrow-forward" size={18} color="#fff" />
                 </View>
@@ -198,10 +187,7 @@ export default function InfoScreen() {
 
               {/* Phone 2 */}
               <TouchableOpacity
-                style={[
-                  styles.contactItem,
-                  { borderBottomColor: "#E5E7EB" },
-                ]}
+                style={[styles.contactItem, { borderBottomColor: "#E5E7EB" }]}
                 onPress={() => handleCall(professorData.phone2)}
               >
                 <View
@@ -221,10 +207,7 @@ export default function InfoScreen() {
                   </ThemedText>
                 </View>
                 <View
-                  style={[
-                    styles.actionButton,
-                    { backgroundColor: "#7313e8" },
-                  ]}
+                  style={[styles.actionButton, { backgroundColor: "#7313e8" }]}
                 >
                   <Ionicons name="arrow-forward" size={18} color="#fff" />
                 </View>
@@ -232,7 +215,7 @@ export default function InfoScreen() {
 
               {/* Email */}
               <TouchableOpacity
-                style={styles.contactItem}
+                style={[styles.contactItem, { borderBottomWidth: 0 }]}
                 onPress={handleEmail}
               >
                 <View
@@ -252,10 +235,7 @@ export default function InfoScreen() {
                   </ThemedText>
                 </View>
                 <View
-                  style={[
-                    styles.actionButton,
-                    { backgroundColor: "#7313e8" },
-                  ]}
+                  style={[styles.actionButton, { backgroundColor: "#7313e8" }]}
                 >
                   <Ionicons name="arrow-forward" size={18} color="#fff" />
                 </View>
