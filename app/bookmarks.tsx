@@ -1,17 +1,17 @@
 import { Ionicons } from "@expo/vector-icons";
-import { useRouter, useFocusEffect } from "expo-router";
-import React, { useState, useCallback } from "react";
+import { useFocusEffect, useRouter } from "expo-router";
+import React, { useCallback, useState } from "react";
 import {
-  SafeAreaView,
+  ActivityIndicator,
+  FlatList,
+  RefreshControl,
   StyleSheet,
   Text,
   TouchableOpacity,
   View,
-  FlatList,
-  ActivityIndicator,
-  RefreshControl,
 } from "react-native";
-import { testsAPI, TestResponse } from "../services/api";
+import { SafeAreaView } from "react-native-safe-area-context";
+import { TestResponse, testsAPI } from "../services/api";
 import { bookmarksService } from "../services/bookmarks";
 import { handleApiError, showSuccess } from "../utils/errorHandler";
 
@@ -155,7 +155,8 @@ export default function BookmarksScreen() {
         <Ionicons name="heart-outline" size={64} color="#9CA3AF" />
         <Text style={styles.emptyTitle}>Sevimli test yoxdur</Text>
         <Text style={styles.emptyText}>
-          Test səhifələrində ürək ikonasına toxunaraq testləri sevimlilərə əlavə edin
+          Test səhifələrində ürək ikonasına toxunaraq testləri sevimlilərə əlavə
+          edin
         </Text>
         <TouchableOpacity
           style={styles.browseButton}
@@ -168,7 +169,7 @@ export default function BookmarksScreen() {
   };
 
   return (
-    <SafeAreaView style={styles.container}>
+    <SafeAreaView style={styles.container} edges={["top", "bottom"]}>
       {/* Header */}
       <View style={styles.header}>
         <TouchableOpacity
@@ -338,4 +339,3 @@ const styles = StyleSheet.create({
     color: "#FFFFFF",
   },
 });
-

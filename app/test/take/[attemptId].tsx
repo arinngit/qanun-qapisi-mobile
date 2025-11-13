@@ -1,20 +1,24 @@
 import { Ionicons } from "@expo/vector-icons";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useLocalSearchParams, useRouter } from "expo-router";
-import React, { useState, useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import {
-  SafeAreaView,
+  ActivityIndicator,
+  Alert,
+  Image,
   ScrollView,
   StyleSheet,
   Text,
+  TextInput,
   TouchableOpacity,
   View,
-  ActivityIndicator,
-  TextInput,
-  Alert,
 } from "react-native";
-import { testsAPI, TestDetailResponse, QuestionResponse, SubmitAnswerRequest } from "../../../services/api";
-import AsyncStorage from "@react-native-async-storage/async-storage";
-import { Image } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
+import {
+  SubmitAnswerRequest,
+  TestDetailResponse,
+  testsAPI,
+} from "../../../services/api";
 
 interface UserAnswer {
   questionId: string;
@@ -28,7 +32,9 @@ export default function TestTakingScreen() {
 
   const [test, setTest] = useState<TestDetailResponse | null>(null);
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
-  const [userAnswers, setUserAnswers] = useState<Map<string, UserAnswer>>(new Map());
+  const [userAnswers, setUserAnswers] = useState<Map<string, UserAnswer>>(
+    new Map()
+  );
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
 
@@ -55,9 +61,15 @@ export default function TestTakingScreen() {
       if (stored) {
         const data = JSON.parse(stored);
         setTest(data.test);
-        
-        // Load saved answers
-        const savedAnswers = new Map(Object.entries(data.answers || {}));
+
+        // Load saved answers, ensuring proper typing as Map<string, UserAnswer>
+        const answersObj = data.answers || {};
+        const savedAnswers = new Map<string, UserAnswer>(
+          Object.entries(answersObj).map(([key, value]) => [
+            key,
+            value as UserAnswer,
+          ])
+        );
         setUserAnswers(savedAnswers);
       } else {
         // If not in storage, we need the test ID - this should come from the attempt
@@ -86,7 +98,11 @@ export default function TestTakingScreen() {
     }
   };
 
-  const handleAnswerSelect = (questionId: string, answerId: string, isMultiple: boolean) => {
+  const handleAnswerSelect = (
+    questionId: string,
+    answerId: string,
+    isMultiple: boolean
+  ) => {
     const currentAnswer = userAnswers.get(questionId);
 
     if (isMultiple) {
@@ -97,12 +113,19 @@ export default function TestTakingScreen() {
         : [...currentIds, answerId];
 
       setUserAnswers(
-        new Map(userAnswers.set(questionId, { questionId, selectedAnswerIds: newIds }))
+        new Map(
+          userAnswers.set(questionId, { questionId, selectedAnswerIds: newIds })
+        )
       );
     } else {
       // Single selection
       setUserAnswers(
-        new Map(userAnswers.set(questionId, { questionId, selectedAnswerIds: [answerId] }))
+        new Map(
+          userAnswers.set(questionId, {
+            questionId,
+            selectedAnswerIds: [answerId],
+          })
+        )
       );
     }
   };
@@ -143,13 +166,13 @@ export default function TestTakingScreen() {
       if (!test) return;
 
       // Convert userAnswers map to API format
-      const answers: SubmitAnswerRequest[] = Array.from(userAnswers.values()).map(
-        (answer) => ({
-          questionId: answer.questionId,
-          selectedAnswerIds: answer.selectedAnswerIds,
-          openTextAnswer: answer.openTextAnswer,
-        })
-      );
+      const answers: SubmitAnswerRequest[] = Array.from(
+        userAnswers.values()
+      ).map((answer) => ({
+        questionId: answer.questionId,
+        selectedAnswerIds: answer.selectedAnswerIds,
+        openTextAnswer: answer.openTextAnswer,
+      }));
 
       // Submit test
       const result = await testsAPI.submitTest(test.id, { answers });
@@ -177,7 +200,7 @@ export default function TestTakingScreen() {
 
   if (loading) {
     return (
-      <SafeAreaView style={styles.container}>
+      <SafeAreaView style={styles.container} edges={["top", "bottom"]}>
         <View style={styles.loadingContainer}>
           <ActivityIndicator size="large" color="#7313e8" />
         </View>
@@ -187,7 +210,7 @@ export default function TestTakingScreen() {
 
   if (!test || !test.questions || test.questions.length === 0) {
     return (
-      <SafeAreaView style={styles.container}>
+      <SafeAreaView style={styles.container} edges={["top", "bottom"]}>
         <View style={styles.emptyContainer}>
           <Ionicons name="alert-circle-outline" size={64} color="#9CA3AF" />
           <Text style={styles.emptyText}>Test sualları tapılmadı</Text>
@@ -202,7 +225,7 @@ export default function TestTakingScreen() {
   const answeredCount = getAnsweredCount();
 
   return (
-    <SafeAreaView style={styles.container}>
+    <SafeAreaView style={styles.container} edges={["top", "bottom"]}>
       {/* Header */}
       <View style={styles.header}>
         <TouchableOpacity
@@ -249,12 +272,16 @@ export default function TestTakingScreen() {
             </Text>
             <View style={styles.scoreBadge}>
               <Ionicons name="star" size={12} color="#F59E0B" />
-              <Text style={styles.scoreBadgeText}>{currentQuestion.score} xal</Text>
+              <Text style={styles.scoreBadgeText}>
+                {currentQuestion.score} xal
+              </Text>
             </View>
           </View>
 
           {/* Question Text */}
-          <Text style={styles.questionText}>{currentQuestion.questionText}</Text>
+          <Text style={styles.questionText}>
+            {currentQuestion.questionText}
+          </Text>
 
           {/* Question Image */}
           {currentQuestion.imageUrl && (
@@ -279,22 +306,34 @@ export default function TestTakingScreen() {
                   numberOfLines={6}
                   placeholder="Cavabınızı buraya yazın..."
                   value={currentAnswer?.openTextAnswer || ""}
-                  onChangeText={(text) => handleTextAnswer(currentQuestion.id, text)}
+                  onChangeText={(text) =>
+                    handleTextAnswer(currentQuestion.id, text)
+                  }
                   textAlignVertical="top"
                 />
               </View>
             ) : (
               // Multiple choice
               currentQuestion.answers.map((answer, index) => {
-                const isSelected = currentAnswer?.selectedAnswerIds?.includes(answer.id);
-                const isMultiple = currentQuestion.questionType === "CLOSED_MULTIPLE";
+                const isSelected = currentAnswer?.selectedAnswerIds?.includes(
+                  answer.id
+                );
+                const isMultiple =
+                  currentQuestion.questionType === "CLOSED_MULTIPLE";
 
                 return (
                   <TouchableOpacity
                     key={answer.id}
-                    style={[styles.answerOption, isSelected && styles.answerOptionSelected]}
+                    style={[
+                      styles.answerOption,
+                      isSelected && styles.answerOptionSelected,
+                    ]}
                     onPress={() =>
-                      handleAnswerSelect(currentQuestion.id, answer.id, isMultiple)
+                      handleAnswerSelect(
+                        currentQuestion.id,
+                        answer.id,
+                        isMultiple
+                      )
                     }
                   >
                     <View style={styles.answerOptionLeft}>
@@ -333,7 +372,11 @@ export default function TestTakingScreen() {
           {/* Question Type Hint */}
           {currentQuestion.questionType === "CLOSED_MULTIPLE" && (
             <View style={styles.hintContainer}>
-              <Ionicons name="information-circle-outline" size={16} color="#6B7280" />
+              <Ionicons
+                name="information-circle-outline"
+                size={16}
+                color="#6B7280"
+              />
               <Text style={styles.hintText}>
                 Bir neçə cavab seçə bilərsiniz
               </Text>
@@ -351,18 +394,22 @@ export default function TestTakingScreen() {
             {answeredCount} / {test.questions.length} cavablandı
           </Text>
           <View style={styles.progressDots}>
-            {test.questions.slice(0, Math.min(10, test.questions.length)).map((q, i) => (
-              <View
-                key={q.id}
-                style={[
-                  styles.progressDot,
-                  isQuestionAnswered(q.id) && styles.progressDotAnswered,
-                  i === currentQuestionIndex && styles.progressDotCurrent,
-                ]}
-              />
-            ))}
+            {test.questions
+              .slice(0, Math.min(10, test.questions.length))
+              .map((q, i) => (
+                <View
+                  key={q.id}
+                  style={[
+                    styles.progressDot,
+                    isQuestionAnswered(q.id) && styles.progressDotAnswered,
+                    i === currentQuestionIndex && styles.progressDotCurrent,
+                  ]}
+                />
+              ))}
             {test.questions.length > 10 && (
-              <Text style={styles.progressDotsMore}>+{test.questions.length - 10}</Text>
+              <Text style={styles.progressDotsMore}>
+                +{test.questions.length - 10}
+              </Text>
             )}
           </View>
         </View>
@@ -393,7 +440,10 @@ export default function TestTakingScreen() {
 
           {currentQuestionIndex === test.questions.length - 1 ? (
             <TouchableOpacity
-              style={[styles.submitButton, submitting && styles.submitButtonDisabled]}
+              style={[
+                styles.submitButton,
+                submitting && styles.submitButtonDisabled,
+              ]}
               onPress={handleSubmit}
               disabled={submitting}
             >
@@ -713,4 +763,3 @@ const styles = StyleSheet.create({
     marginTop: 12,
   },
 });
-

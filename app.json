@@ -31,12 +31,12 @@
       [
         "expo-splash-screen",
         {
-          "image": "./assets/images/splash-icon.png",
+          "image": "./assets/images/qanun.png",
           "imageWidth": 200,
           "resizeMode": "contain",
           "backgroundColor": "#7313e8",
           "dark": {
-            "backgroundColor": "#000000"
+            "backgroundColor": "#7313e8"
           }
         }
       ],

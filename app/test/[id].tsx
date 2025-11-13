@@ -1,17 +1,26 @@
 import { Ionicons } from "@expo/vector-icons";
 import { useLocalSearchParams, useRouter } from "expo-router";
-import React, { useState, useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import {
-  SafeAreaView,
+  ActivityIndicator,
   ScrollView,
   StyleSheet,
   Text,
   TouchableOpacity,
   View,
-  ActivityIndicator,
 } from "react-native";
-import { testsAPI, TestDetailResponse, TestStatisticsResponse, adminAPI, TestAttemptAdminResponse } from "../../services/api";
+import {
+  SafeAreaView,
+  useSafeAreaInsets,
+} from "react-native-safe-area-context";
 import { useAuth } from "../../context/auth-context";
+import {
+  adminAPI,
+  TestAttemptAdminResponse,
+  TestDetailResponse,
+  testsAPI,
+  TestStatisticsResponse,
+} from "../../services/api";
 import { bookmarksService } from "../../services/bookmarks";
 import { showSuccess } from "../../utils/errorHandler";
 
@@ -19,10 +28,15 @@ export default function TestDetailScreen() {
   const router = useRouter();
   const { id } = useLocalSearchParams<{ id: string }>();
   const { user } = useAuth();
+  const insets = useSafeAreaInsets();
 
   const [test, setTest] = useState<TestDetailResponse | null>(null);
-  const [statistics, setStatistics] = useState<TestStatisticsResponse | null>(null);
-  const [recentResults, setRecentResults] = useState<TestAttemptAdminResponse[]>([]);
+  const [statistics, setStatistics] = useState<TestStatisticsResponse | null>(
+    null
+  );
+  const [recentResults, setRecentResults] = useState<
+    TestAttemptAdminResponse[]
+  >([]);
   const [loading, setLoading] = useState(true);
   const [isBookmarked, setIsBookmarked] = useState(false);
 
@@ -81,7 +95,11 @@ export default function TestDetailScreen() {
     try {
       const newStatus = await bookmarksService.toggleBookmark(id as string);
       setIsBookmarked(newStatus);
-      showSuccess(newStatus ? "Test sevimlilərə əlavə edildi" : "Test sevimlilərdən silindi");
+      showSuccess(
+        newStatus
+          ? "Test sevimlilərə əlavə edildi"
+          : "Test sevimlilərdən silindi"
+      );
     } catch (error) {
       console.error("Error toggling bookmark:", error);
     }
@@ -90,21 +108,22 @@ export default function TestDetailScreen() {
   const handleStartTest = async () => {
     try {
       if (!id || !test) return;
-      
+
       const attempt = await testsAPI.startTest(id as string);
-      
+
       // Save test data and attempt to AsyncStorage for test-taking screen
-      const AsyncStorage = require("@react-native-async-storage/async-storage").default;
+      const AsyncStorage =
+        require("@react-native-async-storage/async-storage").default;
       const storageKey = `test_attempt_${attempt.id}`;
       await AsyncStorage.setItem(
         storageKey,
         JSON.stringify({ test, answers: {} })
       );
-      
+
       router.push(`/test/take/${attempt.id}` as any);
     } catch (error: any) {
       console.error("Error starting test:", error);
-      
+
       // Check if premium test and user not premium
       if (error.response?.status === 403) {
         alert("Bu test yalnız Premium istifadəçilər üçündür");
@@ -153,9 +172,12 @@ export default function TestDetailScreen() {
 
   if (loading) {
     return (
-      <SafeAreaView style={styles.container}>
-        <View style={styles.header}>
-          <TouchableOpacity style={styles.backButton} onPress={() => router.back()}>
+      <SafeAreaView style={styles.container} edges={["top", "bottom"]}>
+        <View style={[styles.header, { paddingTop: Math.max(insets.top, 10) }]}>
+          <TouchableOpacity
+            style={styles.backButton}
+            onPress={() => router.back()}
+          >
             <Ionicons name="arrow-back" size={24} color="#111827" />
           </TouchableOpacity>
           <Text style={styles.headerTitle}>Test Təfərrüatları</Text>
@@ -170,9 +192,12 @@ export default function TestDetailScreen() {
 
   if (!test) {
     return (
-      <SafeAreaView style={styles.container}>
-        <View style={styles.header}>
-          <TouchableOpacity style={styles.backButton} onPress={() => router.back()}>
+      <SafeAreaView style={styles.container} edges={["top", "bottom"]}>
+        <View style={[styles.header, { paddingTop: Math.max(insets.top, 10) }]}>
+          <TouchableOpacity
+            style={styles.backButton}
+            onPress={() => router.back()}
+          >
             <Ionicons name="arrow-back" size={24} color="#111827" />
           </TouchableOpacity>
           <Text style={styles.headerTitle}>Test Təfərrüatları</Text>
@@ -187,19 +212,25 @@ export default function TestDetailScreen() {
   }
 
   return (
-    <SafeAreaView style={styles.container}>
+    <SafeAreaView style={styles.container} edges={["top", "bottom"]}>
       {/* Header */}
-      <View style={styles.header}>
-        <TouchableOpacity style={styles.backButton} onPress={() => router.back()}>
+      <View style={[styles.header, { paddingTop: Math.max(insets.top, 12) }]}>
+        <TouchableOpacity
+          style={styles.backButton}
+          onPress={() => router.back()}
+        >
           <Ionicons name="arrow-back" size={24} color="#111827" />
         </TouchableOpacity>
         <Text style={styles.headerTitle}>Test Təfərrüatları</Text>
         <View style={styles.headerRight}>
-          <TouchableOpacity style={styles.iconButton} onPress={handleToggleBookmark}>
-            <Ionicons 
-              name={isBookmarked ? "bookmark" : "bookmark-outline"} 
-              size={24} 
-              color={isBookmarked ? "#7313e8" : "#111827"} 
+          <TouchableOpacity
+            style={styles.iconButton}
+            onPress={handleToggleBookmark}
+          >
+            <Ionicons
+              name={isBookmarked ? "bookmark" : "bookmark-outline"}
+              size={24}
+              color={isBookmarked ? "#7313e8" : "#111827"}
             />
           </TouchableOpacity>
           <TouchableOpacity style={styles.iconButton}>
@@ -284,7 +315,9 @@ export default function TestDetailScreen() {
                     }
                     size={24}
                     color={
-                      typeCount.questionType === "OPEN_TEXT" ? "#059669" : "#2563EB"
+                      typeCount.questionType === "OPEN_TEXT"
+                        ? "#059669"
+                        : "#2563EB"
                     }
                   />
                   <View style={styles.questionTypeInfo}>
@@ -328,7 +361,9 @@ export default function TestDetailScreen() {
                       {result.userFirstName} {result.userLastName}
                     </Text>
                     <Text style={styles.resultDate}>
-                      {result.submittedAt ? formatTimeAgo(result.submittedAt) : "Yarımçıq"}
+                      {result.submittedAt
+                        ? formatTimeAgo(result.submittedAt)
+                        : "Yarımçıq"}
                     </Text>
                   </View>
                   <View style={styles.resultScore}>
@@ -356,7 +391,10 @@ export default function TestDetailScreen() {
                 <Text style={styles.adminActionText}>Redaktə et</Text>
               </TouchableOpacity>
               <TouchableOpacity
-                style={[styles.adminActionButton, styles.adminActionButtonDanger]}
+                style={[
+                  styles.adminActionButton,
+                  styles.adminActionButtonDanger,
+                ]}
                 onPress={async () => {
                   if (confirm("Bu testi silmək istədiyinizdən əminsiniz?")) {
                     try {
@@ -393,7 +431,8 @@ export default function TestDetailScreen() {
               • İnternet bağlantınızın sabit olduğundan əmin olun
             </Text>
             <Text style={styles.tipItem}>
-              • Test başladıqdan sonra vaxtınız {test.estimatedMinutes} dəqiqədir
+              • Test başladıqdan sonra vaxtınız {test.estimatedMinutes}{" "}
+              dəqiqədir
             </Text>
           </View>
         </View>
@@ -402,7 +441,12 @@ export default function TestDetailScreen() {
       </ScrollView>
 
       {/* Bottom Action Bar */}
-      <View style={styles.bottomBar}>
+      <View
+        style={[
+          styles.bottomBar,
+          { paddingBottom: Math.max(insets.bottom, 12) },
+        ]}
+      >
         <View style={styles.bottomBarInfo}>
           <Text style={styles.bottomBarTitle}>Testi başlamağa hazırsınız?</Text>
           <Text style={styles.bottomBarSubtitle}>
@@ -428,7 +472,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "space-between",
     paddingHorizontal: 16,
-    paddingVertical: 12,
+    paddingBottom: 12,
     backgroundColor: "#FFFFFF",
     borderBottomWidth: 1,
     borderBottomColor: "#F3F4F6",
@@ -723,7 +767,7 @@ const styles = StyleSheet.create({
     lineHeight: 18,
   },
   bottomSpacer: {
-    height: 100,
+    height: 120, // Bottom bar + safe area için yeterli alan
   },
   bottomBar: {
     position: "absolute",
@@ -734,7 +778,7 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     paddingHorizontal: 16,
-    paddingVertical: 12,
+    paddingTop: 12,
     borderTopWidth: 1,
     borderTopColor: "#F3F4F6",
     gap: 12,

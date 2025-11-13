@@ -22,6 +22,7 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 export default function Profile() {
   const { user, logout, refreshUser, updateUser } = useAuth();
@@ -31,6 +32,7 @@ export default function Profile() {
   const backgroundColor = useThemeColor({}, "background");
   const textColor = useThemeColor({}, "text");
   const borderColor = useThemeColor({}, "icon");
+  const insets = useSafeAreaInsets();
   const [refreshing, setRefreshing] = useState(false);
 
   const [editProfileModal, setEditProfileModal] = useState(false);
@@ -335,6 +337,7 @@ export default function Profile() {
       <ScrollView
         style={[styles.container, { backgroundColor: "#f5f5f5" }]}
         showsVerticalScrollIndicator={false}
+        contentContainerStyle={{ paddingBottom: Math.max(insets.bottom, 20) }}
         refreshControl={
           <RefreshControl
             refreshing={refreshing}

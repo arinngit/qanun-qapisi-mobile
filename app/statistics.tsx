@@ -1,19 +1,19 @@
 import { Ionicons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
-import React, { useState, useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import {
-  SafeAreaView,
+  ActivityIndicator,
+  RefreshControl,
   ScrollView,
   StyleSheet,
   Text,
   TouchableOpacity,
   View,
-  ActivityIndicator,
-  RefreshControl,
 } from "react-native";
-import { testsAPI, TestAttemptResponse } from "../services/api";
-import { handleApiError } from "../utils/errorHandler";
+import { SafeAreaView } from "react-native-safe-area-context";
 import { useAuth } from "../context/auth-context";
+import { TestAttemptResponse, testsAPI } from "../services/api";
+import { handleApiError } from "../utils/errorHandler";
 
 interface TestAttemptWithTest extends TestAttemptResponse {
   testTitle: string;
@@ -22,7 +22,7 @@ interface TestAttemptWithTest extends TestAttemptResponse {
 export default function StatisticsScreen() {
   const router = useRouter();
   const { user } = useAuth();
-  
+
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [attempts, setAttempts] = useState<TestAttemptWithTest[]>([]);
@@ -118,7 +118,7 @@ export default function StatisticsScreen() {
 
   const formatDate = (dateString: string | null): string => {
     if (!dateString) return "Yarımçıq";
-    
+
     const date = new Date(dateString);
     const now = new Date();
     const diffMs = now.getTime() - date.getTime();
@@ -146,7 +146,10 @@ export default function StatisticsScreen() {
   };
 
   const renderAttemptCard = (attempt: TestAttemptWithTest) => {
-    const percentage = getPercentage(attempt.totalScore, attempt.maxPossibleScore);
+    const percentage = getPercentage(
+      attempt.totalScore,
+      attempt.maxPossibleScore
+    );
     const scoreColor = getScoreColor(percentage);
 
     return (
@@ -164,11 +167,15 @@ export default function StatisticsScreen() {
         <View style={styles.attemptHeader}>
           <View style={styles.attemptInfo}>
             <Text style={styles.attemptTitle}>{attempt.testTitle}</Text>
-            <Text style={styles.attemptDate}>{formatDate(attempt.submittedAt)}</Text>
+            <Text style={styles.attemptDate}>
+              {formatDate(attempt.submittedAt)}
+            </Text>
           </View>
-          
+
           {attempt.status === "COMPLETED" ? (
-            <View style={[styles.attemptScore, { backgroundColor: scoreColor }]}>
+            <View
+              style={[styles.attemptScore, { backgroundColor: scoreColor }]}
+            >
               <Text style={styles.attemptScoreText}>{percentage}%</Text>
             </View>
           ) : (
@@ -192,7 +199,7 @@ export default function StatisticsScreen() {
 
   if (loading) {
     return (
-      <SafeAreaView style={styles.container}>
+      <SafeAreaView style={styles.container} edges={["top", "bottom"]}>
         <View style={styles.header}>
           <TouchableOpacity
             style={styles.backButton}
@@ -210,15 +217,19 @@ export default function StatisticsScreen() {
     );
   }
 
-  const overallPercentage = stats.totalPossibleScore > 0 
-    ? Math.round((stats.totalScore / stats.totalPossibleScore) * 100) 
-    : 0;
+  const overallPercentage =
+    stats.totalPossibleScore > 0
+      ? Math.round((stats.totalScore / stats.totalPossibleScore) * 100)
+      : 0;
 
   return (
-    <SafeAreaView style={styles.container}>
+    <SafeAreaView style={styles.container} edges={["top", "bottom"]}>
       {/* Header */}
       <View style={styles.header}>
-        <TouchableOpacity style={styles.backButton} onPress={() => router.back()}>
+        <TouchableOpacity
+          style={styles.backButton}
+          onPress={() => router.back()}
+        >
           <Ionicons name="arrow-back" size={24} color="#111827" />
         </TouchableOpacity>
         <Text style={styles.headerTitle}>Statistika</Text>
@@ -228,7 +239,11 @@ export default function StatisticsScreen() {
       <ScrollView
         showsVerticalScrollIndicator={false}
         refreshControl={
-          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} colors={["#7313e8"]} />
+          <RefreshControl
+            refreshing={refreshing}
+            onRefresh={onRefresh}
+            colors={["#7313e8"]}
+          />
         }
       >
         {/* Overview Card */}
@@ -240,11 +255,15 @@ export default function StatisticsScreen() {
           </View>
           <View style={styles.overviewStats}>
             <View style={styles.overviewStat}>
-              <Text style={styles.overviewStatValue}>{stats.totalAttempts}</Text>
+              <Text style={styles.overviewStatValue}>
+                {stats.totalAttempts}
+              </Text>
               <Text style={styles.overviewStatLabel}>Cəhd</Text>
             </View>
             <View style={styles.overviewStat}>
-              <Text style={styles.overviewStatValue}>{stats.completedAttempts}</Text>
+              <Text style={styles.overviewStatValue}>
+                {stats.completedAttempts}
+              </Text>
               <Text style={styles.overviewStatLabel}>Tamamlanan</Text>
             </View>
             <View style={styles.overviewStat}>
@@ -285,8 +304,10 @@ export default function StatisticsScreen() {
               <Ionicons name="checkmark-done" size={24} color="#9333EA" />
             </View>
             <Text style={styles.statValue}>
-              {stats.completedAttempts > 0 
-                ? `${Math.round((stats.completedAttempts / stats.totalAttempts) * 100)}%`
+              {stats.completedAttempts > 0
+                ? `${Math.round(
+                    (stats.completedAttempts / stats.totalAttempts) * 100
+                  )}%`
                 : "0%"}
             </Text>
             <Text style={styles.statLabel}>Tamamlanma</Text>
@@ -299,7 +320,9 @@ export default function StatisticsScreen() {
           {attempts.length === 0 ? (
             <View style={styles.emptyState}>
               <Ionicons name="stats-chart-outline" size={64} color="#9CA3AF" />
-              <Text style={styles.emptyStateText}>Hələ test cəhdiniz yoxdur</Text>
+              <Text style={styles.emptyStateText}>
+                Hələ test cəhdiniz yoxdur
+              </Text>
               <TouchableOpacity
                 style={styles.browseButton}
                 onPress={() => router.push("/(tabs)/tests")}
@@ -519,4 +542,3 @@ const styles = StyleSheet.create({
     height: 20,
   },
 });
-

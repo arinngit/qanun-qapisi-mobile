@@ -4,13 +4,16 @@ import React, { useEffect, useState } from "react";
 import {
   ActivityIndicator,
   Image,
-  SafeAreaView,
   ScrollView,
   StyleSheet,
   Text,
   TouchableOpacity,
   View,
 } from "react-native";
+import {
+  SafeAreaView,
+  useSafeAreaInsets,
+} from "react-native-safe-area-context";
 import {
   QuestionResultResponse,
   TestResultResponse,
@@ -20,6 +23,7 @@ import {
 export default function TestResultsScreen() {
   const router = useRouter();
   const { attemptId } = useLocalSearchParams<{ attemptId: string }>();
+  const insets = useSafeAreaInsets();
 
   const [results, setResults] = useState<TestResultResponse | null>(null);
   const [loading, setLoading] = useState(true);
@@ -75,7 +79,7 @@ export default function TestResultsScreen() {
 
   if (loading) {
     return (
-      <SafeAreaView style={styles.container}>
+      <SafeAreaView style={styles.container} edges={["top", "bottom"]}>
         <View style={styles.loadingContainer}>
           <ActivityIndicator size="large" color="#7313e8" />
         </View>
@@ -85,7 +89,7 @@ export default function TestResultsScreen() {
 
   if (!results) {
     return (
-      <SafeAreaView style={styles.container}>
+      <SafeAreaView style={styles.container} edges={["top", "bottom"]}>
         <View style={styles.emptyContainer}>
           <Ionicons name="alert-circle-outline" size={64} color="#9CA3AF" />
           <Text style={styles.emptyText}>Nəticələr tapılmadı</Text>
@@ -102,7 +106,7 @@ export default function TestResultsScreen() {
   ).length;
 
   return (
-    <SafeAreaView style={styles.container}>
+    <SafeAreaView style={styles.container} edges={["top", "bottom"]}>
       {/* Header */}
       <View style={styles.header}>
         <TouchableOpacity style={styles.backButton} onPress={handleBackToTests}>
@@ -358,7 +362,12 @@ export default function TestResultsScreen() {
       </ScrollView>
 
       {/* Bottom Actions */}
-      <View style={styles.bottomActions}>
+      <View
+        style={[
+          styles.bottomActions,
+          { paddingBottom: Math.max(insets.bottom, 12) },
+        ]}
+      >
         <TouchableOpacity
           style={styles.secondaryButton}
           onPress={handleBackToTests}
@@ -662,7 +671,7 @@ const styles = StyleSheet.create({
     fontWeight: "500",
   },
   bottomSpacer: {
-    height: 100,
+    height: 120, // Bottom bar + safe area için yeterli alan
   },
   bottomActions: {
     position: "absolute",
@@ -674,7 +683,7 @@ const styles = StyleSheet.create({
     borderTopColor: "#F3F4F6",
     flexDirection: "row",
     paddingHorizontal: 16,
-    paddingVertical: 12,
+    paddingTop: 12,
     gap: 12,
   },
   secondaryButton: {

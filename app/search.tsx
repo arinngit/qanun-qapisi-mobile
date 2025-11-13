@@ -1,17 +1,17 @@
 import { Ionicons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
-import React, { useState, useEffect, useCallback } from "react";
+import React, { useEffect, useState } from "react";
 import {
-  SafeAreaView,
+  ActivityIndicator,
+  FlatList,
   StyleSheet,
   Text,
+  TextInput,
   TouchableOpacity,
   View,
-  FlatList,
-  ActivityIndicator,
-  TextInput,
 } from "react-native";
-import { testsAPI, TestResponse } from "../services/api";
+import { SafeAreaView } from "react-native-safe-area-context";
+import { TestResponse, testsAPI } from "../services/api";
 import { handleApiError } from "../utils/errorHandler";
 
 // Debounce hook
@@ -178,7 +178,7 @@ export default function SearchScreen() {
   };
 
   return (
-    <SafeAreaView style={styles.container}>
+    <SafeAreaView style={styles.container} edges={["top", "bottom"]}>
       {/* Header */}
       <View style={styles.header}>
         <TouchableOpacity
@@ -210,9 +210,7 @@ export default function SearchScreen() {
       {/* Results Count */}
       {searched && tests.length > 0 && (
         <View style={styles.resultsHeader}>
-          <Text style={styles.resultsCount}>
-            {tests.length} nəticə tapıldı
-          </Text>
+          <Text style={styles.resultsCount}>{tests.length} nəticə tapıldı</Text>
         </View>
       )}
 
@@ -361,4 +359,3 @@ const styles = StyleSheet.create({
     textAlign: "center",
   },
 });
-

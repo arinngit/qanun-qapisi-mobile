@@ -1,5 +1,6 @@
 import { Redirect, Stack } from "expo-router";
 import { useAuth } from "../../context/auth-context";
+import { fadeTransitionConfig } from "../../utils/navigation-transitions";
 
 export default function AuthLayout() {
   const { isAuthenticated, loading } = useAuth();
@@ -9,12 +10,18 @@ export default function AuthLayout() {
   }
 
   return (
-    <Stack>
+    <Stack
+      screenOptions={{
+        headerShown: false,
+        ...fadeTransitionConfig,
+      }}
+    >
       <Stack.Screen
         name="login"
         options={{
           title: "Login",
           headerShown: false,
+          ...fadeTransitionConfig,
         }}
       />
       <Stack.Screen
@@ -22,6 +29,7 @@ export default function AuthLayout() {
         options={{
           title: "Sign Up",
           headerShown: false,
+          ...fadeTransitionConfig,
         }}
       />
       <Stack.Screen
@@ -29,6 +37,7 @@ export default function AuthLayout() {
         options={{
           title: "Verify",
           headerShown: false,
+          ...fadeTransitionConfig,
         }}
       />
       <Stack.Screen
@@ -36,6 +45,7 @@ export default function AuthLayout() {
         options={{
           title: "Reset Password",
           headerShown: false,
+          ...fadeTransitionConfig,
         }}
       />
     </Stack>

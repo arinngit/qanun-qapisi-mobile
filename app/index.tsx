@@ -11,34 +11,88 @@ import {
   Text,
   View,
 } from "react-native";
+import Animated, {
+  useAnimatedStyle,
+  useSharedValue,
+  withSpring,
+  withTiming,
+} from "react-native-reanimated";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 export default function Index() {
   const [index, setIndex] = useState(0);
   const [isChecking, setIsChecking] = useState(true);
 
-  // Проверяем статус онбординга при загрузке
+  // Animation values
+  const slideOpacity = useSharedValue(1);
+  const slideTranslateX = useSharedValue(0);
+  const iconScale = useSharedValue(1);
+  const iconOpacity = useSharedValue(1);
+  const textOpacity = useSharedValue(1);
+  const textTranslateY = useSharedValue(0);
+  const buttonScale = useSharedValue(1);
+
+  // Initialize animations on mount
   useEffect(() => {
-    checkOnboardingStatus();
+    setIsChecking(false);
+
+    // Initial mount animation - fade in from bottom
+    slideOpacity.value = 0;
+    slideTranslateX.value = 0;
+    iconScale.value = 0.8;
+    iconOpacity.value = 0;
+    textOpacity.value = 0;
+    textTranslateY.value = 30;
+
+    // Animate in
+    slideOpacity.value = withTiming(1, { duration: 400 });
+    iconScale.value = withSpring(1, { damping: 10, stiffness: 100 });
+    iconOpacity.value = withTiming(1, { duration: 400 });
+    // Text animation with delay
+    setTimeout(() => {
+      textOpacity.value = withTiming(1, { duration: 400 });
+      textTranslateY.value = withSpring(0, { damping: 15, stiffness: 100 });
+    }, 150);
   }, []);
 
-  const checkOnboardingStatus = async () => {
-    try {
-      const hasOnBoarded = await AsyncStorage.getItem("hasOnBoarded");
-      if (hasOnBoarded === "true") {
-        router.replace("/(auth)/login");
-      } else {
-        setIsChecking(false);
-      }
-    } catch (error) {
-      console.error("Error checking onboarding status:", error);
-      setIsChecking(false);
-    }
-  };
-
   const handlePress = async () => {
+    // Button press animation
+    buttonScale.value = withSpring(0.95, { damping: 10, stiffness: 200 });
+    setTimeout(() => {
+      buttonScale.value = withSpring(1, { damping: 10, stiffness: 200 });
+    }, 100);
+
     if (index < 2) {
-      setIndex((prev) => prev + 1);
+      // Animate out
+      slideOpacity.value = withTiming(0, { duration: 200 });
+      slideTranslateX.value = withTiming(-50, { duration: 200 });
+      iconScale.value = withTiming(0.8, { duration: 200 });
+      iconOpacity.value = withTiming(0, { duration: 200 });
+      textOpacity.value = withTiming(0, { duration: 200 });
+      textTranslateY.value = withTiming(20, { duration: 200 });
+
+      // After animation, change index and animate in
+      setTimeout(() => {
+        setIndex((prev) => prev + 1);
+        // Reset and animate in
+        slideTranslateX.value = 50;
+        slideOpacity.value = 0;
+        iconScale.value = 0.8;
+        iconOpacity.value = 0;
+        textOpacity.value = 0;
+        textTranslateY.value = 20;
+
+        // Animate in
+        slideOpacity.value = withTiming(1, { duration: 300 });
+        slideTranslateX.value = withSpring(0, { damping: 15, stiffness: 100 });
+        iconScale.value = withSpring(1, { damping: 10, stiffness: 100 });
+        iconOpacity.value = withTiming(1, { duration: 300 });
+        // Text animation with slight delay
+        setTimeout(() => {
+          textOpacity.value = withTiming(1, { duration: 300 });
+          textTranslateY.value = withSpring(0, { damping: 15, stiffness: 100 });
+        }, 100);
+      }, 200);
     } else {
       await AsyncStorage.setItem("hasOnBoarded", "true");
       router.replace("/(auth)/login");
@@ -50,21 +104,102 @@ export default function Index() {
     router.replace("/(auth)/login");
   };
 
-  const renderDots = () => (
-    <>
-      {[0, 1, 2].map((item, idx) => (
-        <View
-          key={idx}
-          style={{
-            backgroundColor: idx === index ? "#FFF" : "#8C8BA7",
-            borderRadius: 16,
-            height: 5,
-            width: idx === index ? 18 : 8,
-          }}
-        />
-      ))}
-    </>
-  );
+  // Animated styles
+  const slideAnimatedStyle = useAnimatedStyle(() => {
+    return {
+      opacity: slideOpacity.value,
+      transform: [{ translateX: slideTranslateX.value }],
+    };
+  });
+
+  const iconAnimatedStyle = useAnimatedStyle(() => {
+    return {
+      opacity: iconOpacity.value,
+      transform: [{ scale: iconScale.value }],
+    };
+  });
+
+  const textAnimatedStyle = useAnimatedStyle(() => {
+    return {
+      opacity: textOpacity.value,
+      transform: [{ translateY: textTranslateY.value }],
+    };
+  });
+
+  const buttonAnimatedStyle = useAnimatedStyle(() => {
+    return {
+      transform: [{ scale: buttonScale.value }],
+    };
+  });
+
+  // Dot animations
+  const dotWidths = [useSharedValue(18), useSharedValue(8), useSharedValue(8)];
+  const dotOpacities = [
+    useSharedValue(1),
+    useSharedValue(0.6),
+    useSharedValue(0.6),
+  ];
+
+  // Create animated styles for each dot at component level (not inside map)
+  const dot0AnimatedStyle = useAnimatedStyle(() => {
+    return {
+      width: dotWidths[0].value,
+      opacity: dotOpacities[0].value,
+    };
+  });
+
+  const dot1AnimatedStyle = useAnimatedStyle(() => {
+    return {
+      width: dotWidths[1].value,
+      opacity: dotOpacities[1].value,
+    };
+  });
+
+  const dot2AnimatedStyle = useAnimatedStyle(() => {
+    return {
+      width: dotWidths[2].value,
+      opacity: dotOpacities[2].value,
+    };
+  });
+
+  // Update dot animations when index changes
+  useEffect(() => {
+    [0, 1, 2].forEach((idx) => {
+      const isActive = idx === index;
+      dotWidths[idx].value = withSpring(isActive ? 18 : 8, {
+        damping: 15,
+        stiffness: 100,
+      });
+      dotOpacities[idx].value = withTiming(isActive ? 1 : 0.6, {
+        duration: 200,
+      });
+    });
+  }, [index]);
+
+  const renderDots = () => {
+    const dotStyles = [dot0AnimatedStyle, dot1AnimatedStyle, dot2AnimatedStyle];
+
+    return (
+      <>
+        {[0, 1, 2].map((idx) => {
+          const isActive = idx === index;
+          return (
+            <Animated.View
+              key={idx}
+              style={[
+                {
+                  backgroundColor: isActive ? "#FFF" : "#8C8BA7",
+                  borderRadius: 16,
+                  height: 5,
+                },
+                dotStyles[idx],
+              ]}
+            />
+          );
+        })}
+      </>
+    );
+  };
 
   const slides = [
     {
@@ -110,7 +245,7 @@ export default function Index() {
         locations={[0, 0.7]}
         style={styles.gradientBackground}
       >
-        <SafeAreaView style={styles.container}>
+        <SafeAreaView style={styles.container} edges={["top", "bottom"]}>
           {/* Header */}
           <View style={styles.header}>
             <View style={styles.logoContainer}>
@@ -124,12 +259,13 @@ export default function Index() {
           </View>
 
           {/* Content */}
-          <View style={styles.content}>
+          <Animated.View style={[styles.content, slideAnimatedStyle]}>
             {/* Icon */}
-            <View
+            <Animated.View
               style={[
                 styles.iconContainer,
                 { backgroundColor: `${currentSlide.color}30` },
+                iconAnimatedStyle,
               ]}
             >
               <View
@@ -144,25 +280,27 @@ export default function Index() {
                   color="#FFF"
                 />
               </View>
-            </View>
+            </Animated.View>
 
             {/* Dots */}
             <View style={styles.dotsContainer}>{renderDots()}</View>
 
             {/* Text Content */}
-            <View style={styles.textContent}>
+            <Animated.View style={[styles.textContent, textAnimatedStyle]}>
               <Text style={styles.title}>{currentSlide.title}</Text>
               <Text style={styles.description}>{currentSlide.description}</Text>
-            </View>
-          </View>
+            </Animated.View>
+          </Animated.View>
 
           {/* Bottom Button */}
-          <Pressable style={styles.button} onPress={handlePress}>
-            <Text style={styles.buttonText}>
-              {index < 2 ? "Növbəti" : "Başlayaq"}
-            </Text>
-            <Ionicons name="arrow-forward" size={20} color="#0A0F1D" />
-          </Pressable>
+          <Animated.View style={buttonAnimatedStyle}>
+            <Pressable style={styles.button} onPress={handlePress}>
+              <Text style={styles.buttonText}>
+                {index < 2 ? "Növbəti" : "Başlayaq"}
+              </Text>
+              <Ionicons name="arrow-forward" size={20} color="#0A0F1D" />
+            </Pressable>
+          </Animated.View>
         </SafeAreaView>
       </LinearGradient>
       <StatusBar barStyle="light-content" />

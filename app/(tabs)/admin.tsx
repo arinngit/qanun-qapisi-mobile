@@ -1,23 +1,23 @@
 import { Ionicons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
-import React, { useState, useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import {
-  SafeAreaView,
+  ActivityIndicator,
+  RefreshControl,
   ScrollView,
   StyleSheet,
   Text,
   TouchableOpacity,
   View,
-  ActivityIndicator,
-  RefreshControl,
 } from "react-native";
-import { adminAPI, DashboardStatsResponse } from "../../services/api";
+import { SafeAreaView } from "react-native-safe-area-context";
 import { useAuth } from "../../context/auth-context";
+import { adminAPI, DashboardStatsResponse } from "../../services/api";
 
 export default function AdminDashboardScreen() {
   const router = useRouter();
   const { user } = useAuth();
-  
+
   const [stats, setStats] = useState<DashboardStatsResponse | null>(null);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
@@ -52,7 +52,7 @@ export default function AdminDashboardScreen() {
 
   if (loading) {
     return (
-      <SafeAreaView style={styles.container}>
+      <SafeAreaView style={styles.container} edges={["top", "bottom"]}>
         <View style={styles.header}>
           <Text style={styles.headerTitle}>Admin Panel</Text>
         </View>
@@ -64,7 +64,7 @@ export default function AdminDashboardScreen() {
   }
 
   return (
-    <SafeAreaView style={styles.container}>
+    <SafeAreaView style={styles.container} edges={["top", "bottom"]}>
       {/* Header */}
       <View style={styles.header}>
         <Text style={styles.headerTitle}>Admin Panel</Text>
@@ -73,7 +73,11 @@ export default function AdminDashboardScreen() {
       <ScrollView
         showsVerticalScrollIndicator={false}
         refreshControl={
-          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} colors={["#7313e8"]} />
+          <RefreshControl
+            refreshing={refreshing}
+            onRefresh={onRefresh}
+            colors={["#7313e8"]}
+          />
         }
       >
         {/* Welcome Card */}
@@ -85,16 +89,14 @@ export default function AdminDashboardScreen() {
             <Text style={styles.welcomeTitle}>
               Xoş gəlmisiniz, {user?.firstName || "Admin"}!
             </Text>
-            <Text style={styles.welcomeSubtitle}>
-              İdarəetmə paneli
-            </Text>
+            <Text style={styles.welcomeSubtitle}>İdarəetmə paneli</Text>
           </View>
         </View>
 
         {/* Stats Cards */}
         <View style={styles.statsSection}>
           <Text style={styles.sectionTitle}>Ümumi Statistika</Text>
-          
+
           <View style={styles.statsGrid}>
             <View style={styles.statCard}>
               <View style={[styles.statIcon, { backgroundColor: "#DBEAFE" }]}>
@@ -141,7 +143,7 @@ export default function AdminDashboardScreen() {
         {/* Quick Actions */}
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>Tez Əməliyyatlar</Text>
-          
+
           <View style={styles.actionsGrid}>
             <TouchableOpacity
               style={styles.actionCard}
@@ -194,7 +196,9 @@ export default function AdminDashboardScreen() {
           <View style={styles.section}>
             <View style={styles.sectionHeader}>
               <Text style={styles.sectionTitle}>Son İstifadəçilər</Text>
-              <TouchableOpacity onPress={() => router.push("/admin/users" as any)}>
+              <TouchableOpacity
+                onPress={() => router.push("/admin/users" as any)}
+              >
                 <Text style={styles.seeAllText}>Hamısı</Text>
               </TouchableOpacity>
             </View>
@@ -238,7 +242,11 @@ export default function AdminDashboardScreen() {
                     </View>
                   )}
                   {user.isVerified && (
-                    <Ionicons name="checkmark-circle" size={20} color="#10B981" />
+                    <Ionicons
+                      name="checkmark-circle"
+                      size={20}
+                      color="#10B981"
+                    />
                   )}
                 </View>
               </TouchableOpacity>
@@ -463,4 +471,3 @@ const styles = StyleSheet.create({
     height: 20,
   },
 });
-

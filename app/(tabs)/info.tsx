@@ -12,6 +12,7 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 export default function InfoScreen() {
   const tintColor = useThemeColor({}, "tint");
@@ -20,6 +21,7 @@ export default function InfoScreen() {
   const textColor = useThemeColor({}, "text");
   const borderColor = useThemeColor({}, "icon");
   const [imageError, setImageError] = React.useState(false);
+  const insets = useSafeAreaInsets();
 
   const professorData = {
     name: "Fərid Qurbanov",
@@ -52,6 +54,7 @@ export default function InfoScreen() {
         style={styles.container}
         showsVerticalScrollIndicator={false}
         bounces={false}
+        contentContainerStyle={{ paddingBottom: Math.max(insets.bottom, 20) }}
       >
         <View style={styles.content}>
           {/* Professor Card with Photo */}

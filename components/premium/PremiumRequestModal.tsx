@@ -1,14 +1,15 @@
+import { Ionicons } from "@expo/vector-icons";
 import React from "react";
 import {
+  Alert,
+  Linking,
   Modal,
-  View,
+  Platform,
+  StyleSheet,
   Text,
   TouchableOpacity,
-  StyleSheet,
-  Linking,
-  Alert,
+  View,
 } from "react-native";
-import { Ionicons } from "@expo/vector-icons";
 
 interface PremiumRequestModalProps {
   visible: boolean;
@@ -20,21 +21,44 @@ const PremiumRequestModal: React.FC<PremiumRequestModalProps> = ({
   onClose,
 }) => {
   const teacherPhone = "+994 51 355 51 83";
-  const whatsappNumber = "994513555183"; // Format for WhatsApp link (no + or spaces)
+  const whatsappNumber = "994513555183";
 
-  const handleWhatsAppPress = () => {
-    const whatsappUrl = `https://wa.me/${whatsappNumber}`;
-    Linking.canOpenURL(whatsappUrl)
-      .then((supported) => {
-        if (supported) {
-          Linking.openURL(whatsappUrl);
-        } else {
-          Alert.alert("Xəta", "WhatsApp açıla bilmədi");
+  const handleWhatsAppPress = async () => {
+    try {
+      let whatsappUrl: string;
+
+      if (Platform.OS === "android") {
+        whatsappUrl = `whatsapp://send?phone=${whatsappNumber}`;
+      } else {
+        whatsappUrl = `https://wa.me/${whatsappNumber}`;
+      }
+
+      try {
+        await Linking.openURL(whatsappUrl);
+      } catch (whatsappError) {
+        const alternativeUrl =
+          Platform.OS === "android"
+            ? `https://wa.me/${whatsappNumber}`
+            : `whatsapp://send?phone=${whatsappNumber}`;
+
+        try {
+          await Linking.openURL(alternativeUrl);
+        } catch (altError) {
+          await Linking.openURL(`tel:${teacherPhone}`);
         }
-      })
-      .catch(() => {
-        Alert.alert("Xəta", "WhatsApp açıla bilmədi");
-      });
+      }
+    } catch (error) {
+      console.error("WhatsApp açma hatası:", error);
+
+      try {
+        await Linking.openURL(`tel:${teacherPhone}`);
+      } catch (telError) {
+        Alert.alert(
+          "Xəta",
+          "WhatsApp açıla bilmədi. Zəhmət olmasa WhatsApp-ı yükləyin və ya zəng düyməsini istifadə edin."
+        );
+      }
+    }
   };
 
   const handleCallPress = () => {
@@ -84,7 +108,9 @@ const PremiumRequestModal: React.FC<PremiumRequestModalProps> = ({
                 onPress={handleWhatsAppPress}
               >
                 <Ionicons name="logo-whatsapp" size={20} color="#fff" />
-                <Text style={styles.whatsappButtonText}>WhatsApp ilə əlaqə</Text>
+                <Text style={styles.whatsappButtonText}>
+                  WhatsApp ilə əlaqə
+                </Text>
               </TouchableOpacity>
 
               <TouchableOpacity
@@ -245,4 +271,3 @@ const styles = StyleSheet.create({
 });
 
 export default PremiumRequestModal;
-

@@ -6,12 +6,15 @@ import {
   FlatList,
   Modal,
   RefreshControl,
-  SafeAreaView,
   StyleSheet,
   Text,
   TouchableOpacity,
   View,
 } from "react-native";
+import {
+  SafeAreaView,
+  useSafeAreaInsets,
+} from "react-native-safe-area-context";
 import { TestResponse, testsAPI } from "../../services/api";
 import { handleApiError } from "../../utils/errorHandler";
 
@@ -34,6 +37,7 @@ export default function TestScreen() {
   const [totalElements, setTotalElements] = useState(0);
   const [sortModalVisible, setSortModalVisible] = useState(false);
   const router = useRouter();
+  const insets = useSafeAreaInsets();
 
   const filters: FilterItem[] = [
     { id: "all", label: "Hamısı" },
@@ -268,8 +272,8 @@ export default function TestScreen() {
 
   if (loading) {
     return (
-      <SafeAreaView style={styles.container}>
-        <View style={styles.header}>
+      <SafeAreaView style={styles.container} edges={["top", "bottom"]}>
+        <View style={[styles.header, { paddingTop: Math.max(insets.top, 12) }]}>
           <Text style={styles.headerTitle}>Testlər</Text>
           <View style={styles.headerRight}>
             <TouchableOpacity style={styles.iconButton}>
@@ -292,9 +296,9 @@ export default function TestScreen() {
   }
 
   return (
-    <SafeAreaView style={styles.container}>
+    <SafeAreaView style={styles.container} edges={["top", "bottom"]}>
       {/* Header */}
-      <View style={styles.header}>
+      <View style={[styles.header, { paddingTop: Math.max(insets.top, 12) }]}>
         <Text style={styles.headerTitle}>Testlər</Text>
         <View style={styles.headerRight}>
           <TouchableOpacity
@@ -393,7 +397,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "space-between",
     paddingHorizontal: 16,
-    paddingVertical: 12,
+    paddingBottom: 12,
     backgroundColor: "#FFFFFF",
     borderBottomWidth: 1,
     borderBottomColor: "#F3F4F6",

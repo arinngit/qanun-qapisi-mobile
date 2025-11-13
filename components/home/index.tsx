@@ -5,13 +5,16 @@ import {
   ActivityIndicator,
   Image,
   RefreshControl,
-  SafeAreaView,
   ScrollView,
   StyleSheet,
   Text,
   TouchableOpacity,
   View,
 } from "react-native";
+import {
+  SafeAreaView,
+  useSafeAreaInsets,
+} from "react-native-safe-area-context";
 import { useAuth } from "../../context/auth-context";
 import {
   TestAttemptResponse,
@@ -23,6 +26,7 @@ import { handleApiError } from "../../utils/errorHandler";
 export default function HomeScreen() {
   const router = useRouter();
   const { user } = useAuth();
+  const insets = useSafeAreaInsets();
 
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
@@ -158,7 +162,7 @@ export default function HomeScreen() {
 
   if (loading) {
     return (
-      <SafeAreaView style={styles.container}>
+      <SafeAreaView style={styles.container} edges={["top", "bottom"]}>
         <View style={styles.loadingContainer}>
           <ActivityIndicator size="large" color="#7313e8" />
         </View>
@@ -166,7 +170,7 @@ export default function HomeScreen() {
     );
   }
   return (
-    <SafeAreaView style={styles.container}>
+    <SafeAreaView style={styles.container} edges={["bottom"]}>
       <ScrollView
         showsVerticalScrollIndicator={false}
         refreshControl={
@@ -176,6 +180,7 @@ export default function HomeScreen() {
             colors={["#7313e8"]}
           />
         }
+        contentContainerStyle={{ paddingTop: Math.max(insets.top, 16) }}
       >
         {/* Header */}
         <View style={styles.header}>
@@ -434,7 +439,7 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
     alignItems: "center",
     paddingHorizontal: 20,
-    paddingVertical: 16,
+    paddingBottom: 16,
     backgroundColor: "#FFFFFF",
   },
   headerLeft: {
