@@ -199,9 +199,6 @@ export default function HomeScreen() {
             </View>
             <Text style={styles.headerTitle}>Qanun Qapısı</Text>
           </View>
-          {/* <TouchableOpacity>
-            <Ionicons name="notifications-outline" size={24} color="#111827" />
-          </TouchableOpacity> */}
         </View>
 
         {/* Premium Banner */}
@@ -440,6 +437,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
     paddingHorizontal: 20,
     paddingBottom: 16,
+    paddingTop: 16,
     backgroundColor: "#FFFFFF",
   },
   headerLeft: {

@@ -43,6 +43,25 @@ function AppContent() {
     checkOnboarding();
   }, []);
 
+  useEffect(() => {
+    if (!hasCheckedOnboarding || hasOnboarded) {
+      return;
+    }
+
+    const syncOnboardingStatus = async () => {
+      try {
+        const storedValue = await AsyncStorage.getItem("hasOnBoarded");
+        if (storedValue === "true") {
+          setHasOnboarded(true);
+        }
+      } catch (error) {
+        console.error("Error syncing onboarding status:", error);
+      }
+    };
+
+    syncOnboardingStatus();
+  }, [segments, hasCheckedOnboarding, hasOnboarded]);
+
   // Hide splash screen when ready
   useEffect(() => {
     const hideSplash = async () => {

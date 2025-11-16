@@ -214,14 +214,19 @@ export default function Login() {
         </View>
 
         <View style={styles.footer}>
-          <Text style={styles.footerText}>
-            Daxil olmaqla{" "}
-            <Text style={styles.footerLink}>İstifadə Şərtləri</Text> və{" "}
-            <Text style={styles.footerLink}>Məxfilik Siyasəti</Text> ni qəbul
-            edirsiniz
-          </Text>
+          <View style={styles.footerTextContainer}>
+            <Text style={styles.footerText}>Daxil olmaqla </Text>
+
+            <TouchableOpacity
+              onPress={() => router.push("/privacy-policy" as any)}
+              disabled={loading}
+            >
+              <Text style={styles.footerLink}>Məxfilik Siyasəti</Text>
+            </TouchableOpacity>
+            <Text style={styles.footerText}> ni qəbul edirsiniz</Text>
+          </View>
           <Text style={styles.copyright}>
-            © 2024 Qanun Qapısı. Bütün hüquqlar qorunur.
+            © 2025 Qanun Qapısı. Bütün hüquqlar qorunur.
           </Text>
         </View>
       </ScrollView>
@@ -395,11 +400,16 @@ const styles = StyleSheet.create({
   footer: {
     alignItems: "center",
   },
+  footerTextContainer: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+    justifyContent: "center",
+    alignItems: "center",
+    marginBottom: 8,
+  },
   footerText: {
     fontSize: 12,
     color: "#6B7280",
-    textAlign: "center",
-    marginBottom: 8,
     lineHeight: 18,
   },
   footerLink: {

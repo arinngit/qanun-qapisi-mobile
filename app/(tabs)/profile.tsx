@@ -1,5 +1,6 @@
 import GBottomSheet from "@/components/common/GBottomSheet";
 import PremiumRequestModal from "@/components/premium/PremiumRequestModal";
+import { ProfileImageCropper } from "@/components/profile/ProfileImageCropper";
 import { ThemedText } from "@/components/theme/themed-text";
 import { translations } from "@/constants/translations";
 import { useAuth } from "@/context/auth-context";
@@ -49,6 +50,9 @@ export default function Profile() {
   const [newEmail, setNewEmail] = useState("");
   const [verificationCode, setVerificationCode] = useState("");
   const [loading, setLoading] = useState(false);
+  const [cropperVisible, setCropperVisible] = useState(false);
+  const [pendingAsset, setPendingAsset] =
+    useState<ImagePicker.ImagePickerAsset | null>(null);
 
   const handleLogout = async () => {
     Alert.alert(translations.logout, translations.logoutConfirmation, [
@@ -247,33 +251,53 @@ export default function Profile() {
       }
 
       const result = await ImagePicker.launchImageLibraryAsync({
-        mediaTypes: ["images"],
-        allowsEditing: true,
-        aspect: [1, 1],
-        quality: 0.8,
+        mediaTypes: ImagePicker.MediaTypeOptions.Images,
+        allowsEditing: false,
+        allowsMultipleSelection: false,
+        quality: 1,
       });
 
-      if (!result.canceled && result.assets[0]) {
-        setLoading(true);
-
-        const formData = new FormData();
-        const imageUri = result.assets[0].uri;
-        const filename = imageUri.split("/").pop() || "profile.jpg";
-        const match = /\.(\w+)$/.exec(filename);
-        const type = match ? `image/${match[1]}` : "image/jpeg";
-
-        formData.append("file", {
-          uri: imageUri,
-          name: filename,
-          type,
-        } as any);
-
-        const response = await profileAPI.uploadProfilePicture(formData);
-
-        updateUser({ profilePicture: response.imageUrl });
-        Alert.alert("Uğurlu", "Profil şəkli yeniləndi");
-        await refreshUser();
+      if (result.canceled || !result.assets[0]) {
+        return;
       }
+
+      setPendingAsset(result.assets[0]);
+      setCropperVisible(true);
+    } catch (error: any) {
+      console.error("Error uploading profile picture:", error);
+      Alert.alert(
+        "Xəta",
+        error.response?.data?.message || "Şəkil yüklənərkən xəta baş verdi"
+      );
+    }
+  };
+
+  const handleCropCancel = () => {
+    setCropperVisible(false);
+    setPendingAsset(null);
+  };
+
+  const handleCropComplete = async (processedImageUri: string) => {
+    try {
+      setCropperVisible(false);
+      setPendingAsset(null);
+      setLoading(true);
+
+      const filename =
+        processedImageUri.split("/").pop() || `profile_${Date.now()}.jpg`;
+      const formData = new FormData();
+      formData.append("file", {
+        uri: processedImageUri,
+        name: filename,
+        type: "image/jpeg",
+      } as any);
+
+      const response = await profileAPI.uploadProfilePicture(formData);
+
+      updateUser({ profilePicture: response.imageUrl });
+      await refreshUser();
+
+      Alert.alert("Uğurlu", "Profil şəkli yeniləndi");
     } catch (error: any) {
       console.error("Error uploading profile picture:", error);
       Alert.alert(
@@ -506,27 +530,6 @@ export default function Profile() {
               <ThemedText style={styles.menuText}>E-poçtu Dəyiş</ThemedText>
               <Ionicons name="chevron-forward" size={20} color="#9CA3AF" />
             </TouchableOpacity>
-
-            {/* <TouchableOpacity
-              style={[
-                styles.menuItem,
-                { borderBottomColor: "#E5E7EB", borderBottomWidth: 1 },
-              ]}
-              onPress={() =>
-                Alert.alert(
-                  "Xəbərdarlıq",
-                  "Bu funksiya hazırlanma prosesindədir"
-                )
-              }
-            >
-              <View
-                style={[styles.iconContainer, { backgroundColor: "#7313e8" }]}
-              >
-                <Ionicons name="notifications-outline" size={22} color="#fff" />
-              </View>
-              <ThemedText style={styles.menuText}>Bildirişlər</ThemedText>
-              <Ionicons name="chevron-forward" size={20} color="#9CA3AF" />
-            </TouchableOpacity> */}
 
             {/* Dark Mode Toggle */}
             {/* <View
@@ -876,6 +879,12 @@ export default function Profile() {
       <PremiumRequestModal
         visible={premiumRequestModal}
         onClose={() => setPremiumRequestModal(false)}
+      />
+      <ProfileImageCropper
+        visible={cropperVisible}
+        asset={pendingAsset}
+        onCancel={handleCropCancel}
+        onComplete={handleCropComplete}
       />
     </>
   );

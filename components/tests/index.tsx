@@ -15,7 +15,7 @@ import {
   SafeAreaView,
   useSafeAreaInsets,
 } from "react-native-safe-area-context";
-import { TestResponse, testsAPI } from "../../services/api";
+import { GetTestsParams, TestResponse, testsAPI } from "../../services/api";
 import { handleApiError } from "../../utils/errorHandler";
 
 interface FilterItem {
@@ -25,8 +25,38 @@ interface FilterItem {
 
 type SortBy = "publishedAt" | "questionCount" | "totalPossibleScore";
 
-export default function TestScreen() {
-  const [selectedFilter, setSelectedFilter] = useState("all");
+const FILTER_ALL = "all";
+const FILTER_PREMIUM = "premium";
+const FILTER_FREE = "pulsuz";
+
+const PAGE_SIZE = 10;
+
+const filterTests = (items: TestResponse[], filter: string): TestResponse[] => {
+  if (filter === FILTER_PREMIUM) {
+    return items.filter((test) => test.isPremium);
+  }
+
+  if (filter === FILTER_FREE) {
+    return items.filter((test) => !test.isPremium);
+  }
+
+  return items;
+};
+
+const filters: FilterItem[] = [
+  { id: FILTER_ALL, label: "Hamısı" },
+  { id: FILTER_PREMIUM, label: "Premium" },
+  { id: FILTER_FREE, label: "Pulsuz" },
+];
+
+const sortOptions = [
+  { id: "publishedAt", label: "Tarix", icon: "calendar-outline" },
+  { id: "questionCount", label: "Sual sayı", icon: "help-circle-outline" },
+  { id: "totalPossibleScore", label: "Xal", icon: "star-outline" },
+];
+
+const TestScreen: React.FC = () => {
+  const [selectedFilter, setSelectedFilter] = useState(FILTER_ALL);
   const [sortBy, setSortBy] = useState<SortBy>("publishedAt");
   const [tests, setTests] = useState<TestResponse[]>([]);
   const [loading, setLoading] = useState(true);
@@ -34,60 +64,52 @@ export default function TestScreen() {
   const [loadingMore, setLoadingMore] = useState(false);
   const [page, setPage] = useState(0);
   const [totalPages, setTotalPages] = useState(0);
-  const [totalElements, setTotalElements] = useState(0);
+  const [loadedFilteredCount, setLoadedFilteredCount] = useState(0);
   const [sortModalVisible, setSortModalVisible] = useState(false);
   const router = useRouter();
   const insets = useSafeAreaInsets();
-
-  const filters: FilterItem[] = [
-    { id: "all", label: "Hamısı" },
-    { id: "premium", label: "Premium" },
-    { id: "pulsuz", label: "Pulsuz" },
-  ];
-
-  const sortOptions = [
-    { id: "publishedAt", label: "Tarix", icon: "calendar-outline" },
-    { id: "questionCount", label: "Sual sayı", icon: "help-circle-outline" },
-    { id: "totalPossibleScore", label: "Xal", icon: "star-outline" },
-  ];
 
   useEffect(() => {
     loadTests(true);
   }, [selectedFilter, sortBy]);
 
-  const loadTests = async (reset = false) => {
+  const loadTests = async (reset = false, targetPage?: number) => {
     try {
       if (reset) {
         setLoading(true);
         setPage(0);
+        setLoadedFilteredCount(0);
       }
 
-      const currentPage = reset ? 0 : page;
+      const currentPage = reset ? 0 : targetPage ?? page;
 
-      // Build filter params
-      const params: any = {
+      const params: GetTestsParams = {
         page: currentPage,
-        size: 10,
+        size: PAGE_SIZE,
         sortBy,
         sortDir: "desc",
       };
 
-      if (selectedFilter === "premium") {
+      if (selectedFilter === FILTER_PREMIUM) {
         params.isPremium = true;
-      } else if (selectedFilter === "pulsuz") {
+      } else if (selectedFilter === FILTER_FREE) {
         params.isPremium = false;
       }
 
       const response = await testsAPI.getTests(params);
 
+      const filteredContent = filterTests(response.content, selectedFilter);
+
       if (reset) {
-        setTests(response.content);
+        setTests(filteredContent);
       } else {
-        setTests((prev) => [...prev, ...response.content]);
+        setTests((prev) => [...prev, ...filteredContent]);
       }
 
       setTotalPages(response.totalPages);
-      setTotalElements(response.totalElements);
+      setLoadedFilteredCount((prev) =>
+        reset ? filteredContent.length : prev + filteredContent.length
+      );
       setPage(currentPage);
     } catch (error: any) {
       handleApiError(error, "Testləri yükləmək mümkün olmadı");
@@ -106,8 +128,9 @@ export default function TestScreen() {
   const loadMore = () => {
     if (!loadingMore && page + 1 < totalPages) {
       setLoadingMore(true);
-      setPage(page + 1);
-      loadTests(false);
+      const nextPage = page + 1;
+      setPage(nextPage);
+      loadTests(false, nextPage);
     }
   };
 
@@ -118,11 +141,6 @@ export default function TestScreen() {
   const handleSortSelect = (sortOption: SortBy) => {
     setSortBy(sortOption);
     setSortModalVisible(false);
-  };
-
-  const getSortLabel = () => {
-    const option = sortOptions.find((opt) => opt.id === sortBy);
-    return option ? option.label : "Sırala";
   };
 
   const formatDate = (dateString: string) => {
@@ -232,7 +250,7 @@ export default function TestScreen() {
 
       {/* Test Count */}
       <View style={styles.countContainer}>
-        <Text style={styles.countText}>{totalElements} test tapıldı</Text>
+        <Text style={styles.countText}>{loadedFilteredCount} test tapıldı</Text>
       </View>
     </View>
   );
@@ -279,13 +297,6 @@ export default function TestScreen() {
             <TouchableOpacity style={styles.iconButton}>
               <Ionicons name="search" size={24} color="#111827" />
             </TouchableOpacity>
-            <TouchableOpacity style={styles.iconButton}>
-              <Ionicons
-                name="notifications-outline"
-                size={24}
-                color="#111827"
-              />
-            </TouchableOpacity>
           </View>
         </View>
         <View style={styles.loadingContainer}>
@@ -312,9 +323,6 @@ export default function TestScreen() {
             onPress={() => router.push("/search" as any)}
           >
             <Ionicons name="search" size={24} color="#111827" />
-          </TouchableOpacity>
-          <TouchableOpacity style={styles.iconButton}>
-            <Ionicons name="notifications-outline" size={24} color="#111827" />
           </TouchableOpacity>
         </View>
       </View>
@@ -385,7 +393,7 @@ export default function TestScreen() {
       </Modal>
     </SafeAreaView>
   );
-}
+};
 
 const styles = StyleSheet.create({
   container: {
@@ -613,3 +621,5 @@ const styles = StyleSheet.create({
     color: "#111827",
   },
 });
+
+export default TestScreen;
