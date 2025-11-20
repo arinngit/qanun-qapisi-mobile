@@ -1,8 +1,8 @@
 {
   "expo": {
     "name": "Qanun Qapısı",
-    "slug": "qanun-qapisi-mobile",
-    "version": "1.0.0",
+    "slug": "qanun-qapisi",
+    "version": "2.0.0",
     "orientation": "portrait",
     "icon": "./assets/images/qanun.png",
     "scheme": "qanunqapisimobile",
@@ -10,7 +10,10 @@
     "newArchEnabled": true,
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "com.qanunqapisi.mobile"
+      "bundleIdentifier": "com.creadev.qanunqapisi",
+      "infoPlist": {
+        "ITSAppUsesNonExemptEncryption": false
+      }
     },
     "android": {
       "package": "com.qanunqapisi.mobile",
@@ -52,6 +55,13 @@
     "experiments": {
       "typedRoutes": true,
       "reactCompiler": true
-    }
+    },
+    "extra": {
+      "router": {},
+      "eas": {
+        "projectId": "3f54983d-9286-4e78-887c-5c37c823546a"
+      }
+    },
+    "owner": "fakhri2406"
   }
 }
