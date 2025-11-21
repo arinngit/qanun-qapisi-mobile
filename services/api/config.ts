@@ -1,7 +1,7 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import axios, { AxiosRequestConfig } from "axios";
 
-export const API_BASE_URL = "http://31.220.84.200:8080/api/v1";
+export const API_BASE_URL = "https://vmi2809419.contaboserver.net/api/v1";
 
 // Device ID bypass email - set this to the email that should bypass device restrictions
 export const DEVICE_BYPASS_EMAIL = "appreview.qanunqapisi@gmail.com";
