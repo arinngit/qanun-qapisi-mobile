@@ -54,6 +54,13 @@ export interface Translations {
   helpAndSupport: string;
   logout: string;
   logoutConfirmation: string;
+  deleteAccount: string;
+  deleteAccountConfirmation: string;
+  deleteAccountWarning: string;
+  deleteAccountPasswordPrompt: string;
+  deleteAccountSuccess: string;
+  deleteAccountFailed: string;
+  deleteAccountIncorrectPassword: string;
 
   // Auth
   welcomeBack: string;
@@ -263,6 +270,14 @@ export const translations: Record<Language, Translations> = {
     helpAndSupport: "Kömək və Dəstək",
     logout: "Çıxış",
     logoutConfirmation: "Çıxış etmək istədiyinizə əminsiniz?",
+    deleteAccount: "Hesabı Sil",
+    deleteAccountConfirmation: "Hesabınızı silmək istədiyinizə əminsiniz?",
+    deleteAccountWarning:
+      "Bu əməliyyat geri qaytarıla bilməz. Hesabınız və bütün məlumatlarınız (test nəticələri, cavablar və şəxsi məlumatlar) həmişəlik silinəcək.",
+    deleteAccountPasswordPrompt: "Davam etmək üçün şifrənizi daxil edin",
+    deleteAccountSuccess: "Hesabınız uğurla silindi",
+    deleteAccountFailed: "Hesab silinmədi. Yenidən cəhd edin.",
+    deleteAccountIncorrectPassword: "Yanlış şifrə",
 
     // Auth
     welcomeBack: "Xoş gəldiniz!",
@@ -471,6 +486,14 @@ export const translations: Record<Language, Translations> = {
     helpAndSupport: "Help & Support",
     logout: "Logout",
     logoutConfirmation: "Are you sure you want to logout?",
+    deleteAccount: "Delete Account",
+    deleteAccountConfirmation: "Are you sure you want to delete your account?",
+    deleteAccountWarning:
+      "This action cannot be undone. Your account and all associated data (test results, answers, and personal information) will be permanently deleted.",
+    deleteAccountPasswordPrompt: "Enter your password to confirm",
+    deleteAccountSuccess: "Your account has been successfully deleted",
+    deleteAccountFailed: "Failed to delete account. Please try again.",
+    deleteAccountIncorrectPassword: "Incorrect password",
 
     // Auth
     welcomeBack: "Welcome Back!",

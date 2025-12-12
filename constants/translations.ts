@@ -68,6 +68,14 @@ export const translations = {
   logout: "Çıxış",
   logoutConfirmation: "Çıxış etmək istədiyinizə əminsiniz?",
   user: "İstifadəçi",
+  deleteAccount: "Hesabı Sil",
+  deleteAccountConfirmation: "Hesabınızı silmək istədiyinizə əminsiniz?",
+  deleteAccountWarning:
+    "Bu əməliyyat geri qaytarıla bilməz. Hesabınız və bütün məlumatlarınız (test nəticələri, cavablar və şəxsi məlumatlar) həmişəlik silinəcək.",
+  deleteAccountPasswordPrompt: "Davam etmək üçün şifrənizi daxil edin",
+  deleteAccountSuccess: "Hesabınız uğurla silindi",
+  deleteAccountFailed: "Hesab silinmədi. Yenidən cəhd edin.",
+  deleteAccountIncorrectPassword: "Yanlış şifrə",
 
   // Test Results
   score: "Bal",

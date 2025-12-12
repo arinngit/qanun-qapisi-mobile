@@ -41,6 +41,7 @@ export default function Profile() {
   const [changeEmailModal, setChangeEmailModal] = useState(false);
   const [verifyEmailModal, setVerifyEmailModal] = useState(false);
   const [premiumRequestModal, setPremiumRequestModal] = useState(false);
+  const [deleteAccountModal, setDeleteAccountModal] = useState(false);
 
   const [firstName, setFirstName] = useState(user?.firstName || "");
   const [lastName, setLastName] = useState(user?.lastName || "");
@@ -49,6 +50,7 @@ export default function Profile() {
   const [confirmPassword, setConfirmPassword] = useState("");
   const [newEmail, setNewEmail] = useState("");
   const [verificationCode, setVerificationCode] = useState("");
+  const [deletePassword, setDeletePassword] = useState("");
   const [loading, setLoading] = useState(false);
   const [cropperVisible, setCropperVisible] = useState(false);
   const [pendingAsset, setPendingAsset] =
@@ -74,6 +76,36 @@ export default function Profile() {
         },
       },
     ]);
+  };
+
+  const handleDeleteAccount = () => {
+    setDeletePassword("");
+    setDeleteAccountModal(true);
+  };
+
+  const handleConfirmDeleteAccount = async () => {
+    if (!deletePassword.trim()) {
+      Alert.alert(t.error, t.deleteAccountPasswordPrompt);
+      return;
+    }
+
+    setLoading(true);
+    try {
+      await profileAPI.deleteAccount({ password: deletePassword });
+      setDeleteAccountModal(false);
+      Alert.alert(t.success, t.deleteAccountSuccess);
+      
+      setTimeout(async () => {
+        await logout();
+        router.replace("/(auth)/login");
+      }, 1000);
+    } catch (error: any) {
+      console.error("Error deleting account:", error);
+      const errorMessage = error.response?.data?.message || t.deleteAccountFailed;
+      Alert.alert(t.error, errorMessage);
+    } finally {
+      setLoading(false);
+    }
   };
 
   const handleRefresh = async () => {
@@ -635,6 +667,24 @@ export default function Profile() {
               <Ionicons name="chevron-forward" size={20} color="#9CA3AF" />
             </TouchableOpacity>
 
+            <TouchableOpacity
+              style={[
+                styles.menuItem,
+                { borderBottomColor: "#E5E7EB", borderBottomWidth: 1 },
+              ]}
+              onPress={handleDeleteAccount}
+            >
+              <View
+                style={[styles.iconContainer, { backgroundColor: "#FEF2F2" }]}
+              >
+                <Ionicons name="trash-outline" size={22} color="#DC2626" />
+              </View>
+              <ThemedText style={[styles.menuText, { color: "#DC2626" }]}>
+                {t.deleteAccount}
+              </ThemedText>
+              <Ionicons name="chevron-forward" size={20} color="#DC2626" />
+            </TouchableOpacity>
+
             <TouchableOpacity style={styles.menuItem} onPress={handleLogout}>
               <View
                 style={[styles.iconContainer, { backgroundColor: "#FEE2E2" }]}
@@ -872,6 +922,75 @@ export default function Profile() {
               <ThemedText style={styles.modalButtonText}>Təsdiqlə</ThemedText>
             )}
           </TouchableOpacity>
+        </View>
+      </GBottomSheet>
+
+      {/* Delete Account BottomSheet */}
+      <GBottomSheet
+        visible={deleteAccountModal}
+        onClose={() => setDeleteAccountModal(false)}
+        title={t.deleteAccount}
+        type="form"
+      >
+        <View style={styles.modalBody}>
+          <View style={styles.warningContainer}>
+            <Ionicons name="warning" size={48} color="#DC2626" />
+            <ThemedText style={styles.warningTitle}>
+              {t.deleteAccountConfirmation}
+            </ThemedText>
+            <ThemedText style={styles.warningText}>
+              {t.deleteAccountWarning}
+            </ThemedText>
+          </View>
+
+          <ThemedText style={styles.inputLabel}>
+            {t.deleteAccountPasswordPrompt}
+          </ThemedText>
+          <TextInput
+            style={[
+              styles.input,
+              {
+                backgroundColor: colors.backgroundSecondary,
+                color: colors.text,
+                borderColor: colors.border,
+              },
+            ]}
+            value={deletePassword}
+            onChangeText={setDeletePassword}
+            placeholder={t.password}
+            placeholderTextColor={colors.placeholder}
+            secureTextEntry
+          />
+
+          <View style={styles.modalButtonGroup}>
+            <TouchableOpacity
+              style={[styles.modalButtonSecondary, { flex: 1 }]}
+              onPress={() => setDeleteAccountModal(false)}
+              disabled={loading}
+            >
+              <ThemedText style={styles.modalButtonSecondaryText}>
+                {t.cancel}
+              </ThemedText>
+            </TouchableOpacity>
+
+            <TouchableOpacity
+              style={[
+                styles.modalButtonDanger,
+                { flex: 1 },
+                loading && styles.modalButtonDisabled,
+              ]}
+              onPress={handleConfirmDeleteAccount}
+              disabled={loading}
+            >
+              {loading ? (
+                <ActivityIndicator color="#fff" />
+              ) : (
+                <ThemedText style={styles.modalButtonText}>
+                  {t.deleteAccount}
+                </ThemedText>
+              )}
+            </TouchableOpacity>
+          </View>
         </View>
       </GBottomSheet>
 
@@ -1184,6 +1303,46 @@ const styles = StyleSheet.create({
     color: "#fff",
     fontSize: 16,
     fontWeight: "600",
+  },
+  modalButtonGroup: {
+    flexDirection: "row",
+    gap: 12,
+    marginTop: 24,
+  },
+  modalButtonSecondary: {
+    backgroundColor: "#F3F4F6",
+    borderRadius: 12,
+    paddingVertical: 16,
+    alignItems: "center",
+  },
+  modalButtonSecondaryText: {
+    color: "#374151",
+    fontSize: 16,
+    fontWeight: "600",
+  },
+  modalButtonDanger: {
+    backgroundColor: "#DC2626",
+    borderRadius: 12,
+    paddingVertical: 16,
+    alignItems: "center",
+  },
+  warningContainer: {
+    alignItems: "center",
+    marginBottom: 24,
+  },
+  warningTitle: {
+    fontSize: 18,
+    fontWeight: "600",
+    color: "#DC2626",
+    marginTop: 12,
+    marginBottom: 8,
+    textAlign: "center",
+  },
+  warningText: {
+    fontSize: 14,
+    color: "#6B7280",
+    textAlign: "center",
+    lineHeight: 20,
   },
   premiumSection: {
     paddingHorizontal: 20,

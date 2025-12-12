@@ -111,8 +111,32 @@ api.interceptors.response.use(
   async (error) => {
     const originalRequest = error.config;
 
+    // Enhanced error logging for debugging
+    if (!error.response) {
+      // Network error (no response received)
+      console.error('❌ Network Error:', {
+        message: error.message,
+        code: error.code,
+        url: originalRequest?.url,
+        baseURL: originalRequest?.baseURL,
+      });
+      
+      // Common network errors
+      if (error.message.includes('Network request failed')) {
+        console.error('Possible causes: SSL certificate issue, DNS resolution failed, or server unreachable');
+      }
+    } else {
+      // Server responded with error status
+      console.error('❌ Server Error:', {
+        status: error.response.status,
+        statusText: error.response.statusText,
+        url: originalRequest?.url,
+        data: error.response.data,
+      });
+    }
+
     // Clear cache for failed requests
-    if (originalRequest.method?.toLowerCase() === 'get') {
+    if (originalRequest?.method?.toLowerCase() === 'get') {
       const cacheKey = getCacheKey(originalRequest);
       requestCache.delete(cacheKey);
       cacheExpiry.delete(cacheKey);

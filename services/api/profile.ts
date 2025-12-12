@@ -34,6 +34,10 @@ export interface VerifyEmailChangeRequest {
   code: number;
 }
 
+export interface DeleteAccountRequest {
+  password: string;
+}
+
 // Profile API
 export const profileAPI = {
   // Get user profile
@@ -78,5 +82,10 @@ export const profileAPI = {
   // Delete profile picture
   deleteProfilePicture: async (): Promise<void> => {
     await api.delete("/profile/picture");
+  },
+
+  // Delete account
+  deleteAccount: async (data: DeleteAccountRequest): Promise<void> => {
+    await api.delete("/profile/account", { data });
   },
 };
