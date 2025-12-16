@@ -274,14 +274,6 @@ export default function Profile() {
 
   const handleUploadProfilePicture = async () => {
     try {
-      const { status } =
-        await ImagePicker.requestMediaLibraryPermissionsAsync();
-
-      if (status !== "granted") {
-        Alert.alert("Xəta", "Şəkil kitabxanasına giriş icazəsi tələb olunur");
-        return;
-      }
-
       const result = await ImagePicker.launchImageLibraryAsync({
         mediaTypes: ImagePicker.MediaTypeOptions.Images,
         allowsEditing: false,

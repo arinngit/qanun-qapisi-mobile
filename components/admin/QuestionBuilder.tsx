@@ -117,12 +117,6 @@ export default function QuestionBuilder({
 
   const handleImageUpload = async () => {
     try {
-      const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
-      if (status !== "granted") {
-        Alert.alert("Xəta", "Şəkil kitabxanasına giriş icazəsi tələb olunur");
-        return;
-      }
-
       const result = await ImagePicker.launchImageLibraryAsync({
         mediaTypes: ['images'],
         allowsEditing: true,
