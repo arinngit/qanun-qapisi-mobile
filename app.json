@@ -35,7 +35,13 @@
       },
       "usesCleartextTraffic": false,
       "edgeToEdgeEnabled": true,
-      "predictiveBackGestureEnabled": false
+      "predictiveBackGestureEnabled": false,
+      "blockedPermissions": [
+        "android.permission.READ_MEDIA_IMAGES",
+        "android.permission.READ_MEDIA_VIDEO",
+        "android.permission.READ_EXTERNAL_STORAGE",
+        "android.permission.WRITE_EXTERNAL_STORAGE"
+      ]
     },
     "web": {
       "output": "static",
@@ -56,14 +62,21 @@
         }
       ],
       [
+        "expo-image-picker",
+        {
+          "photosPermission": false
+        }
+      ],
+      [
         "expo-build-properties",
         {
           "android": {
+            "minSdkVersion": 21,
+            "targetSdkVersion": 33,
             "usesCleartextTraffic": false
           }
         }
-      ],
-      "./plugins/remove-media-permissions.js"
+      ]
     ],
     "experiments": {
       "typedRoutes": true,
