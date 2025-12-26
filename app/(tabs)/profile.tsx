@@ -279,6 +279,9 @@ export default function Profile() {
         allowsEditing: false,
         allowsMultipleSelection: false,
         quality: 1,
+        selectionLimit: 1,
+        orderedSelection: false,
+        legacy: false,
       });
 
       if (result.canceled || !result.assets[0]) {

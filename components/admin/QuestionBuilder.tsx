@@ -118,9 +118,11 @@ export default function QuestionBuilder({
   const handleImageUpload = async () => {
     try {
       const result = await ImagePicker.launchImageLibraryAsync({
-        mediaTypes: ['images'],
+        mediaTypes: ImagePicker.MediaTypeOptions.Images,
         allowsEditing: true,
         quality: 0.8,
+        selectionLimit: 1,
+        legacy: false,
       });
 
       if (!result.canceled && result.assets[0]) {
