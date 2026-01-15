@@ -283,17 +283,6 @@ export default function TestTakingScreen() {
             {currentQuestion.questionText}
           </Text>
 
-          {/* Question Image */}
-          {currentQuestion.imageUrl && (
-            <View style={styles.imageContainer}>
-              <Image
-                source={{ uri: currentQuestion.imageUrl }}
-                style={styles.questionImage}
-                resizeMode="contain"
-              />
-            </View>
-          )}
-
           {/* Answer Options */}
           <View style={styles.answersContainer}>
             {currentQuestion.questionType === "OPEN_TEXT" ? (

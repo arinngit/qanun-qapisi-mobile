@@ -67,7 +67,6 @@ export interface TestAttemptAdminResponse {
 export interface CreateQuestionRequest {
   questionType: string;
   questionText: string;
-  imageUrl?: string;
   score: number;
   orderIndex?: number;
   correctAnswer?: string;

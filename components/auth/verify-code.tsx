@@ -86,7 +86,6 @@ export default function VerifyScreen() {
           lastName: profileData.lastName,
           role: profileData.role,
           verified: profileData.verified,
-          profilePicture: profileData.profilePictureUrl || undefined,
           isPremium: profileData.isPremium,
           createdAt: profileData.createdAt,
           updatedAt: profileData.updatedAt,

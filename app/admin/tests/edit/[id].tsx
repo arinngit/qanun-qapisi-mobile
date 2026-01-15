@@ -51,7 +51,6 @@ export default function EditTestScreen() {
         id: q.id,
         questionType: q.questionType,
         questionText: q.questionText,
-        imageUrl: q.imageUrl,
         score: q.score,
         orderIndex: q.orderIndex,
         correctAnswer: q.correctAnswer,
@@ -194,8 +193,6 @@ export default function EditTestScreen() {
         questions: questions.map((q, qIdx) => ({
           questionType: q.questionType,
           questionText: q.questionText.trim(),
-          // Only include imageUrl if it's an HTTP URL, not a local file URI
-          imageUrl: q.imageUrl && q.imageUrl.startsWith('http') ? q.imageUrl : undefined,
           score: q.score,
           orderIndex: qIdx, // Always use sequential index
           correctAnswer: q.correctAnswer,

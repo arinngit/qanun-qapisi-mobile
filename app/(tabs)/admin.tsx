@@ -210,19 +210,11 @@ export default function AdminDashboardScreen() {
                 onPress={() => router.push(`/admin/users/${user.id}` as any)}
               >
                 <View style={styles.userAvatar}>
-                  {user.profilePictureUrl ? (
-                    <View style={styles.userAvatarPlaceholder}>
-                      <Text style={styles.userAvatarText}>
-                        {user.firstName?.charAt(0) || "?"}
-                      </Text>
-                    </View>
-                  ) : (
-                    <View style={styles.userAvatarPlaceholder}>
-                      <Text style={styles.userAvatarText}>
-                        {user.firstName?.charAt(0) || "?"}
-                      </Text>
-                    </View>
-                  )}
+                  <View style={styles.userAvatarPlaceholder}>
+                    <Text style={styles.userAvatarText}>
+                      {user.firstName?.charAt(0) || "?"}
+                    </Text>
+                  </View>
                 </View>
                 <View style={styles.userInfo}>
                   <Text style={styles.userName}>

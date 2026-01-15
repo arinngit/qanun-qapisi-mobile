@@ -30,7 +30,6 @@ interface UserItem {
   isActive: boolean;
   verified: boolean;
   isPremium: boolean;
-  profilePictureUrl?: string;
   createdAt: string;
   lastLoginAt?: string;
 }
@@ -230,15 +229,11 @@ export default function UserManagementScreen() {
       <View style={styles.userCard}>
         <View style={styles.userHeader}>
           <View style={styles.avatarContainer}>
-            {item.profilePictureUrl ? (
-              <Image source={{ uri: item.profilePictureUrl }} style={styles.avatar} />
-            ) : (
-              <View style={styles.avatarPlaceholder}>
-                <Text style={styles.avatarText}>
-                  {item.firstName.charAt(0)}{item.lastName.charAt(0)}
-                </Text>
-              </View>
-            )}
+            <View style={styles.avatarPlaceholder}>
+              <Text style={styles.avatarText}>
+                {item.firstName.charAt(0)}{item.lastName.charAt(0)}
+              </Text>
+            </View>
           </View>
 
           <View style={styles.userInfo}>

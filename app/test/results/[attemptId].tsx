@@ -235,17 +235,6 @@ export default function TestResultsScreen() {
                   {/* Question Details (Expanded) */}
                   {isExpanded && (
                     <View style={styles.questionDetails}>
-                      {/* Question Image */}
-                      {questionResult.imageUrl && (
-                        <View style={styles.imageContainer}>
-                          <Image
-                            source={{ uri: questionResult.imageUrl }}
-                            style={styles.questionImage}
-                            resizeMode="contain"
-                          />
-                        </View>
-                      )}
-
                       {/* User's Answer */}
                       {questionResult.questionType === "OPEN_TEXT" ? (
                         <View style={styles.answerSection}>
