@@ -2,7 +2,7 @@
   "expo": {
     "name": "Qanun Qapısı",
     "slug": "qanun-qapisi",
-    "version": "2.0.11",
+    "version": "2.1.0",
     "orientation": "portrait",
     "icon": "./assets/images/qanun.png",
     "scheme": "qanunqapisimobile",
