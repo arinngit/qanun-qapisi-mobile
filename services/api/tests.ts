@@ -41,7 +41,6 @@ export interface QuestionResponse {
   id: string;
   questionType: string;
   questionText: string;
-  imageUrl: string | null;
   score: number;
   orderIndex: number;
   correctAnswer: string | null;
@@ -81,7 +80,6 @@ export interface QuestionResultResponse {
   questionId: string;
   questionType: string;
   questionText: string;
-  imageUrl: string | null;
   score: number;
   orderIndex: number;
   isCorrect: boolean;

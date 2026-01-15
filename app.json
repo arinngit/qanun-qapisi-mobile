@@ -2,7 +2,7 @@
   "expo": {
     "name": "Qanun Qapısı",
     "slug": "qanun-qapisi",
-    "version": "2.0.8",
+    "version": "2.0.11",
     "orientation": "portrait",
     "icon": "./assets/images/qanun.png",
     "scheme": "qanunqapisimobile",
@@ -64,18 +64,11 @@
         }
       ],
       [
-        "expo-image-picker",
-        {
-          "photosPermission": false,
-          "cameraPermission": false
-        }
-      ],
-      [
         "expo-build-properties",
         {
           "android": {
-            "minSdkVersion": 21,
-            "targetSdkVersion": 33,
+            "minSdkVersion": 24,
+            "targetSdkVersion": 35,
             "usesCleartextTraffic": false
           }
         }

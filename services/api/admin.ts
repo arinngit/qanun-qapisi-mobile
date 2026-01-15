@@ -13,7 +13,6 @@ export interface AdminUserResponse {
   verified: boolean;
   isVerified?: boolean; // Alias for backward compatibility
   dateOfBirth: string | null;
-  profilePictureUrl: string | null;
   lastLoginAt: string | null;
   createdAt: string;
   updatedAt: string;
@@ -187,23 +186,6 @@ export const adminAPI = {
   getAdminTestById: async (id: string): Promise<TestDetailResponse> => {
     const response = await api.get(`/admin/tests/${id}`);
     return response.data;
-  },
-
-  // Upload question image
-  uploadQuestionImage: async (questionId: string, file: FormData): Promise<{ imageUrl: string }> => {
-    const response = await api.post(`/admin/tests/questions/${questionId}/image`, file, {
-      headers: {
-        'Content-Type': 'multipart/form-data',
-        'Accept': 'application/json',
-      },
-      timeout: 30000,
-    });
-    return response.data;
-  },
-
-  // Delete question image
-  deleteQuestionImage: async (questionId: string): Promise<void> => {
-    await api.delete(`/admin/tests/questions/${questionId}/image`);
   },
 
   // Get test results (all attempts for a test)

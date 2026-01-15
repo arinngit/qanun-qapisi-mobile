@@ -92,8 +92,8 @@ android {
         applicationId 'com.qanunqapisi.mobile'
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
-        versionCode 1
-        versionName "2.0.7"
+        versionCode 20009
+        versionName "2.0.9"
 
         buildConfigField "String", "REACT_NATIVE_RELEASE_LEVEL", "\"${findProperty('reactNativeReleaseLevel') ?: 'stable'}\""
     }
@@ -104,6 +104,17 @@ android {
             keyAlias 'androiddebugkey'
             keyPassword 'android'
         }
+        release {
+            def keystoreFile = findProperty("MYAPP_UPLOAD_STORE_FILE")
+            def keystorePassword = findProperty("MYAPP_UPLOAD_STORE_PASSWORD")
+            def keyAliasName = findProperty("MYAPP_UPLOAD_KEY_ALIAS")
+            def keyPasswordValue = findProperty("MYAPP_UPLOAD_KEY_PASSWORD")
+
+            storeFile file(keystoreFile)
+            storePassword keystorePassword
+            keyAlias keyAliasName
+            keyPassword keyPasswordValue
+        }
     }
     buildTypes {
         debug {
@@ -112,7 +123,7 @@ android {
         release {
             // Caution! In production, you need to generate your own keystore file.
             // see https://reactnative.dev/docs/signed-apk-android.
-            signingConfig signingConfigs.debug
+            signingConfig signingConfigs.release
             def enableShrinkResources = findProperty('android.enableShrinkResourcesInReleaseBuilds') ?: 'false'
             shrinkResources enableShrinkResources.toBoolean()
             minifyEnabled enableMinifyInReleaseBuilds

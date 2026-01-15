@@ -1,6 +1,5 @@
 import GBottomSheet from "@/components/common/GBottomSheet";
 import PremiumRequestModal from "@/components/premium/PremiumRequestModal";
-import { ProfileImageCropper } from "@/components/profile/ProfileImageCropper";
 import { ThemedText } from "@/components/theme/themed-text";
 import { translations } from "@/constants/translations";
 import { useAuth } from "@/context/auth-context";
@@ -9,13 +8,11 @@ import { useTheme } from "@/context/theme-context";
 import { useThemeColor } from "@/hooks/use-theme-color";
 import { profileAPI } from "@/services/api";
 import { Ionicons } from "@expo/vector-icons";
-import * as ImagePicker from "expo-image-picker";
 import { router } from "expo-router";
 import React, { useState } from "react";
 import {
   ActivityIndicator,
   Alert,
-  Image,
   RefreshControl,
   ScrollView,
   StyleSheet,
@@ -52,9 +49,19 @@ export default function Profile() {
   const [verificationCode, setVerificationCode] = useState("");
   const [deletePassword, setDeletePassword] = useState("");
   const [loading, setLoading] = useState(false);
-  const [cropperVisible, setCropperVisible] = useState(false);
-  const [pendingAsset, setPendingAsset] =
-    useState<ImagePicker.ImagePickerAsset | null>(null);
+
+  // Avatar helper functions
+  const getInitials = (firstName?: string, lastName?: string) => {
+    const first = firstName?.charAt(0).toUpperCase() || '';
+    const last = lastName?.charAt(0).toUpperCase() || '';
+    return first + last || '?';
+  };
+
+  const getAvatarColor = (name: string) => {
+    const colors = ['#FF6B6B', '#4ECDC4', '#45B7D1', '#FFA07A', '#98D8C8', '#F7DC6F', '#BB8FCE', '#85C1E2'];
+    const index = name.charCodeAt(0) % colors.length;
+    return colors[index];
+  };
 
   const handleLogout = async () => {
     Alert.alert(translations.logout, translations.logoutConfirmation, [
@@ -272,102 +279,6 @@ export default function Profile() {
     }
   };
 
-  const handleUploadProfilePicture = async () => {
-    try {
-      const result = await ImagePicker.launchImageLibraryAsync({
-        mediaTypes: ImagePicker.MediaTypeOptions.Images,
-        allowsEditing: false,
-        allowsMultipleSelection: false,
-        quality: 1,
-        selectionLimit: 1,
-        orderedSelection: false,
-        legacy: false,
-      });
-
-      if (result.canceled || !result.assets[0]) {
-        return;
-      }
-
-      setPendingAsset(result.assets[0]);
-      setCropperVisible(true);
-    } catch (error: any) {
-      console.error("Error uploading profile picture:", error);
-      Alert.alert(
-        "Xəta",
-        error.response?.data?.message || "Şəkil yüklənərkən xəta baş verdi"
-      );
-    }
-  };
-
-  const handleCropCancel = () => {
-    setCropperVisible(false);
-    setPendingAsset(null);
-  };
-
-  const handleCropComplete = async (processedImageUri: string) => {
-    try {
-      setCropperVisible(false);
-      setPendingAsset(null);
-      setLoading(true);
-
-      const filename =
-        processedImageUri.split("/").pop() || `profile_${Date.now()}.jpg`;
-      const formData = new FormData();
-      formData.append("file", {
-        uri: processedImageUri,
-        name: filename,
-        type: "image/jpeg",
-      } as any);
-
-      const response = await profileAPI.uploadProfilePicture(formData);
-
-      updateUser({ profilePicture: response.imageUrl });
-      await refreshUser();
-
-      Alert.alert("Uğurlu", "Profil şəkli yeniləndi");
-    } catch (error: any) {
-      console.error("Error uploading profile picture:", error);
-      Alert.alert(
-        "Xəta",
-        error.response?.data?.message || "Şəkil yüklənərkən xəta baş verdi"
-      );
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const handleDeleteProfilePicture = async () => {
-    Alert.alert(
-      "Əminsiniz?",
-      "Profil şəklini silmək istədiyinizdən əminsiniz?",
-      [
-        { text: "Xeyr", style: "cancel" },
-        {
-          text: "Bəli",
-          style: "destructive",
-          onPress: async () => {
-            setLoading(true);
-            try {
-              await profileAPI.deleteProfilePicture();
-              updateUser({ profilePicture: undefined });
-              Alert.alert("Uğurlu", "Profil şəkli silindi");
-              await refreshUser();
-            } catch (error: any) {
-              console.error("Error deleting profile picture:", error);
-              Alert.alert(
-                "Xəta",
-                error.response?.data?.message ||
-                  "Şəkil silinərkən xəta baş verdi"
-              );
-            } finally {
-              setLoading(false);
-            }
-          },
-        },
-      ]
-    );
-  };
-
   const formatDate = (dateString?: string) => {
     if (!dateString) return "Tarix məlum deyil";
 
@@ -403,37 +314,12 @@ export default function Profile() {
             {/* Avatar with ring */}
             <View style={styles.avatarWrapper}>
               <View style={[styles.avatarRing, { borderColor: "#7313e8" }]}>
-                <View style={styles.avatarContainer}>
-                  {user?.profilePicture ? (
-                    <Image
-                      source={{ uri: user.profilePicture }}
-                      style={styles.avatarImage}
-                    />
-                  ) : (
-                    <Ionicons name="person-circle" size={90} color="#7313e8" />
-                  )}
+                <View style={[styles.avatarContainer, { backgroundColor: getAvatarColor(user?.firstName || 'U') }]}>
+                  <ThemedText style={styles.avatarText}>
+                    {getInitials(user?.firstName, user?.lastName)}
+                  </ThemedText>
                 </View>
               </View>
-              <TouchableOpacity
-                style={styles.editAvatarButton}
-                onPress={handleUploadProfilePicture}
-                disabled={loading}
-              >
-                {loading ? (
-                  <ActivityIndicator size="small" color="#fff" />
-                ) : (
-                  <Ionicons name="camera-outline" size={16} color="#fff" />
-                )}
-              </TouchableOpacity>
-              {user?.profilePicture && (
-                <TouchableOpacity
-                  style={styles.deleteAvatarButton}
-                  onPress={handleDeleteProfilePicture}
-                  disabled={loading}
-                >
-                  <Ionicons name="trash-outline" size={14} color="#fff" />
-                </TouchableOpacity>
-              )}
             </View>
 
             <ThemedText type="title" style={styles.nameLight}>
@@ -994,12 +880,6 @@ export default function Profile() {
         visible={premiumRequestModal}
         onClose={() => setPremiumRequestModal(false)}
       />
-      <ProfileImageCropper
-        visible={cropperVisible}
-        asset={pendingAsset}
-        onCancel={handleCropCancel}
-        onComplete={handleCropComplete}
-      />
     </>
   );
 }
@@ -1040,36 +920,10 @@ const styles = StyleSheet.create({
     alignItems: "center",
     overflow: "hidden",
   },
-  avatarImage: {
-    width: "100%",
-    height: "100%",
-    borderRadius: 50,
-  },
-  editAvatarButton: {
-    position: "absolute",
-    bottom: 5,
-    right: 5,
-    backgroundColor: "#7313e8",
-    width: 32,
-    height: 32,
-    borderRadius: 16,
-    justifyContent: "center",
-    alignItems: "center",
-    borderWidth: 2,
-    borderColor: "#fff",
-  },
-  deleteAvatarButton: {
-    position: "absolute",
-    bottom: 5,
-    left: 5,
-    backgroundColor: "#FF3B30",
-    width: 28,
-    height: 28,
-    borderRadius: 14,
-    justifyContent: "center",
-    alignItems: "center",
-    borderWidth: 2,
-    borderColor: "#fff",
+  avatarText: {
+    fontSize: 36,
+    fontWeight: "bold",
+    color: "#fff",
   },
   name: {
     fontSize: 26,

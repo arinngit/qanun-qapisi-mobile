@@ -7,7 +7,6 @@ export interface ProfileResponse {
   firstName: string;
   lastName: string;
   dateOfBirth: string | null;
-  profilePictureUrl: string | null;
   isPremium: boolean;
   verified: boolean;
   role: string;
@@ -65,23 +64,6 @@ export const profileAPI = {
   // Verify email change
   verifyEmailChange: async (data: VerifyEmailChangeRequest): Promise<void> => {
     await api.post("/profile/verify-email-change", data);
-  },
-
-  // Upload profile picture
-  uploadProfilePicture: async (file: FormData): Promise<{ imageUrl: string }> => {
-    const response = await api.post("/profile/picture", file, {
-      headers: {
-        'Content-Type': 'multipart/form-data',
-        'Accept': 'application/json',
-      },
-      timeout: 30000,
-    });
-    return response.data;
-  },
-
-  // Delete profile picture
-  deleteProfilePicture: async (): Promise<void> => {
-    await api.delete("/profile/picture");
   },
 
   // Delete account

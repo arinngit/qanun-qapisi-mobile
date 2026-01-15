@@ -5,12 +5,9 @@ import {
   TextInput,
   TouchableOpacity,
   StyleSheet,
-  Image,
-  ActivityIndicator,
   Alert,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
-import * as ImagePicker from "expo-image-picker";
 import AnswerBuilder, { AnswerData } from "./AnswerBuilder";
 import { adminAPI } from "../../services/api/admin";
 
@@ -18,7 +15,6 @@ export interface QuestionData {
   id?: string;
   questionType: string;
   questionText: string;
-  imageUrl?: string;
   score: number;
   orderIndex: number;
   correctAnswer?: string;
@@ -115,30 +111,6 @@ export default function QuestionBuilder({
     onChange(questionIndex, { ...question, answers: newAnswers });
   };
 
-  const handleImageUpload = async () => {
-    try {
-      const result = await ImagePicker.launchImageLibraryAsync({
-        mediaTypes: ImagePicker.MediaTypeOptions.Images,
-        allowsEditing: true,
-        quality: 0.8,
-        selectionLimit: 1,
-        legacy: false,
-      });
-
-      if (!result.canceled && result.assets[0]) {
-        const uri = result.assets[0].uri;
-        // Store URI temporarily, will be uploaded when question is saved
-        onChange(questionIndex, { ...question, imageUrl: uri });
-      }
-    } catch (error) {
-      Alert.alert("Xəta", "Şəkil seçilərkən xəta baş verdi");
-    }
-  };
-
-  const handleRemoveImage = () => {
-    onChange(questionIndex, { ...question, imageUrl: undefined });
-  };
-
   return (
     <View style={styles.container}>
       <View style={styles.header}>
@@ -232,32 +204,6 @@ export default function QuestionBuilder({
             placeholderTextColor="#9CA3AF"
             keyboardType="number-pad"
           />
-        </View>
-
-        {/* Image Upload */}
-        <View style={styles.field}>
-          <Text style={styles.label}>Şəkil (isteğe bağlı)</Text>
-          <View style={styles.imageInfoBox}>
-            <Ionicons name="information-circle-outline" size={16} color="#7313e8" />
-            <Text style={styles.imageInfoText}>
-              Şəkil yükləmə funksiyası hazırda mövcud deyil. Testlər şəkilsiz yaradıla bilər.
-            </Text>
-          </View>
-          {question.imageUrl && question.imageUrl.startsWith('http') && (
-            <View style={styles.imagePreview}>
-              <Image
-                source={{ uri: question.imageUrl }}
-                style={styles.image}
-                resizeMode="cover"
-              />
-              <TouchableOpacity
-                style={styles.removeImageButton}
-                onPress={handleRemoveImage}
-              >
-                <Ionicons name="close-circle" size={24} color="#EF4444" />
-              </TouchableOpacity>
-            </View>
-          )}
         </View>
 
         {/* For OPEN_TEXT, show correct answer field */}
