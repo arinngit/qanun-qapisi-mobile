@@ -1,9 +1,7 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { Stack, useRouter, useSegments } from "expo-router";
-import * as ScreenCapture from "expo-screen-capture";
 import * as SplashScreen from "expo-splash-screen";
 import { useEffect, useRef, useState } from "react";
-import { Platform } from "react-native";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import Toast from "react-native-toast-message";
 import AppStatusBar from "../components/theme/app-status-bar";
@@ -185,27 +183,6 @@ function AppContent() {
 }
 
 export default function RootLayout() {
-  useEffect(() => {
-    const enableScreenProtection = async () => {
-      try {
-        if (Platform.OS === "android" || Platform.OS === "ios") {
-          await ScreenCapture.preventScreenCaptureAsync();
-          console.log("Screen capture protection enabled");
-        }
-      } catch (error) {
-        console.warn("Failed to enable screen capture protection:", error);
-      }
-    };
-
-    if (Platform.OS === "android" || Platform.OS === "ios") {
-      enableScreenProtection();
-    }
-
-    return () => {
-      ScreenCapture.allowScreenCaptureAsync().catch(() => {});
-    };
-  }, []);
-
   return (
     <ThemeProvider>
       <LanguageProvider>
