@@ -187,14 +187,14 @@ export default function HomeScreen() {
           <View style={styles.headerLeft}>
             <View style={styles.logo}>
               <Image
-                source={require("../../assets/images/qanun.png")}
+                source={require("../../assets/images/qanun-new.png")}
                 style={{
                   width: 36,
                   height: 36,
                   resizeMode: "contain",
                   borderRadius: 20,
                 }}
-                accessibilityLabel="qanun"
+                accessibilityLabel="qanun-new"
               />
             </View>
             <Text style={styles.headerTitle}>Qanun Qapısı</Text>

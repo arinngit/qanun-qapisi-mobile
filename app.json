@@ -1,10 +1,10 @@
 {
   "expo": {
-    "name": "Qanun Qapısı",
+    "name": "Qanun Qapısı (Unofficial)",
     "slug": "qanun-qapisi",
-    "version": "2.1.2",
+    "version": "2.1.4",
     "orientation": "portrait",
-    "icon": "./assets/images/qanun.png",
+    "icon": "./assets/images/qanun-new.png",
     "scheme": "qanunqapisimobile",
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
@@ -31,7 +31,7 @@
       "package": "com.qanunqapisi.mobile",
       "adaptiveIcon": {
         "backgroundColor": "#7313e8",
-        "foregroundImage": "./assets/images/qanun.png"
+        "foregroundImage": "./assets/images/qanun-new.png"
       },
       "usesCleartextTraffic": false,
       "edgeToEdgeEnabled": true,
@@ -54,7 +54,7 @@
       [
         "expo-splash-screen",
         {
-          "image": "./assets/images/qanun.png",
+          "image": "./assets/images/qanun-new.png",
           "imageWidth": 200,
           "resizeMode": "contain",
           "backgroundColor": "#7313e8",

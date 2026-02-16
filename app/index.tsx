@@ -250,7 +250,7 @@ export default function Index() {
           <View style={styles.header}>
             <View style={styles.logoContainer}>
               <Ionicons name="shield-checkmark" size={24} color="#FFF" />
-              <Text style={styles.logoText}>Qanun Qapısı</Text>
+              <Text style={styles.logoText}>Qanun Qapısı (Unofficial)</Text>
             </View>
             {/* Кнопка пропуска */}
             <Pressable onPress={handleSkip} style={styles.skipButton}>
@@ -301,6 +301,10 @@ export default function Index() {
               <Ionicons name="arrow-forward" size={20} color="#0A0F1D" />
             </Pressable>
           </Animated.View>
+
+          <Text style={styles.disclaimerText}>
+            Dövlət qurumları ilə əlaqəli deyil (Not affiliated with government)
+          </Text>
         </SafeAreaView>
       </LinearGradient>
       <StatusBar barStyle="light-content" />
@@ -428,5 +432,11 @@ const styles = StyleSheet.create({
     color: "white",
     marginTop: 16,
     fontSize: 16,
+  },
+  disclaimerText: {
+    color: "rgba(255, 255, 255, 0.4)",
+    textAlign: "center",
+    marginTop: 12,
+    fontSize: 10,
   },
 });

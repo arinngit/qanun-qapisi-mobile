@@ -37,7 +37,7 @@ export default function PrivacyPolicy() {
         showsVerticalScrollIndicator={false}
       >
         {/* Last Updated */}
-        <Text style={styles.lastUpdated}>Son yenilənmə: 11 Avqust 2025</Text>
+        <Text style={styles.lastUpdated}>Son yenilənmə: 26 Yanvar 2026</Text>
 
         {/* Introduction */}
         <View style={styles.section}>

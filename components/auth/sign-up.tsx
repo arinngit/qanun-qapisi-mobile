@@ -160,14 +160,14 @@ export default function SignUpScreen() {
         <View style={styles.header}>
           <View style={styles.logoContainer}>
             <Image
-              source={require("../../assets/images/qanun.png")}
+              source={require("../../assets/images/qanun-new.png")}
               style={{
                 width: 40,
                 height: 40,
                 resizeMode: "contain",
                 borderRadius: 40,
               }}
-              accessibilityLabel="qanun"
+              accessibilityLabel="qanun-new"
             />
           </View>
           <Text style={styles.headerTitle}>Qanun Qapısı</Text>

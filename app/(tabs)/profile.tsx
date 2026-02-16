@@ -101,7 +101,7 @@ export default function Profile() {
       await profileAPI.deleteAccount({ password: deletePassword });
       setDeleteAccountModal(false);
       Alert.alert(t.success, t.deleteAccountSuccess);
-      
+
       setTimeout(async () => {
         await logout();
         router.replace("/(auth)/login");
@@ -240,7 +240,7 @@ export default function Profile() {
       Alert.alert(
         "Xəta",
         error.response?.data?.message ||
-          "E-poçt dəyişdirilməsi sorğusu göndərilərkən xəta baş verdi"
+        "E-poçt dəyişdirilməsi sorğusu göndərilərkən xəta baş verdi"
       );
     } finally {
       setLoading(false);
@@ -504,6 +504,23 @@ export default function Profile() {
           <View style={[styles.menuCard, { backgroundColor: "#fff" }]}>
             <TouchableOpacity
               style={[
+                styles.menuItem,
+                { borderBottomColor: "#E5E7EB", borderBottomWidth: 1 },
+              ]}
+              onPress={() => router.push("/legal")}
+            >
+              <View
+                style={[styles.iconContainer, { backgroundColor: `#7313e8` }]}
+              >
+                <Ionicons name="document-text-outline" size={22} color={"#fff"} />
+              </View>
+              <ThemedText style={styles.menuText}>Hüquqi Məlumat</ThemedText>
+              <Ionicons name="chevron-forward" size={20} color="#9CA3AF" />
+            </TouchableOpacity>
+
+            <TouchableOpacity
+              style={[
+                styles.menuItem,
                 styles.menuItem,
                 { borderBottomColor: "#E5E7EB", borderBottomWidth: 1 },
               ]}
