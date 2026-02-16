@@ -3,6 +3,7 @@ import { useLocalSearchParams, useRouter } from "expo-router";
 import React, { useEffect, useState } from "react";
 import {
   ActivityIndicator,
+  Alert,
   ScrollView,
   StyleSheet,
   Text,
@@ -395,16 +396,27 @@ export default function TestDetailScreen() {
                   styles.adminActionButton,
                   styles.adminActionButtonDanger,
                 ]}
-                onPress={async () => {
-                  if (confirm("Bu testi silmək istədiyinizdən əminsiniz?")) {
-                    try {
-                      await adminAPI.deleteTest(id as string);
-                      alert("Test silindi");
-                      router.back();
-                    } catch (error) {
-                      alert("Test silinə bilmədi");
-                    }
-                  }
+                onPress={() => {
+                  Alert.alert(
+                    "Testi sil",
+                    "Bu testi silmək istədiyinizdən əminsiniz? Bu əməliyyat geri qaytarıla bilməz.",
+                    [
+                      { text: "Ləğv et", style: "cancel" },
+                      {
+                        text: "Sil",
+                        style: "destructive",
+                        onPress: async () => {
+                          try {
+                            await adminAPI.deleteTest(id as string);
+                            showSuccess("Test uğurla silindi");
+                            router.back();
+                          } catch (error) {
+                            Alert.alert("Xəta", "Test silinə bilmədi");
+                          }
+                        },
+                      },
+                    ]
+                  );
                 }}
               >
                 <Ionicons name="trash-outline" size={20} color="#DC2626" />
