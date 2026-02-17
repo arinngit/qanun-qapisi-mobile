@@ -249,7 +249,17 @@ export default function EditTestScreen() {
           <Ionicons name="arrow-back" size={24} color="#111827" />
         </TouchableOpacity>
         <Text style={styles.headerTitle}>Testi Redaktə Et</Text>
-        <View style={styles.headerRight} />
+        <TouchableOpacity
+          style={styles.headerSaveButton}
+          onPress={handleUpdate}
+          disabled={loading || !title.trim() || !description.trim()}
+        >
+          {loading ? (
+            <ActivityIndicator color="#fff" size="small" />
+          ) : (
+            <Ionicons name="checkmark" size={22} color="#fff" />
+          )}
+        </TouchableOpacity>
       </View>
 
       <ScrollView style={styles.container} contentContainerStyle={styles.contentContainer}>
@@ -400,6 +410,14 @@ const styles = StyleSheet.create({
   },
   headerRight: {
     width: 40,
+  },
+  headerSaveButton: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    backgroundColor: "#7313e8",
+    alignItems: "center",
+    justifyContent: "center",
   },
   container: {
     flex: 1,
