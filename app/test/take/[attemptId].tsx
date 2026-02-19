@@ -190,6 +190,14 @@ export default function TestTakingScreen() {
     }
   };
 
+  const formatQuestionText = (text: string): string => {
+    // Add newlines before numbered list items (e.g., "1. ", "2. ") except the first one
+    // and lettered list items (e.g., "A. ", "B. ") except the first one
+    return text
+      .replace(/(?<!\n)\s+(\d+\.\s)/g, "\n$1")
+      .replace(/(?<!\n)\s+([A-Za-z]\.\s)/g, "\n$1");
+  };
+
   const getAnsweredCount = () => {
     return userAnswers.size;
   };
@@ -280,7 +288,7 @@ export default function TestTakingScreen() {
 
           {/* Question Text */}
           <Text style={styles.questionText}>
-            {currentQuestion.questionText}
+            {formatQuestionText(currentQuestion.questionText)}
           </Text>
 
           {/* Answer Options */}
