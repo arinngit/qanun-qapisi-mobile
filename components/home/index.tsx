@@ -185,19 +185,11 @@ export default function HomeScreen() {
         {/* Header */}
         <View style={styles.header}>
           <View style={styles.headerLeft}>
-            <View style={styles.logo}>
-              <Image
-                source={require("../../assets/images/qanun-new.png")}
-                style={{
-                  width: 36,
-                  height: 36,
-                  resizeMode: "contain",
-                  borderRadius: 20,
-                }}
-                accessibilityLabel="qanun-new"
-              />
-            </View>
-            <Text style={styles.headerTitle}>Qanun Qapısı</Text>
+            <Image
+              source={require("../../assets/images/farid-logo.jpg")}
+              style={styles.headerLogo}
+            />
+            <Text style={styles.headerTitle}>Fərid Qurbanovun Testləri</Text>
           </View>
         </View>
 
@@ -444,13 +436,10 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
   },
-  logo: {
+  headerLogo: {
     width: 36,
     height: 36,
-    backgroundColor: "#7313e8",
-    borderRadius: 20,
-    justifyContent: "center",
-    alignItems: "center",
+    borderRadius: 18,
     marginRight: 12,
   },
   headerTitle: {

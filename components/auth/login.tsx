@@ -92,7 +92,7 @@ export default function Login() {
         <View style={styles.header}>
           <View style={styles.logoContainer}>
             <Image
-              source={require("../../assets/images/qanun-new.png")}
+              source={require("../../assets/images/farid-logo.jpg")}
               style={{
                 width: 80,
                 height: 80,
@@ -102,7 +102,7 @@ export default function Login() {
               accessibilityLabel="qanun-new"
             />
           </View>
-          <Text style={styles.title}>Qanun Qapısı</Text>
+          <Text style={styles.title}>Fərid Qurbanovun Testləri</Text>
           <Text style={styles.subtitle}>
             Hüquq imtahanına hazırlıq platforması
           </Text>
@@ -226,7 +226,7 @@ export default function Login() {
             <Text style={styles.footerText}> ni qəbul edirsiniz</Text>
           </View>
           <Text style={styles.copyright}>
-            © 2025 Qanun Qapısı. Bütün hüquqlar qorunur.
+            © 2025 Fərid Qurbanovun Testləri. Bütün hüquqlar qorunur.
           </Text>
         </View>
       </ScrollView>

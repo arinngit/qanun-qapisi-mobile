@@ -55,7 +55,7 @@ export default function LegalScreen() {
                         <Text style={styles.warningTitle}>Vacib Bildiriş</Text>
                     </View>
                     <Text style={styles.warningText}>
-                        "Qanun Qapısı" tətbiqi müstəqil bir layihədir və Azərbaycan Respublikasının heç bir dövlət orqanını, hökumət qurumunu və ya rəsmi təşkilatını təmsil etmir.
+                        "Fərid Qurbanovun Testləri" tətbiqi müstəqil bir layihədir və Azərbaycan Respublikasının heç bir dövlət orqanını, hökumət qurumunu və ya rəsmi təşkilatını təmsil etmir.
                     </Text>
                     <Text style={styles.warningText}>
                         Tətbiqdə təqdim olunan məlumatlar yalnız maarifləndirmə və imtahanlara hazırlıq məqsədi daşıyır.
@@ -98,7 +98,7 @@ export default function LegalScreen() {
                 {/* Footer */}
                 <View style={styles.footer}>
                     <Text style={styles.footerText}>
-                        Qanun Qapısı (Unofficial)
+                        Fərid Qurbanovun Testləri
                     </Text>
                     <Text style={styles.footerSubText}>
                         © 2026 Bütün hüquqlar qorunur

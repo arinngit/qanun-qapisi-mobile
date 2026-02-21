@@ -8,6 +8,7 @@ import { useTheme } from "@/context/theme-context";
 import { useThemeColor } from "@/hooks/use-theme-color";
 import { profileAPI } from "@/services/api";
 import { Ionicons } from "@expo/vector-icons";
+import Constants from "expo-constants";
 import { router } from "expo-router";
 import React, { useState } from "react";
 import {
@@ -31,6 +32,7 @@ export default function Profile() {
   const textColor = useThemeColor({}, "text");
   const borderColor = useThemeColor({}, "icon");
   const insets = useSafeAreaInsets();
+  const appVersion = Constants.expoConfig?.version ?? "1.0.0";
   const [refreshing, setRefreshing] = useState(false);
 
   const [editProfileModal, setEditProfileModal] = useState(false);
@@ -548,7 +550,7 @@ export default function Profile() {
               onPress={() =>
                 Alert.alert(
                   "Tətbiq Haqqında",
-                  "Qanun Qapısı v1.0.0\nHüquq testləri tətbiqi"
+                  `Fərid Qurbanovun Testləri v${appVersion}\nHüquq testləri tətbiqi`
                 )
               }
             >
@@ -598,7 +600,7 @@ export default function Profile() {
         </View>
 
         <View style={styles.footer}>
-          <ThemedText style={styles.footerText}>Version 1.0.0</ThemedText>
+          <ThemedText style={styles.footerText}>Version {appVersion}</ThemedText>
         </View>
       </ScrollView>
 

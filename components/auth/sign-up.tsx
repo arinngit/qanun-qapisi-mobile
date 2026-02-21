@@ -160,7 +160,7 @@ export default function SignUpScreen() {
         <View style={styles.header}>
           <View style={styles.logoContainer}>
             <Image
-              source={require("../../assets/images/qanun-new.png")}
+              source={require("../../assets/images/farid-logo.jpg")}
               style={{
                 width: 40,
                 height: 40,
@@ -170,7 +170,7 @@ export default function SignUpScreen() {
               accessibilityLabel="qanun-new"
             />
           </View>
-          <Text style={styles.headerTitle}>Qanun Qapısı</Text>
+          <Text style={styles.headerTitle}>Fərid Qurbanovun Testləri</Text>
         </View>
 
         {/* Hero Section */}

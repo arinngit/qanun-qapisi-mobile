@@ -1,10 +1,10 @@
 {
   "expo": {
-    "name": "Qanun Qapısı (Unofficial)",
+    "name": "Fərid Qurbanovun Testləri",
     "slug": "qanun-qapisi",
-    "version": "2.1.6",
+    "version": "2.1.7",
     "orientation": "portrait",
-    "icon": "./assets/images/qanun-new.png",
+    "icon": "./assets/images/farid-logo.jpg",
     "scheme": "qanunqapisimobile",
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
@@ -31,7 +31,7 @@
       "package": "com.qanunqapisi.mobile",
       "adaptiveIcon": {
         "backgroundColor": "#7313e8",
-        "foregroundImage": "./assets/images/qanun-new.png"
+        "foregroundImage": "./assets/images/farid-logo.jpg"
       },
       "usesCleartextTraffic": false,
       "edgeToEdgeEnabled": true,
@@ -54,7 +54,7 @@
       [
         "expo-splash-screen",
         {
-          "image": "./assets/images/qanun-new.png",
+          "image": "./assets/images/farid-logo.jpg",
           "imageWidth": 200,
           "resizeMode": "contain",
           "backgroundColor": "#7313e8",

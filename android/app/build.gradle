@@ -92,8 +92,8 @@ android {
         applicationId 'com.qanunqapisi.mobile'
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
-        versionCode 20106
-        versionName "2.1.6"
+        versionCode 20107
+        versionName "2.1.7"
 
         buildConfigField "String", "REACT_NATIVE_RELEASE_LEVEL", "\"${findProperty('reactNativeReleaseLevel') ?: 'stable'}\""
     }

@@ -250,7 +250,7 @@ export default function Index() {
           <View style={styles.header}>
             <View style={styles.logoContainer}>
               <Ionicons name="shield-checkmark" size={24} color="#FFF" />
-              <Text style={styles.logoText}>Qanun Qapısı (Unofficial)</Text>
+              <Text style={styles.logoText}>Fərid Qurbanovun Testləri</Text>
             </View>
             {/* Кнопка пропуска */}
             <Pressable onPress={handleSkip} style={styles.skipButton}>

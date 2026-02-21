@@ -43,7 +43,7 @@ export default function PrivacyPolicy() {
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>Giriş</Text>
           <Text style={styles.paragraph}>
-            Bu Məxfilik Siyasəti, Qanun Qapısı tətbiqini istifadə etdiyiniz
+            Bu Məxfilik Siyasəti, Fərid Qurbanovun Testləri tətbiqini istifadə etdiyiniz
             zaman məlumatlarınızın toplanması, istifadəsi və açıqlanması ilə
             bağlı siyasətimizi təsvir edir. Xidmətimizdən istifadə etməklə, bu
             Məxfilik Siyasətinə uyğun olaraq məlumatların toplanması və
@@ -247,7 +247,7 @@ export default function PrivacyPolicy() {
         {/* Footer */}
         <View style={styles.footer}>
           <Text style={styles.footerText}>
-            © 2025 Qanun Qapısı. Bütün hüquqlar qorunur.
+            © 2025 Fərid Qurbanovun Testləri. Bütün hüquqlar qorunur.
           </Text>
         </View>
       </ScrollView>
