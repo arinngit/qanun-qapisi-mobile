@@ -1,6 +1,5 @@
-import { api } from './config';
+import {api} from './config';
 
-// Profile Types (matches backend ProfileResponse exactly)
 export interface ProfileResponse {
   id: string;
   email: string;
@@ -37,37 +36,30 @@ export interface DeleteAccountRequest {
   password: string;
 }
 
-// Profile API
 export const profileAPI = {
-  // Get user profile
   getProfile: async (): Promise<ProfileResponse> => {
     const response = await api.get("/profile");
     return response.data;
   },
 
-  // Update profile
   updateProfile: async (data: UpdateProfileRequest): Promise<ProfileResponse> => {
     const response = await api.put("/profile", data);
     return response.data;
   },
 
-  // Change password
   changePassword: async (data: ChangePasswordRequest): Promise<void> => {
     await api.post("/profile/change-password", data);
   },
 
-  // Request email change
   requestEmailChange: async (data: ChangeEmailRequest): Promise<void> => {
     await api.post("/profile/change-email", data);
   },
 
-  // Verify email change
   verifyEmailChange: async (data: VerifyEmailChangeRequest): Promise<void> => {
     await api.post("/profile/verify-email-change", data);
   },
 
-  // Delete account
   deleteAccount: async (data: DeleteAccountRequest): Promise<void> => {
-    await api.delete("/profile/account", { data });
+    await api.delete("/profile/account", {data});
   },
 };

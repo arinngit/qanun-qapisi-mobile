@@ -1,22 +1,21 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import { Stack, useRouter, useSegments } from "expo-router";
+import {Stack, useRouter, useSegments} from "expo-router";
 import * as SplashScreen from "expo-splash-screen";
-import { useEffect, useRef, useState } from "react";
-import { GestureHandlerRootView } from "react-native-gesture-handler";
+import {useEffect, useRef, useState} from "react";
+import {GestureHandlerRootView} from "react-native-gesture-handler";
 import Toast from "react-native-toast-message";
 import AppStatusBar from "../components/theme/app-status-bar";
-import { AuthProvider, useAuth } from "../context/auth-context";
-import { LanguageProvider } from "../context/language-context";
-import { ThemeProvider } from "../context/theme-context";
-import { fadeTransitionConfig } from "../utils/navigation-transitions";
+import {AuthProvider, useAuth} from "@/context/auth-context";
+import {LanguageProvider} from "@/context/language-context";
+import {ThemeProvider} from "@/context/theme-context";
+import {fadeTransitionConfig} from "@/utils/navigation-transitions";
 
-// Prevent splash screen from auto-hiding
 SplashScreen.preventAutoHideAsync().catch(() => {
   /* ignore */
 });
 
 function AppContent() {
-  const { loading: authLoading, isAuthenticated } = useAuth();
+  const {loading: authLoading, isAuthenticated} = useAuth();
   const router = useRouter();
   const segments = useSegments();
   const [hasHiddenSplash, setHasHiddenSplash] = useState(false);
@@ -24,7 +23,6 @@ function AppContent() {
   const [hasOnboarded, setHasOnboarded] = useState<boolean | null>(null);
   const hasNavigatedRef = useRef(false);
 
-  // Check onboarding status
   useEffect(() => {
     const checkOnboarding = async () => {
       try {
@@ -60,7 +58,6 @@ function AppContent() {
     syncOnboardingStatus();
   }, [segments, hasCheckedOnboarding, hasOnboarded]);
 
-  // Hide splash screen when ready
   useEffect(() => {
     const hideSplash = async () => {
       if (!authLoading && hasCheckedOnboarding && hasOnboarded !== null) {
@@ -77,12 +74,10 @@ function AppContent() {
     hideSplash();
   }, [authLoading, hasCheckedOnboarding, hasOnboarded]);
 
-  // Reset navigation ref when onboarding or auth status changes
   useEffect(() => {
     hasNavigatedRef.current = false;
   }, [hasOnboarded, isAuthenticated]);
 
-  // Navigate based on onboarding and auth status
   useEffect(() => {
     if (
       authLoading ||
@@ -97,22 +92,18 @@ function AppContent() {
     const currentRoute = segments[0] || "";
 
     if (hasOnboarded) {
-      // If onboarded, redirect based on auth status
       if (!isAuthenticated) {
-        // If onboarded but not authenticated, redirect to auth
         if (currentRoute !== "(auth)") {
           hasNavigatedRef.current = true;
           router.replace("/(auth)/login");
         }
       } else {
-        // If onboarded and authenticated, redirect to tabs
         if (currentRoute !== "(tabs)") {
           hasNavigatedRef.current = true;
           router.replace("/(tabs)");
         }
       }
     } else {
-      // If not onboarded, show onboarding (index screen)
       if (currentRoute && currentRoute !== "index") {
         hasNavigatedRef.current = true;
         router.replace("/");
@@ -128,7 +119,6 @@ function AppContent() {
     router,
   ]);
 
-  // Show nothing while loading
   if (
     authLoading ||
     !hasCheckedOnboarding ||
@@ -138,10 +128,9 @@ function AppContent() {
     return null;
   }
 
-  // Render Stack - navigation is handled by useEffect
   return (
-    <GestureHandlerRootView style={{ flex: 1 }}>
-      <AppStatusBar />
+    <GestureHandlerRootView style={{flex: 1}}>
+      <AppStatusBar/>
       <Stack
         screenOptions={{
           headerShown: false,
@@ -172,12 +161,8 @@ function AppContent() {
             ...fadeTransitionConfig,
           }}
         />
-        {/* 
-          Note: test/, admin/, bookmarks.tsx, search.tsx, statistics.tsx
-          are automatically registered by Expo Router based on file structure.
-        */}
       </Stack>
-      <Toast />
+      <Toast/>
     </GestureHandlerRootView>
   );
 }
@@ -187,7 +172,7 @@ export default function RootLayout() {
     <ThemeProvider>
       <LanguageProvider>
         <AuthProvider>
-          <AppContent />
+          <AppContent/>
         </AuthProvider>
       </LanguageProvider>
     </ThemeProvider>

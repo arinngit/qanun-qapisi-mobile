@@ -1,20 +1,10 @@
-import { Ionicons } from "@expo/vector-icons";
-import { useLocalSearchParams, useRouter } from "expo-router";
-import React, { useEffect, useState } from "react";
-import {
-  ActivityIndicator,
-  Alert,
-  ScrollView,
-  StyleSheet,
-  Text,
-  TouchableOpacity,
-  View,
-} from "react-native";
-import {
-  SafeAreaView,
-  useSafeAreaInsets,
-} from "react-native-safe-area-context";
-import { useAuth } from "../../context/auth-context";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import {Ionicons} from "@expo/vector-icons";
+import {useLocalSearchParams, useRouter} from "expo-router";
+import React, {useEffect, useState} from "react";
+import {ActivityIndicator, Alert, ScrollView, StyleSheet, Text, TouchableOpacity, View,} from "react-native";
+import {SafeAreaView, useSafeAreaInsets,} from "react-native-safe-area-context";
+import {useAuth} from "../../context/auth-context";
 import {
   adminAPI,
   TestAttemptAdminResponse,
@@ -22,13 +12,13 @@ import {
   testsAPI,
   TestStatisticsResponse,
 } from "../../services/api";
-import { bookmarksService } from "../../services/bookmarks";
-import { showSuccess } from "../../utils/errorHandler";
+import {bookmarksService} from "../../services/bookmarks";
+import {showSuccess} from "../../utils/errorHandler";
 
 export default function TestDetailScreen() {
   const router = useRouter();
-  const { id } = useLocalSearchParams<{ id: string }>();
-  const { user } = useAuth();
+  const {id} = useLocalSearchParams<{ id: string }>();
+  const {user} = useAuth();
   const insets = useSafeAreaInsets();
 
   const [test, setTest] = useState<TestDetailResponse | null>(null);
@@ -44,6 +34,7 @@ export default function TestDetailScreen() {
   useEffect(() => {
     loadTestData();
     checkBookmarkStatus();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [id]);
 
   const checkBookmarkStatus = async () => {
@@ -82,9 +73,8 @@ export default function TestDetailScreen() {
           console.log("Could not load results:", error);
         }
       }
-    } catch (error) {
-      console.error("Error loading test data:", error);
-      alert("Test məlumatlarını yükləmək mümkün olmadı");
+    } catch {
+      Alert.alert("Xəta", "Test məlumatlarını yükləmək mümkün olmadı");
     } finally {
       setLoading(false);
     }
@@ -113,23 +103,20 @@ export default function TestDetailScreen() {
       const attempt = await testsAPI.startTest(id as string);
 
       // Save test data and attempt to AsyncStorage for test-taking screen
-      const AsyncStorage =
-        require("@react-native-async-storage/async-storage").default;
       const storageKey = `test_attempt_${attempt.id}`;
       await AsyncStorage.setItem(
         storageKey,
-        JSON.stringify({ test, answers: {} })
+        JSON.stringify({test, answers: {}})
       );
 
       router.push(`/test/take/${attempt.id}` as any);
-    } catch (error: any) {
-      console.error("Error starting test:", error);
-
+    } catch (error: unknown) {
       // Check if premium test and user not premium
-      if (error.response?.status === 403) {
-        alert("Bu test yalnız Premium istifadəçilər üçündür");
+      const axiosError = error as { response?: { status?: number } };
+      if (axiosError.response?.status === 403) {
+        Alert.alert("Xəta", "Bu test yalnız Premium istifadəçilər üçündür");
       } else {
-        alert("Testi başlatmaq mümkün olmadı");
+        Alert.alert("Xəta", "Testi başlatmaq mümkün olmadı");
       }
     }
   };
@@ -174,18 +161,18 @@ export default function TestDetailScreen() {
   if (loading) {
     return (
       <SafeAreaView style={styles.container} edges={["top", "bottom"]}>
-        <View style={[styles.header, { paddingTop: Math.max(insets.top, 10) }]}>
+        <View style={[styles.header, {paddingTop: Math.max(insets.top, 10)}]}>
           <TouchableOpacity
             style={styles.backButton}
             onPress={() => router.back()}
           >
-            <Ionicons name="arrow-back" size={24} color="#111827" />
+            <Ionicons name="arrow-back" size={24} color="#111827"/>
           </TouchableOpacity>
           <Text style={styles.headerTitle}>Test Təfərrüatları</Text>
-          <View style={styles.headerRight} />
+          <View style={styles.headerRight}/>
         </View>
         <View style={styles.loadingContainer}>
-          <ActivityIndicator size="large" color="#7313e8" />
+          <ActivityIndicator size="large" color="#7313e8"/>
         </View>
       </SafeAreaView>
     );
@@ -194,18 +181,18 @@ export default function TestDetailScreen() {
   if (!test) {
     return (
       <SafeAreaView style={styles.container} edges={["top", "bottom"]}>
-        <View style={[styles.header, { paddingTop: Math.max(insets.top, 10) }]}>
+        <View style={[styles.header, {paddingTop: Math.max(insets.top, 10)}]}>
           <TouchableOpacity
             style={styles.backButton}
             onPress={() => router.back()}
           >
-            <Ionicons name="arrow-back" size={24} color="#111827" />
+            <Ionicons name="arrow-back" size={24} color="#111827"/>
           </TouchableOpacity>
           <Text style={styles.headerTitle}>Test Təfərrüatları</Text>
-          <View style={styles.headerRight} />
+          <View style={styles.headerRight}/>
         </View>
         <View style={styles.emptyContainer}>
-          <Ionicons name="alert-circle-outline" size={64} color="#9CA3AF" />
+          <Ionicons name="alert-circle-outline" size={64} color="#9CA3AF"/>
           <Text style={styles.emptyText}>Test tapılmadı</Text>
         </View>
       </SafeAreaView>
@@ -215,12 +202,12 @@ export default function TestDetailScreen() {
   return (
     <SafeAreaView style={styles.container} edges={["top", "bottom"]}>
       {/* Header */}
-      <View style={[styles.header, { paddingTop: Math.max(insets.top, 12) }]}>
+      <View style={[styles.header, {paddingTop: Math.max(insets.top, 12)}]}>
         <TouchableOpacity
           style={styles.backButton}
           onPress={() => router.back()}
         >
-          <Ionicons name="arrow-back" size={24} color="#111827" />
+          <Ionicons name="arrow-back" size={24} color="#111827"/>
         </TouchableOpacity>
         <Text style={styles.headerTitle}>Test Təfərrüatları</Text>
         <View style={styles.headerRight}>
@@ -235,7 +222,7 @@ export default function TestDetailScreen() {
             />
           </TouchableOpacity>
           <TouchableOpacity style={styles.iconButton}>
-            <Ionicons name="share-outline" size={24} color="#111827" />
+            <Ionicons name="share-outline" size={24} color="#111827"/>
           </TouchableOpacity>
         </View>
       </View>
@@ -257,7 +244,7 @@ export default function TestDetailScreen() {
             <View style={styles.statsRow}>
               <View style={styles.statBox}>
                 <View style={styles.statIconContainer}>
-                  <Ionicons name="help-circle-outline" size={20} color="#fff" />
+                  <Ionicons name="help-circle-outline" size={20} color="#fff"/>
                 </View>
                 <Text style={styles.statLabel}>Sual sayı</Text>
                 <Text style={styles.statValue}>{test.questionCount}</Text>
@@ -265,7 +252,7 @@ export default function TestDetailScreen() {
 
               <View style={styles.statBox}>
                 <View style={styles.statIconContainer}>
-                  <Ionicons name="star-outline" size={20} color="#fff" />
+                  <Ionicons name="star-outline" size={20} color="#fff"/>
                 </View>
                 <Text style={styles.statLabel}>Maksimum xal</Text>
                 <Text style={styles.statValue}>{test.totalPossibleScore}</Text>
@@ -277,16 +264,16 @@ export default function TestDetailScreen() {
         {/* Info Cards */}
         <View style={styles.infoCardsContainer}>
           <View style={styles.infoCard}>
-            <View style={[styles.infoIcon, { backgroundColor: "#DBEAFE" }]}>
-              <Ionicons name="time-outline" size={24} color="#2563EB" />
+            <View style={[styles.infoIcon, {backgroundColor: "#DBEAFE"}]}>
+              <Ionicons name="time-outline" size={24} color="#2563EB"/>
             </View>
             <Text style={styles.infoValue}>{test.estimatedMinutes}</Text>
             <Text style={styles.infoLabel}>Dəqiqə</Text>
           </View>
 
           <View style={styles.infoCard}>
-            <View style={[styles.infoIcon, { backgroundColor: "#FEF3C7" }]}>
-              <Ionicons name="people-outline" size={24} color="#D97706" />
+            <View style={[styles.infoIcon, {backgroundColor: "#FEF3C7"}]}>
+              <Ionicons name="people-outline" size={24} color="#D97706"/>
             </View>
             <Text style={styles.infoValue}>
               {statistics?.totalParticipants || 0}
@@ -388,7 +375,7 @@ export default function TestDetailScreen() {
                 style={styles.adminActionButton}
                 onPress={() => router.push(`/admin/tests/edit/${id}` as any)}
               >
-                <Ionicons name="create-outline" size={20} color="#2563EB" />
+                <Ionicons name="create-outline" size={20} color="#2563EB"/>
                 <Text style={styles.adminActionText}>Redaktə et</Text>
               </TouchableOpacity>
               <TouchableOpacity
@@ -401,7 +388,7 @@ export default function TestDetailScreen() {
                     "Testi sil",
                     "Bu testi silmək istədiyinizdən əminsiniz? Bu əməliyyat geri qaytarıla bilməz.",
                     [
-                      { text: "Ləğv et", style: "cancel" },
+                      {text: "Ləğv et", style: "cancel"},
                       {
                         text: "Sil",
                         style: "destructive",
@@ -410,7 +397,7 @@ export default function TestDetailScreen() {
                             await adminAPI.deleteTest(id as string);
                             showSuccess("Test uğurla silindi");
                             router.back();
-                          } catch (error) {
+                          } catch {
                             Alert.alert("Xəta", "Test silinə bilmədi");
                           }
                         },
@@ -419,8 +406,8 @@ export default function TestDetailScreen() {
                   );
                 }}
               >
-                <Ionicons name="trash-outline" size={20} color="#DC2626" />
-                <Text style={[styles.adminActionText, { color: "#DC2626" }]}>
+                <Ionicons name="trash-outline" size={20} color="#DC2626"/>
+                <Text style={[styles.adminActionText, {color: "#DC2626"}]}>
                   Sil
                 </Text>
               </TouchableOpacity>
@@ -431,7 +418,7 @@ export default function TestDetailScreen() {
         {/* Tips */}
         <View style={styles.tipsContainer}>
           <View style={styles.tipsHeader}>
-            <Ionicons name="bulb-outline" size={20} color="#D97706" />
+            <Ionicons name="bulb-outline" size={20} color="#D97706"/>
             <Text style={styles.tipsTitle}>Tövsiyələr</Text>
           </View>
           <Text style={styles.tipsText}>
@@ -449,14 +436,14 @@ export default function TestDetailScreen() {
           </View>
         </View>
 
-        <View style={styles.bottomSpacer} />
+        <View style={styles.bottomSpacer}/>
       </ScrollView>
 
       {/* Bottom Action Bar */}
       <View
         style={[
           styles.bottomBar,
-          { paddingBottom: Math.max(insets.bottom, 12) },
+          {paddingBottom: Math.max(insets.bottom, 12)},
         ]}
       >
         <View style={styles.bottomBarInfo}>
@@ -466,7 +453,7 @@ export default function TestDetailScreen() {
           </Text>
         </View>
         <TouchableOpacity style={styles.startButton} onPress={handleStartTest}>
-          <Ionicons name="play" size={20} color="#fff" />
+          <Ionicons name="play" size={20} color="#fff"/>
           <Text style={styles.startButtonText}>Başla</Text>
         </TouchableOpacity>
       </View>

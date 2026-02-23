@@ -1,10 +1,16 @@
-import ResetPasswordScreen from "@/components/auth/resed-password";
-import { View } from "react-native";
+import ResetPasswordScreen from "@/components/auth/reset-password";
+import {StyleSheet, View} from "react-native";
 
-export default function ResedPassword() {
+export default function ResetPassword() {
   return (
-    <View style={{ flex: 1 }}>
-      <ResetPasswordScreen />
+    <View style={styles.container}>
+      <ResetPasswordScreen/>
     </View>
   );
 }
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+  },
+});

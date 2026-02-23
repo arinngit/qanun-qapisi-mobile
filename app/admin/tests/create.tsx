@@ -1,21 +1,12 @@
-import React, { useState } from "react";
-import {
-  View,
-  Text,
-  TextInput,
-  TouchableOpacity,
-  StyleSheet,
-  ScrollView,
-  ActivityIndicator,
-  Alert,
-} from "react-native";
-import { SafeAreaView } from "react-native-safe-area-context";
-import { Ionicons } from "@expo/vector-icons";
-import { useRouter } from "expo-router";
-import QuestionBuilder, { QuestionData } from "../../../components/admin/QuestionBuilder";
+import React, {useState} from "react";
+import {ActivityIndicator, Alert, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View,} from "react-native";
+import {SafeAreaView} from "react-native-safe-area-context";
+import {Ionicons} from "@expo/vector-icons";
+import {useRouter} from "expo-router";
+import QuestionBuilder, {QuestionData} from "../../../components/admin/QuestionBuilder";
 import ConfirmDialog from "../../../components/admin/ConfirmDialog";
-import { adminAPI } from "../../../services/api/admin";
-import { handleApiError, showSuccess } from "../../../utils/errorHandler";
+import {adminAPI} from "../../../services/api/admin";
+import {handleApiError, showSuccess} from "../../../utils/errorHandler";
 
 export default function CreateTestScreen() {
   const router = useRouter();
@@ -49,16 +40,17 @@ export default function CreateTestScreen() {
       "Əminsiniz?",
       "Bu sualı silmək istədiyinizdən əminsiniz?",
       [
-        { text: "Xeyr", style: "cancel" },
+        {text: "Xeyr", style: "cancel"},
         {
           text: "Bəli",
           style: "destructive",
           onPress: () => {
             const newQuestions = questions.filter((_, idx) => idx !== index);
-            // Recalculate order indices
+
             newQuestions.forEach((q, idx) => {
               q.orderIndex = idx;
             });
+
             setQuestions(newQuestions);
           },
         },
@@ -70,10 +62,11 @@ export default function CreateTestScreen() {
     if (index === 0) return;
     const newQuestions = [...questions];
     [newQuestions[index], newQuestions[index - 1]] = [newQuestions[index - 1], newQuestions[index]];
-    // Recalculate order indices
+
     newQuestions.forEach((q, idx) => {
       q.orderIndex = idx;
     });
+
     setQuestions(newQuestions);
   };
 
@@ -81,10 +74,11 @@ export default function CreateTestScreen() {
     if (index === questions.length - 1) return;
     const newQuestions = [...questions];
     [newQuestions[index], newQuestions[index + 1]] = [newQuestions[index + 1], newQuestions[index]];
-    // Recalculate order indices
+
     newQuestions.forEach((q, idx) => {
       q.orderIndex = idx;
     });
+
     setQuestions(newQuestions);
   };
 
@@ -150,12 +144,12 @@ export default function CreateTestScreen() {
           questionType: q.questionType,
           questionText: q.questionText.trim(),
           score: q.score,
-          orderIndex: qIdx, // Always use sequential index
+          orderIndex: qIdx,
           correctAnswer: q.correctAnswer,
           answers: q.answers.map((a, aIdx) => ({
             answerText: a.answerText.trim(),
             isCorrect: a.isCorrect,
-            orderIndex: aIdx, // Always use sequential index
+            orderIndex: aIdx,
           })),
         })),
       };
@@ -186,12 +180,12 @@ export default function CreateTestScreen() {
           questionType: q.questionType,
           questionText: q.questionText.trim(),
           score: q.score,
-          orderIndex: qIdx, // Always use sequential index
+          orderIndex: qIdx,
           correctAnswer: q.correctAnswer,
           answers: q.answers.map((a, aIdx) => ({
             answerText: a.answerText.trim(),
             isCorrect: a.isCorrect,
-            orderIndex: aIdx, // Always use sequential index
+            orderIndex: aIdx,
           })),
         })),
       };
@@ -222,10 +216,10 @@ export default function CreateTestScreen() {
           style={styles.backButton}
           onPress={() => setShowCancelDialog(true)}
         >
-          <Ionicons name="arrow-back" size={24} color="#111827" />
+          <Ionicons name="arrow-back" size={24} color="#111827"/>
         </TouchableOpacity>
         <Text style={styles.headerTitle}>Yeni Test</Text>
-        <View style={styles.headerRight} />
+        <View style={styles.headerRight}/>
       </View>
 
       <ScrollView style={styles.container} contentContainerStyle={styles.contentContainer}>
@@ -265,7 +259,7 @@ export default function CreateTestScreen() {
             onPress={() => setIsPremium(!isPremium)}
           >
             <View style={[styles.checkbox, isPremium && styles.checkboxChecked]}>
-              {isPremium && <Ionicons name="checkmark" size={18} color="#fff" />}
+              {isPremium && <Ionicons name="checkmark" size={18} color="#fff"/>}
             </View>
             <Text style={styles.premiumLabel}>Premium test</Text>
           </TouchableOpacity>
@@ -305,7 +299,7 @@ export default function CreateTestScreen() {
           ))}
 
           <TouchableOpacity style={styles.addQuestionButton} onPress={handleAddQuestion}>
-            <Ionicons name="add-circle" size={24} color="#7313e8" />
+            <Ionicons name="add-circle" size={24} color="#7313e8"/>
             <Text style={styles.addQuestionText}>Sual əlavə et</Text>
           </TouchableOpacity>
         </View>
@@ -326,7 +320,7 @@ export default function CreateTestScreen() {
             disabled={loading || !title.trim() || !description.trim()}
           >
             {loading ? (
-              <ActivityIndicator color="#7313e8" size="small" />
+              <ActivityIndicator color="#7313e8" size="small"/>
             ) : (
               <Text style={styles.draftButtonText}>Qaralama kimi saxla</Text>
             )}
@@ -338,7 +332,7 @@ export default function CreateTestScreen() {
             disabled={loading || !title.trim() || !description.trim() || questions.length === 0}
           >
             {loading ? (
-              <ActivityIndicator color="#fff" size="small" />
+              <ActivityIndicator color="#fff" size="small"/>
             ) : (
               <Text style={styles.publishButtonText}>Nəşr et</Text>
             )}
@@ -541,4 +535,3 @@ const styles = StyleSheet.create({
     color: "#fff",
   },
 });
-

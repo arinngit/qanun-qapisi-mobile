@@ -1,29 +1,16 @@
-import { Ionicons } from "@expo/vector-icons";
+import {Ionicons} from "@expo/vector-icons";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import { LinearGradient } from "expo-linear-gradient";
-import { router } from "expo-router";
-import { useEffect, useState } from "react";
-import {
-  ActivityIndicator,
-  Pressable,
-  StatusBar,
-  StyleSheet,
-  Text,
-  View,
-} from "react-native";
-import Animated, {
-  useAnimatedStyle,
-  useSharedValue,
-  withSpring,
-  withTiming,
-} from "react-native-reanimated";
-import { SafeAreaView } from "react-native-safe-area-context";
+import {LinearGradient} from "expo-linear-gradient";
+import {router} from "expo-router";
+import {useEffect, useState} from "react";
+import {ActivityIndicator, Pressable, StatusBar, StyleSheet, Text, View,} from "react-native";
+import Animated, {useAnimatedStyle, useSharedValue, withSpring, withTiming,} from "react-native-reanimated";
+import {SafeAreaView} from "react-native-safe-area-context";
 
 export default function Index() {
   const [index, setIndex] = useState(0);
   const [isChecking, setIsChecking] = useState(true);
 
-  // Animation values
   const slideOpacity = useSharedValue(1);
   const slideTranslateX = useSharedValue(0);
   const iconScale = useSharedValue(1);
@@ -32,11 +19,9 @@ export default function Index() {
   const textTranslateY = useSharedValue(0);
   const buttonScale = useSharedValue(1);
 
-  // Initialize animations on mount
   useEffect(() => {
     setIsChecking(false);
 
-    // Initial mount animation - fade in from bottom
     slideOpacity.value = 0;
     slideTranslateX.value = 0;
     iconScale.value = 0.8;
@@ -44,37 +29,33 @@ export default function Index() {
     textOpacity.value = 0;
     textTranslateY.value = 30;
 
-    // Animate in
-    slideOpacity.value = withTiming(1, { duration: 400 });
-    iconScale.value = withSpring(1, { damping: 10, stiffness: 100 });
-    iconOpacity.value = withTiming(1, { duration: 400 });
-    // Text animation with delay
+    slideOpacity.value = withTiming(1, {duration: 400});
+    iconScale.value = withSpring(1, {damping: 10, stiffness: 100});
+    iconOpacity.value = withTiming(1, {duration: 400});
+
     setTimeout(() => {
-      textOpacity.value = withTiming(1, { duration: 400 });
-      textTranslateY.value = withSpring(0, { damping: 15, stiffness: 100 });
+      textOpacity.value = withTiming(1, {duration: 400});
+      textTranslateY.value = withSpring(0, {damping: 15, stiffness: 100});
     }, 150);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const handlePress = async () => {
-    // Button press animation
-    buttonScale.value = withSpring(0.95, { damping: 10, stiffness: 200 });
+    buttonScale.value = withSpring(0.95, {damping: 10, stiffness: 200});
     setTimeout(() => {
-      buttonScale.value = withSpring(1, { damping: 10, stiffness: 200 });
+      buttonScale.value = withSpring(1, {damping: 10, stiffness: 200});
     }, 100);
 
     if (index < 2) {
-      // Animate out
-      slideOpacity.value = withTiming(0, { duration: 200 });
-      slideTranslateX.value = withTiming(-50, { duration: 200 });
-      iconScale.value = withTiming(0.8, { duration: 200 });
-      iconOpacity.value = withTiming(0, { duration: 200 });
-      textOpacity.value = withTiming(0, { duration: 200 });
-      textTranslateY.value = withTiming(20, { duration: 200 });
+      slideOpacity.value = withTiming(0, {duration: 200});
+      slideTranslateX.value = withTiming(-50, {duration: 200});
+      iconScale.value = withTiming(0.8, {duration: 200});
+      iconOpacity.value = withTiming(0, {duration: 200});
+      textOpacity.value = withTiming(0, {duration: 200});
+      textTranslateY.value = withTiming(20, {duration: 200});
 
-      // After animation, change index and animate in
       setTimeout(() => {
         setIndex((prev) => prev + 1);
-        // Reset and animate in
         slideTranslateX.value = 50;
         slideOpacity.value = 0;
         iconScale.value = 0.8;
@@ -82,15 +63,14 @@ export default function Index() {
         textOpacity.value = 0;
         textTranslateY.value = 20;
 
-        // Animate in
-        slideOpacity.value = withTiming(1, { duration: 300 });
-        slideTranslateX.value = withSpring(0, { damping: 15, stiffness: 100 });
-        iconScale.value = withSpring(1, { damping: 10, stiffness: 100 });
-        iconOpacity.value = withTiming(1, { duration: 300 });
-        // Text animation with slight delay
+        slideOpacity.value = withTiming(1, {duration: 300});
+        slideTranslateX.value = withSpring(0, {damping: 15, stiffness: 100});
+        iconScale.value = withSpring(1, {damping: 10, stiffness: 100});
+        iconOpacity.value = withTiming(1, {duration: 300});
+
         setTimeout(() => {
-          textOpacity.value = withTiming(1, { duration: 300 });
-          textTranslateY.value = withSpring(0, { damping: 15, stiffness: 100 });
+          textOpacity.value = withTiming(1, {duration: 300});
+          textTranslateY.value = withSpring(0, {damping: 15, stiffness: 100});
         }, 100);
       }, 200);
     } else {
@@ -104,35 +84,33 @@ export default function Index() {
     router.replace("/(auth)/login");
   };
 
-  // Animated styles
   const slideAnimatedStyle = useAnimatedStyle(() => {
     return {
       opacity: slideOpacity.value,
-      transform: [{ translateX: slideTranslateX.value }],
+      transform: [{translateX: slideTranslateX.value}],
     };
   });
 
   const iconAnimatedStyle = useAnimatedStyle(() => {
     return {
       opacity: iconOpacity.value,
-      transform: [{ scale: iconScale.value }],
+      transform: [{scale: iconScale.value}],
     };
   });
 
   const textAnimatedStyle = useAnimatedStyle(() => {
     return {
       opacity: textOpacity.value,
-      transform: [{ translateY: textTranslateY.value }],
+      transform: [{translateY: textTranslateY.value}],
     };
   });
 
   const buttonAnimatedStyle = useAnimatedStyle(() => {
     return {
-      transform: [{ scale: buttonScale.value }],
+      transform: [{scale: buttonScale.value}],
     };
   });
 
-  // Dot animations
   const dotWidths = [useSharedValue(18), useSharedValue(8), useSharedValue(8)];
   const dotOpacities = [
     useSharedValue(1),
@@ -140,7 +118,6 @@ export default function Index() {
     useSharedValue(0.6),
   ];
 
-  // Create animated styles for each dot at component level (not inside map)
   const dot0AnimatedStyle = useAnimatedStyle(() => {
     return {
       width: dotWidths[0].value,
@@ -162,7 +139,6 @@ export default function Index() {
     };
   });
 
-  // Update dot animations when index changes
   useEffect(() => {
     [0, 1, 2].forEach((idx) => {
       const isActive = idx === index;
@@ -174,6 +150,7 @@ export default function Index() {
         duration: 200,
       });
     });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [index]);
 
   const renderDots = () => {
@@ -225,11 +202,10 @@ export default function Index() {
     },
   ];
 
-  // Показываем индикатор загрузки пока проверяем статус
   if (isChecking) {
     return (
       <View style={styles.loadingContainer}>
-        <ActivityIndicator size="large" color="#7313e8" />
+        <ActivityIndicator size="large" color="#7313e8"/>
         <Text style={styles.loadingText}>Yüklənir...</Text>
       </View>
     );
@@ -249,10 +225,9 @@ export default function Index() {
           {/* Header */}
           <View style={styles.header}>
             <View style={styles.logoContainer}>
-              <Ionicons name="shield-checkmark" size={24} color="#FFF" />
+              <Ionicons name="shield-checkmark" size={24} color="#FFF"/>
               <Text style={styles.logoText}>Fərid Qurbanovun Testləri</Text>
             </View>
-            {/* Кнопка пропуска */}
             <Pressable onPress={handleSkip} style={styles.skipButton}>
               <Text style={styles.skipText}>Keç</Text>
             </Pressable>
@@ -264,14 +239,14 @@ export default function Index() {
             <Animated.View
               style={[
                 styles.iconContainer,
-                { backgroundColor: `${currentSlide.color}30` },
+                {backgroundColor: `${currentSlide.color}30`},
                 iconAnimatedStyle,
               ]}
             >
               <View
                 style={[
                   styles.iconInner,
-                  { backgroundColor: `${currentSlide.color}50` },
+                  {backgroundColor: `${currentSlide.color}50`},
                 ]}
               >
                 <Ionicons
@@ -298,7 +273,7 @@ export default function Index() {
               <Text style={styles.buttonText}>
                 {index < 2 ? "Növbəti" : "Başlayaq"}
               </Text>
-              <Ionicons name="arrow-forward" size={20} color="#0A0F1D" />
+              <Ionicons name="arrow-forward" size={20} color="#0A0F1D"/>
             </Pressable>
           </Animated.View>
 
@@ -307,7 +282,7 @@ export default function Index() {
           </Text>
         </SafeAreaView>
       </LinearGradient>
-      <StatusBar barStyle="light-content" />
+      <StatusBar barStyle="light-content"/>
     </View>
   );
 }
@@ -412,7 +387,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
     gap: 8,
     shadowColor: "#000",
-    shadowOffset: { width: 0, height: 4 },
+    shadowOffset: {width: 0, height: 4},
     shadowOpacity: 0.3,
     shadowRadius: 8,
     elevation: 5,

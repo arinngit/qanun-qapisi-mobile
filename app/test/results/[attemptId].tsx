@@ -1,28 +1,13 @@
-import { Ionicons } from "@expo/vector-icons";
-import { useLocalSearchParams, useRouter } from "expo-router";
-import React, { useEffect, useState } from "react";
-import {
-  ActivityIndicator,
-  Image,
-  ScrollView,
-  StyleSheet,
-  Text,
-  TouchableOpacity,
-  View,
-} from "react-native";
-import {
-  SafeAreaView,
-  useSafeAreaInsets,
-} from "react-native-safe-area-context";
-import {
-  QuestionResultResponse,
-  TestResultResponse,
-  testsAPI,
-} from "../../../services/api";
+import {Ionicons} from "@expo/vector-icons";
+import {useLocalSearchParams, useRouter} from "expo-router";
+import React, {useEffect, useState} from "react";
+import {ActivityIndicator, ScrollView, StyleSheet, Text, TouchableOpacity, View,} from "react-native";
+import {SafeAreaView, useSafeAreaInsets,} from "react-native-safe-area-context";
+import {TestResultResponse, testsAPI,} from "../../../services/api";
 
 export default function TestResultsScreen() {
   const router = useRouter();
-  const { attemptId } = useLocalSearchParams<{ attemptId: string }>();
+  const {attemptId} = useLocalSearchParams<{ attemptId: string }>();
   const insets = useSafeAreaInsets();
 
   const [results, setResults] = useState<TestResultResponse | null>(null);
@@ -33,6 +18,7 @@ export default function TestResultsScreen() {
 
   useEffect(() => {
     loadResults();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [attemptId]);
 
   const loadResults = async () => {
@@ -41,9 +27,8 @@ export default function TestResultsScreen() {
 
       const data = await testsAPI.getAttemptResults(attemptId as string);
       setResults(data);
-    } catch (error) {
-      console.error("Error loading results:", error);
-      alert("Nəticələri yükləmək mümkün olmadı");
+    } catch {
+      Alert.alert("Xəta", "Nəticələri yükləmək mümkün olmadı");
     } finally {
       setLoading(false);
     }
@@ -69,19 +54,11 @@ export default function TestResultsScreen() {
     router.replace("/(tabs)/tests");
   };
 
-  const getAnswerText = (
-    questionResult: QuestionResultResponse,
-    answerId: string
-  ): string => {
-    const answer = questionResult.allAnswers.find((a) => a.id === answerId);
-    return answer?.answerText || "Naməlum cavab";
-  };
-
   if (loading) {
     return (
       <SafeAreaView style={styles.container} edges={["top", "bottom"]}>
         <View style={styles.loadingContainer}>
-          <ActivityIndicator size="large" color="#7313e8" />
+          <ActivityIndicator size="large" color="#7313e8"/>
         </View>
       </SafeAreaView>
     );
@@ -91,7 +68,7 @@ export default function TestResultsScreen() {
     return (
       <SafeAreaView style={styles.container} edges={["top", "bottom"]}>
         <View style={styles.emptyContainer}>
-          <Ionicons name="alert-circle-outline" size={64} color="#9CA3AF" />
+          <Ionicons name="alert-circle-outline" size={64} color="#9CA3AF"/>
           <Text style={styles.emptyText}>Nəticələr tapılmadı</Text>
         </View>
       </SafeAreaView>
@@ -110,7 +87,7 @@ export default function TestResultsScreen() {
       {/* Header */}
       <View style={styles.header}>
         <TouchableOpacity style={styles.backButton} onPress={handleBackToTests}>
-          <Ionicons name="close" size={24} color="#111827" />
+          <Ionicons name="close" size={24} color="#111827"/>
         </TouchableOpacity>
         <Text style={styles.headerTitle}>Test Nəticələri</Text>
         {/* <TouchableOpacity style={styles.shareButton}>
@@ -128,8 +105,8 @@ export default function TestResultsScreen() {
                 percentage >= 70
                   ? styles.scoreCircleSuccess
                   : percentage >= 50
-                  ? styles.scoreCircleWarning
-                  : styles.scoreCircleDanger,
+                    ? styles.scoreCircleWarning
+                    : styles.scoreCircleDanger,
               ]}
             >
               <Text style={styles.scorePercentage}>{percentage}%</Text>
@@ -146,16 +123,16 @@ export default function TestResultsScreen() {
         {/* Stats Cards */}
         <View style={styles.statsContainer}>
           <View style={styles.statCard}>
-            <View style={[styles.statIcon, { backgroundColor: "#D1FAE5" }]}>
-              <Ionicons name="checkmark-circle" size={24} color="#10B981" />
+            <View style={[styles.statIcon, {backgroundColor: "#D1FAE5"}]}>
+              <Ionicons name="checkmark-circle" size={24} color="#10B981"/>
             </View>
             <Text style={styles.statValue}>{correctCount}</Text>
             <Text style={styles.statLabel}>Doğru</Text>
           </View>
 
           <View style={styles.statCard}>
-            <View style={[styles.statIcon, { backgroundColor: "#FEE2E2" }]}>
-              <Ionicons name="close-circle" size={24} color="#EF4444" />
+            <View style={[styles.statIcon, {backgroundColor: "#FEE2E2"}]}>
+              <Ionicons name="close-circle" size={24} color="#EF4444"/>
             </View>
             <Text style={styles.statValue}>
               {results.questionResults.length - correctCount}
@@ -254,7 +231,7 @@ export default function TestResultsScreen() {
                                 <Text
                                   style={[
                                     styles.answerSectionTitle,
-                                    { marginTop: 12 },
+                                    {marginTop: 12},
                                   ]}
                                 >
                                   Doğru cavab:
@@ -293,14 +270,14 @@ export default function TestResultsScreen() {
                                 style={[
                                   styles.answerOption,
                                   isSelected &&
-                                    isCorrect &&
-                                    styles.answerOptionCorrect,
+                                  isCorrect &&
+                                  styles.answerOptionCorrect,
                                   isSelected &&
-                                    !isCorrect &&
-                                    styles.answerOptionIncorrect,
+                                  !isCorrect &&
+                                  styles.answerOptionIncorrect,
                                   !isSelected &&
-                                    isCorrect &&
-                                    styles.answerOptionMissed,
+                                  isCorrect &&
+                                  styles.answerOptionMissed,
                                 ]}
                               >
                                 <View style={styles.answerOptionLeft}>
@@ -323,13 +300,13 @@ export default function TestResultsScreen() {
                                     />
                                   )}
                                   {!isSelected && !isCorrect && (
-                                    <View style={styles.emptyCircle} />
+                                    <View style={styles.emptyCircle}/>
                                   )}
                                   <Text
                                     style={[
                                       styles.answerOptionText,
                                       (isSelected || isCorrect) &&
-                                        styles.answerOptionTextBold,
+                                      styles.answerOptionTextBold,
                                     ]}
                                   >
                                     {answer.answerText}
@@ -347,14 +324,14 @@ export default function TestResultsScreen() {
             })}
         </View>
 
-        <View style={styles.bottomSpacer} />
+        <View style={styles.bottomSpacer}/>
       </ScrollView>
 
       {/* Bottom Actions */}
       <View
         style={[
           styles.bottomActions,
-          { paddingBottom: Math.max(insets.bottom, 12) },
+          {paddingBottom: Math.max(insets.bottom, 12)},
         ]}
       >
         <TouchableOpacity
@@ -367,7 +344,7 @@ export default function TestResultsScreen() {
           style={styles.primaryButton}
           onPress={handleRetakeTest}
         >
-          <Ionicons name="refresh" size={18} color="#fff" />
+          <Ionicons name="refresh" size={18} color="#fff"/>
           <Text style={styles.primaryButtonText}>Yenidən</Text>
         </TouchableOpacity>
       </View>

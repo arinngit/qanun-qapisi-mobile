@@ -1,15 +1,7 @@
-import React, { useState } from "react";
-import {
-  View,
-  Text,
-  TextInput,
-  TouchableOpacity,
-  StyleSheet,
-  Alert,
-} from "react-native";
-import { Ionicons } from "@expo/vector-icons";
-import AnswerBuilder, { AnswerData } from "./AnswerBuilder";
-import { adminAPI } from "../../services/api/admin";
+import React from "react";
+import {StyleSheet, Text, TextInput, TouchableOpacity, View,} from "react-native";
+import {Ionicons} from "@expo/vector-icons";
+import AnswerBuilder, {AnswerData} from "./AnswerBuilder";
 
 export interface QuestionData {
   id?: string;
@@ -33,21 +25,19 @@ interface QuestionBuilderProps {
 }
 
 export default function QuestionBuilder({
-  question,
-  questionIndex,
-  onChange,
-  onRemove,
-  onMoveUp,
-  onMoveDown,
-  canMoveUp,
-  canMoveDown,
-}: QuestionBuilderProps) {
-  const [uploadingImage, setUploadingImage] = useState(false);
-
+                                          question,
+                                          questionIndex,
+                                          onChange,
+                                          onRemove,
+                                          onMoveUp,
+                                          onMoveDown,
+                                          canMoveUp,
+                                          canMoveDown,
+                                        }: QuestionBuilderProps) {
   const questionTypes = [
-    { value: "CLOSED_SINGLE", label: "Tək seçimli" },
-    { value: "CLOSED_MULTIPLE", label: "Çox seçimli" },
-    { value: "OPEN_TEXT", label: "Açıq cavab" },
+    {value: "CLOSED_SINGLE", label: "Tək seçimli"},
+    {value: "CLOSED_MULTIPLE", label: "Çox seçimli"},
+    {value: "OPEN_TEXT", label: "Açıq cavab"},
   ];
 
   const isClosed = question.questionType === "CLOSED_SINGLE" || question.questionType === "CLOSED_MULTIPLE";
@@ -65,50 +55,38 @@ export default function QuestionBuilder({
   };
 
   const handleAnswerChange = (answerIndex: number, updatedAnswer: AnswerData) => {
-    const newAnswers = [...question.answers];
-    
-    // For single choice, if this answer is being marked correct, unmark all others
+    let newAnswers = [...question.answers];
+
     if (question.questionType === "CLOSED_SINGLE" && updatedAnswer.isCorrect) {
-      newAnswers.forEach((ans, idx) => {
-        if (idx !== answerIndex) {
-          ans.isCorrect = false;
-        }
-      });
+      newAnswers = newAnswers.map((ans, idx) =>
+        idx !== answerIndex ? {...ans, isCorrect: false} : ans
+      );
     }
-    
+
     newAnswers[answerIndex] = updatedAnswer;
-    onChange(questionIndex, { ...question, answers: newAnswers });
+    onChange(questionIndex, {...question, answers: newAnswers});
   };
+
+  const reindex = (answers: AnswerData[]) =>
+    answers.map((ans, idx) => ({...ans, orderIndex: idx}));
 
   const handleRemoveAnswer = (answerIndex: number) => {
     const newAnswers = question.answers.filter((_, idx) => idx !== answerIndex);
-    // Recalculate order indices
-    newAnswers.forEach((ans, idx) => {
-      ans.orderIndex = idx;
-    });
-    onChange(questionIndex, { ...question, answers: newAnswers });
+    onChange(questionIndex, {...question, answers: reindex(newAnswers)});
   };
 
   const handleMoveAnswerUp = (answerIndex: number) => {
     if (answerIndex === 0) return;
     const newAnswers = [...question.answers];
     [newAnswers[answerIndex], newAnswers[answerIndex - 1]] = [newAnswers[answerIndex - 1], newAnswers[answerIndex]];
-    // Recalculate order indices
-    newAnswers.forEach((ans, idx) => {
-      ans.orderIndex = idx;
-    });
-    onChange(questionIndex, { ...question, answers: newAnswers });
+    onChange(questionIndex, {...question, answers: reindex(newAnswers)});
   };
 
   const handleMoveAnswerDown = (answerIndex: number) => {
     if (answerIndex === question.answers.length - 1) return;
     const newAnswers = [...question.answers];
     [newAnswers[answerIndex], newAnswers[answerIndex + 1]] = [newAnswers[answerIndex + 1], newAnswers[answerIndex]];
-    // Recalculate order indices
-    newAnswers.forEach((ans, idx) => {
-      ans.orderIndex = idx;
-    });
-    onChange(questionIndex, { ...question, answers: newAnswers });
+    onChange(questionIndex, {...question, answers: reindex(newAnswers)});
   };
 
   return (
@@ -120,14 +98,14 @@ export default function QuestionBuilder({
             disabled={!canMoveUp}
             style={[styles.orderButton, !canMoveUp && styles.orderButtonDisabled]}
           >
-            <Ionicons name="chevron-up" size={20} color={canMoveUp ? "#7313e8" : "#9CA3AF"} />
+            <Ionicons name="chevron-up" size={20} color={canMoveUp ? "#7313e8" : "#9CA3AF"}/>
           </TouchableOpacity>
           <TouchableOpacity
             onPress={() => onMoveDown(questionIndex)}
             disabled={!canMoveDown}
             style={[styles.orderButton, !canMoveDown && styles.orderButtonDisabled]}
           >
-            <Ionicons name="chevron-down" size={20} color={canMoveDown ? "#7313e8" : "#9CA3AF"} />
+            <Ionicons name="chevron-down" size={20} color={canMoveDown ? "#7313e8" : "#9CA3AF"}/>
           </TouchableOpacity>
         </View>
 
@@ -137,7 +115,7 @@ export default function QuestionBuilder({
           onPress={() => onRemove(questionIndex)}
           style={styles.removeButton}
         >
-          <Ionicons name="trash-outline" size={20} color="#EF4444" />
+          <Ionicons name="trash-outline" size={20} color="#EF4444"/>
         </TouchableOpacity>
       </View>
 
@@ -181,7 +159,7 @@ export default function QuestionBuilder({
             style={styles.textArea}
             value={question.questionText}
             onChangeText={(text) =>
-              onChange(questionIndex, { ...question, questionText: text })
+              onChange(questionIndex, {...question, questionText: text})
             }
             placeholder="Sual mətnini daxil edin"
             placeholderTextColor="#9CA3AF"
@@ -198,7 +176,7 @@ export default function QuestionBuilder({
             value={question.score.toString()}
             onChangeText={(text) => {
               const num = parseInt(text) || 1;
-              onChange(questionIndex, { ...question, score: Math.max(1, num) });
+              onChange(questionIndex, {...question, score: Math.max(1, num)});
             }}
             placeholder="1"
             placeholderTextColor="#9CA3AF"
@@ -214,7 +192,7 @@ export default function QuestionBuilder({
               style={styles.input}
               value={question.correctAnswer || ""}
               onChangeText={(text) =>
-                onChange(questionIndex, { ...question, correctAnswer: text })
+                onChange(questionIndex, {...question, correctAnswer: text})
               }
               placeholder="Nümunə cavab"
               placeholderTextColor="#9CA3AF"
@@ -232,7 +210,6 @@ export default function QuestionBuilder({
                 answer={answer}
                 answerIndex={idx}
                 questionType={question.questionType}
-                allAnswers={question.answers}
                 onChange={handleAnswerChange}
                 onRemove={handleRemoveAnswer}
                 onMoveUp={handleMoveAnswerUp}
@@ -242,7 +219,7 @@ export default function QuestionBuilder({
               />
             ))}
             <TouchableOpacity style={styles.addAnswerButton} onPress={handleAddAnswer}>
-              <Ionicons name="add-circle-outline" size={20} color="#7313e8" />
+              <Ionicons name="add-circle-outline" size={20} color="#7313e8"/>
               <Text style={styles.addAnswerText}>Cavab əlavə et</Text>
             </TouchableOpacity>
           </View>
@@ -259,7 +236,7 @@ const styles = StyleSheet.create({
     padding: 16,
     marginBottom: 16,
     shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
+    shadowOffset: {width: 0, height: 2},
     shadowOpacity: 0.08,
     shadowRadius: 8,
     elevation: 3,
@@ -356,40 +333,6 @@ const styles = StyleSheet.create({
     minHeight: 80,
     textAlignVertical: "top",
   },
-  uploadButton: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "center",
-    gap: 8,
-    padding: 16,
-    borderRadius: 8,
-    borderWidth: 2,
-    borderColor: "#E5E7EB",
-    borderStyle: "dashed",
-    backgroundColor: "#F9FAFB",
-  },
-  uploadText: {
-    fontSize: 15,
-    color: "#7313e8",
-    fontWeight: "500",
-  },
-  imagePreview: {
-    position: "relative",
-    borderRadius: 8,
-    overflow: "hidden",
-  },
-  image: {
-    width: "100%",
-    height: 200,
-    borderRadius: 8,
-  },
-  removeImageButton: {
-    position: "absolute",
-    top: 8,
-    right: 8,
-    backgroundColor: "#fff",
-    borderRadius: 12,
-  },
   addAnswerButton: {
     flexDirection: "row",
     alignItems: "center",
@@ -406,21 +349,4 @@ const styles = StyleSheet.create({
     color: "#7313e8",
     fontWeight: "500",
   },
-  imageInfoBox: {
-    flexDirection: "row",
-    alignItems: "flex-start",
-    gap: 8,
-    padding: 12,
-    backgroundColor: "#F5F3FF",
-    borderRadius: 8,
-    borderWidth: 1,
-    borderColor: "#E9D5FF",
-  },
-  imageInfoText: {
-    flex: 1,
-    fontSize: 13,
-    color: "#7313e8",
-    lineHeight: 18,
-  },
 });
-

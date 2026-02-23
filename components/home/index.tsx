@@ -1,6 +1,7 @@
-import { Ionicons } from "@expo/vector-icons";
-import { useRouter } from "expo-router";
-import React, { useEffect, useState } from "react";
+import {Ionicons} from "@expo/vector-icons";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import {useRouter} from "expo-router";
+import React, {useEffect, useState} from "react";
 import {
   ActivityIndicator,
   Image,
@@ -11,21 +12,17 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
-import {
-  SafeAreaView,
-  useSafeAreaInsets,
-} from "react-native-safe-area-context";
-import { useAuth } from "../../context/auth-context";
-import {
-  TestAttemptResponse,
-  TestResponse,
-  testsAPI,
-} from "../../services/api";
-import { handleApiError } from "../../utils/errorHandler";
+import {SafeAreaView, useSafeAreaInsets,} from "react-native-safe-area-context";
+import {BACKGROUND_CARD, BACKGROUND_PAGE, BRAND_PRIMARY, TEXT_PRIMARY,} from "@/constants/colors";
+import {useAuth} from "@/context/auth-context";
+import {TestAttemptResponse, TestResponse, testsAPI,} from "@/services/api";
+import {handleApiError} from "@/utils/errorHandler";
+
+const faridLogo = require("../../assets/images/farid-logo.jpg");
 
 export default function HomeScreen() {
   const router = useRouter();
-  const { user } = useAuth();
+  const {user} = useAuth();
   const insets = useSafeAreaInsets();
 
   const [loading, setLoading] = useState(true);
@@ -46,7 +43,6 @@ export default function HomeScreen() {
 
   const loadData = async () => {
     try {
-      // Fetch recent published tests
       const testsResponse = await testsAPI.getTests({
         page: 0,
         size: 10,
@@ -54,33 +50,30 @@ export default function HomeScreen() {
         sortDir: "desc",
       });
       const tests = testsResponse.content;
-      setRecentTests(tests.slice(0, 3)); // Take first 3 for display
+      setRecentTests(tests.slice(0, 3));
 
-      // Fetch attempts for each test to determine status
+      const attemptResults = await Promise.allSettled(
+        tests.map((test) => testsAPI.getTestAttempts(test.id))
+      );
+
       const attemptsMap = new Map<string, TestAttemptResponse>();
       let completedCount = 0;
       let inProgressCount = 0;
       let totalScore = 0;
 
-      for (const test of tests) {
-        try {
-          const attempts = await testsAPI.getTestAttempts(test.id);
-          if (attempts && attempts.length > 0) {
-            // Get the most recent attempt
-            const latestAttempt = attempts[0];
-            attemptsMap.set(test.id, latestAttempt);
+      attemptResults.forEach((result, index) => {
+        if (result.status === "fulfilled" && result.value.length > 0) {
+          const latestAttempt = result.value[0];
+          attemptsMap.set(tests[index].id, latestAttempt);
 
-            if (latestAttempt.status === "COMPLETED") {
-              completedCount++;
-              totalScore += latestAttempt.totalScore;
-            } else if (latestAttempt.status === "IN_PROGRESS") {
-              inProgressCount++;
-            }
+          if (latestAttempt.status === "COMPLETED") {
+            completedCount++;
+            totalScore += latestAttempt.totalScore;
+          } else if (latestAttempt.status === "IN_PROGRESS") {
+            inProgressCount++;
           }
-        } catch (error) {
-          // Test not attempted yet, continue
         }
-      }
+      });
 
       setAttemptsByTest(attemptsMap);
       setStats({
@@ -88,7 +81,7 @@ export default function HomeScreen() {
         inProgress: inProgressCount,
         totalScore,
       });
-    } catch (error: any) {
+    } catch (error: unknown) {
       handleApiError(error, "Ana səhifə məlumatlarını yükləmək mümkün olmadı");
     } finally {
       setLoading(false);
@@ -104,41 +97,34 @@ export default function HomeScreen() {
   const getTestStatus = (testId: string) => {
     const attempt = attemptsByTest.get(testId);
     if (!attempt) {
-      return { status: "NOT_STARTED", color: "#9CA3AF", text: "Başlanmayıb" };
+      return {status: "NOT_STARTED", color: "#9CA3AF", text: "Başlanmayıb"};
     }
     if (attempt.status === "COMPLETED") {
-      return { status: "COMPLETED", color: "#10B981", text: "Tamamlandı" };
+      return {status: "COMPLETED", color: "#10B981", text: "Tamamlandı"};
     }
-    return { status: "IN_PROGRESS", color: "#F59E0B", text: "Yarımçıq" };
+    return {status: "IN_PROGRESS", color: "#F59E0B", text: "Yarımçıq"};
   };
 
   const handleTestPress = async (testId: string) => {
     const attempt = attemptsByTest.get(testId);
     if (!attempt) {
-      // Start new test
       try {
-        // First fetch full test details
         const testDetails = await testsAPI.getTestById(testId);
         const newAttempt = await testsAPI.startTest(testId);
 
-        // Save test data to AsyncStorage
-        const AsyncStorage =
-          require("@react-native-async-storage/async-storage").default;
         const storageKey = `test_attempt_${newAttempt.id}`;
         await AsyncStorage.setItem(
           storageKey,
-          JSON.stringify({ test: testDetails, answers: {} })
+          JSON.stringify({test: testDetails, answers: {}})
         );
 
         router.push(`/test/take/${newAttempt.id}` as any);
-      } catch (error: any) {
+      } catch (error: unknown) {
         handleApiError(error, "Testi başlatmaq mümkün olmadı");
       }
     } else if (attempt.status === "COMPLETED") {
-      // View results
       router.push(`/test/results/${attempt.id}` as any);
     } else {
-      // Continue test
       router.push(`/test/take/${attempt.id}` as any);
     }
   };
@@ -164,7 +150,7 @@ export default function HomeScreen() {
     return (
       <SafeAreaView style={styles.container} edges={["top", "bottom"]}>
         <View style={styles.loadingContainer}>
-          <ActivityIndicator size="large" color="#7313e8" />
+          <ActivityIndicator size="large" color={BRAND_PRIMARY}/>
         </View>
       </SafeAreaView>
     );
@@ -177,16 +163,16 @@ export default function HomeScreen() {
           <RefreshControl
             refreshing={refreshing}
             onRefresh={onRefresh}
-            colors={["#7313e8"]}
+            colors={[BRAND_PRIMARY]}
           />
         }
-        contentContainerStyle={{ paddingTop: Math.max(insets.top, 16) }}
+        contentContainerStyle={{paddingTop: Math.max(insets.top, 16)}}
       >
         {/* Header */}
         <View style={styles.header}>
           <View style={styles.headerLeft}>
             <Image
-              source={require("../../assets/images/farid-logo.jpg")}
+              source={faridLogo}
               style={styles.headerLogo}
             />
             <Text style={styles.headerTitle}>Fərid Qurbanovun Testləri</Text>
@@ -213,24 +199,24 @@ export default function HomeScreen() {
         {/* Stats Cards */}
         <View style={styles.statsContainer}>
           <View style={styles.statCard}>
-            <View style={[styles.statIcon, { backgroundColor: "#D1FAE5" }]}>
-              <Ionicons name="checkmark" size={24} color="#10B981" />
+            <View style={[styles.statIcon, {backgroundColor: "#D1FAE5"}]}>
+              <Ionicons name="checkmark" size={24} color="#10B981"/>
             </View>
             <Text style={styles.statNumber}>{stats.completed}</Text>
             <Text style={styles.statLabel}>Tamamlanan</Text>
           </View>
 
           <View style={styles.statCard}>
-            <View style={[styles.statIcon, { backgroundColor: "#DBEAFE" }]}>
-              <Ionicons name="time-outline" size={24} color="#3B82F6" />
+            <View style={[styles.statIcon, {backgroundColor: "#DBEAFE"}]}>
+              <Ionicons name="time-outline" size={24} color="#3B82F6"/>
             </View>
             <Text style={styles.statNumber}>{stats.inProgress}</Text>
             <Text style={styles.statLabel}>Gözləyən</Text>
           </View>
 
           <View style={styles.statCard}>
-            <View style={[styles.statIcon, { backgroundColor: "#FEF3C7" }]}>
-              <Ionicons name="trophy" size={24} color="#F59E0B" />
+            <View style={[styles.statIcon, {backgroundColor: "#FEF3C7"}]}>
+              <Ionicons name="trophy" size={24} color="#F59E0B"/>
             </View>
             <Text style={styles.statNumber}>{stats.totalScore}</Text>
             <Text style={styles.statLabel}>Xal</Text>
@@ -258,7 +244,6 @@ export default function HomeScreen() {
           ) : (
             recentTests.map((test) => {
               const status = getTestStatus(test.id);
-              const attempt = attemptsByTest.get(test.id);
 
               return (
                 <View key={test.id} style={styles.testCard}>
@@ -313,11 +298,11 @@ export default function HomeScreen() {
                         <View
                           style={[
                             styles.statusDot,
-                            { backgroundColor: status.color },
+                            {backgroundColor: status.color},
                           ]}
                         />
                         <Text
-                          style={[styles.statusText, { color: status.color }]}
+                          style={[styles.statusText, {color: status.color}]}
                         >
                           {status.text}
                         </Text>
@@ -340,8 +325,8 @@ export default function HomeScreen() {
                           {status.status === "COMPLETED"
                             ? "Nəticələr"
                             : status.status === "IN_PROGRESS"
-                            ? "Davam et"
-                            : "Başla"}
+                              ? "Davam et"
+                              : "Başla"}
                         </Text>
                       </TouchableOpacity>
                     </View>
@@ -361,9 +346,9 @@ export default function HomeScreen() {
               onPress={() => handleQuickAction("new-test")}
             >
               <View
-                style={[styles.quickActionIcon, { backgroundColor: "#DBEAFE" }]}
+                style={[styles.quickActionIcon, {backgroundColor: "#DBEAFE"}]}
               >
-                <Ionicons name="play" size={24} color="#7313e8" />
+                <Ionicons name="play" size={24} color={BRAND_PRIMARY}/>
               </View>
               <Text style={styles.quickActionTitle}>Yeni Test</Text>
               <Text style={styles.quickActionSubtitle}>
@@ -376,9 +361,9 @@ export default function HomeScreen() {
               onPress={() => handleQuickAction("results")}
             >
               <View
-                style={[styles.quickActionIcon, { backgroundColor: "#D1FAE5" }]}
+                style={[styles.quickActionIcon, {backgroundColor: "#D1FAE5"}]}
               >
-                <Ionicons name="stats-chart" size={24} color="#10B981" />
+                <Ionicons name="stats-chart" size={24} color="#10B981"/>
               </View>
               <Text style={styles.quickActionTitle}>Nəticələr</Text>
               <Text style={styles.quickActionSubtitle}>
@@ -391,9 +376,9 @@ export default function HomeScreen() {
               onPress={() => handleQuickAction("bookmarks")}
             >
               <View
-                style={[styles.quickActionIcon, { backgroundColor: "#FEF3C7" }]}
+                style={[styles.quickActionIcon, {backgroundColor: "#FEF3C7"}]}
               >
-                <Ionicons name="bookmark" size={24} color="#F59E0B" />
+                <Ionicons name="bookmark" size={24} color="#F59E0B"/>
               </View>
               <Text style={styles.quickActionTitle}>Sevimlilər</Text>
               <Text style={styles.quickActionSubtitle}>Saxlanmış testlər</Text>
@@ -404,9 +389,9 @@ export default function HomeScreen() {
               onPress={() => handleQuickAction("teacher")}
             >
               <View
-                style={[styles.quickActionIcon, { backgroundColor: "#E9D5FF" }]}
+                style={[styles.quickActionIcon, {backgroundColor: "#E9D5FF"}]}
               >
-                <Ionicons name="school" size={24} color="#9333EA" />
+                <Ionicons name="school" size={24} color="#9333EA"/>
               </View>
               <Text style={styles.quickActionTitle}>Müəllim</Text>
               <Text style={styles.quickActionSubtitle}>Əlaqə məlumatları</Text>
@@ -421,7 +406,7 @@ export default function HomeScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#F9FAFB",
+    backgroundColor: BACKGROUND_PAGE,
   },
   header: {
     flexDirection: "row",
@@ -430,7 +415,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
     paddingBottom: 16,
     paddingTop: 16,
-    backgroundColor: "#FFFFFF",
+    backgroundColor: BACKGROUND_CARD,
   },
   headerLeft: {
     flexDirection: "row",
@@ -445,10 +430,10 @@ const styles = StyleSheet.create({
   headerTitle: {
     fontSize: 18,
     fontWeight: "bold",
-    color: "#111827",
+    color: TEXT_PRIMARY,
   },
   premiumBanner: {
-    backgroundColor: "#7313e8",
+    backgroundColor: BRAND_PRIMARY,
     marginHorizontal: 20,
     marginVertical: 16,
     padding: 20,
@@ -529,7 +514,7 @@ const styles = StyleSheet.create({
   },
   seeAllButton: {
     fontSize: 14,
-    color: "#7313e8",
+    color: BRAND_PRIMARY,
     fontWeight: "600",
   },
   testCard: {
@@ -601,7 +586,7 @@ const styles = StyleSheet.create({
     fontWeight: "500",
   },
   primaryButton: {
-    backgroundColor: "#7313e8",
+    backgroundColor: BRAND_PRIMARY,
     paddingHorizontal: 24,
     paddingVertical: 10,
     borderRadius: 10,

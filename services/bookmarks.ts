@@ -3,7 +3,6 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 const BOOKMARKS_KEY = 'test_bookmarks';
 
 export const bookmarksService = {
-  // Get all bookmarked test IDs
   getBookmarks: async (): Promise<string[]> => {
     try {
       const bookmarksJson = await AsyncStorage.getItem(BOOKMARKS_KEY);
@@ -14,7 +13,6 @@ export const bookmarksService = {
     }
   },
 
-  // Add a test to bookmarks
   addBookmark: async (testId: string): Promise<void> => {
     try {
       const bookmarks = await bookmarksService.getBookmarks();
@@ -28,7 +26,6 @@ export const bookmarksService = {
     }
   },
 
-  // Remove a test from bookmarks
   removeBookmark: async (testId: string): Promise<void> => {
     try {
       const bookmarks = await bookmarksService.getBookmarks();
@@ -40,7 +37,6 @@ export const bookmarksService = {
     }
   },
 
-  // Toggle bookmark status
   toggleBookmark: async (testId: string): Promise<boolean> => {
     try {
       const bookmarks = await bookmarksService.getBookmarks();
@@ -59,7 +55,6 @@ export const bookmarksService = {
     }
   },
 
-  // Check if a test is bookmarked
   isBookmarked: async (testId: string): Promise<boolean> => {
     try {
       const bookmarks = await bookmarksService.getBookmarks();
@@ -69,15 +64,4 @@ export const bookmarksService = {
       return false;
     }
   },
-
-  // Clear all bookmarks
-  clearAllBookmarks: async (): Promise<void> => {
-    try {
-      await AsyncStorage.removeItem(BOOKMARKS_KEY);
-    } catch (error) {
-      console.error('Error clearing bookmarks:', error);
-      throw error;
-    }
-  },
 };
-

@@ -1,10 +1,16 @@
 import VerifyScreen from "@/components/auth/verify-code";
-import { View } from "react-native";
+import {StyleSheet, View} from "react-native";
 
 export default function Verify() {
   return (
-    <View style={{ flex: 1 }}>
-      <VerifyScreen />
+    <View style={styles.container}>
+      <VerifyScreen/>
     </View>
   );
 }
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+  },
+});

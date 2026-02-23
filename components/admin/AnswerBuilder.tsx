@@ -1,12 +1,6 @@
 import React from "react";
-import {
-  View,
-  Text,
-  TextInput,
-  TouchableOpacity,
-  StyleSheet,
-} from "react-native";
-import { Ionicons } from "@expo/vector-icons";
+import {StyleSheet, Text, TextInput, TouchableOpacity, View,} from "react-native";
+import {Ionicons} from "@expo/vector-icons";
 
 export interface AnswerData {
   answerText: string;
@@ -18,7 +12,6 @@ interface AnswerBuilderProps {
   answer: AnswerData;
   answerIndex: number;
   questionType: string;
-  allAnswers: AnswerData[];
   onChange: (index: number, answer: AnswerData) => void;
   onRemove: (index: number) => void;
   onMoveUp: (index: number) => void;
@@ -28,24 +21,21 @@ interface AnswerBuilderProps {
 }
 
 export default function AnswerBuilder({
-  answer,
-  answerIndex,
-  questionType,
-  allAnswers,
-  onChange,
-  onRemove,
-  onMoveUp,
-  onMoveDown,
-  canMoveUp,
-  canMoveDown,
-}: AnswerBuilderProps) {
+                                        answer,
+                                        answerIndex,
+                                        questionType,
+                                        onChange,
+                                        onRemove,
+                                        onMoveUp,
+                                        onMoveDown,
+                                        canMoveUp,
+                                        canMoveDown,
+                                      }: AnswerBuilderProps) {
   const handleCorrectToggle = () => {
     if (questionType === "CLOSED_SINGLE") {
-      // For single choice, uncheck all others and check this one
-      onChange(answerIndex, { ...answer, isCorrect: true });
+      onChange(answerIndex, {...answer, isCorrect: true});
     } else {
-      // For multiple choice, just toggle this one
-      onChange(answerIndex, { ...answer, isCorrect: !answer.isCorrect });
+      onChange(answerIndex, {...answer, isCorrect: !answer.isCorrect});
     }
   };
 
@@ -58,14 +48,14 @@ export default function AnswerBuilder({
             disabled={!canMoveUp}
             style={[styles.orderButton, !canMoveUp && styles.orderButtonDisabled]}
           >
-            <Ionicons name="chevron-up" size={16} color={canMoveUp ? "#7313e8" : "#9CA3AF"} />
+            <Ionicons name="chevron-up" size={16} color={canMoveUp ? "#7313e8" : "#9CA3AF"}/>
           </TouchableOpacity>
           <TouchableOpacity
             onPress={() => onMoveDown(answerIndex)}
             disabled={!canMoveDown}
             style={[styles.orderButton, !canMoveDown && styles.orderButtonDisabled]}
           >
-            <Ionicons name="chevron-down" size={16} color={canMoveDown ? "#7313e8" : "#9CA3AF"} />
+            <Ionicons name="chevron-down" size={16} color={canMoveDown ? "#7313e8" : "#9CA3AF"}/>
           </TouchableOpacity>
         </View>
 
@@ -75,7 +65,7 @@ export default function AnswerBuilder({
           onPress={() => onRemove(answerIndex)}
           style={styles.removeButton}
         >
-          <Ionicons name="trash-outline" size={18} color="#EF4444" />
+          <Ionicons name="trash-outline" size={18} color="#EF4444"/>
         </TouchableOpacity>
       </View>
 
@@ -84,7 +74,7 @@ export default function AnswerBuilder({
           style={styles.input}
           value={answer.answerText}
           onChangeText={(text) =>
-            onChange(answerIndex, { ...answer, answerText: text })
+            onChange(answerIndex, {...answer, answerText: text})
           }
           placeholder="Cavab mətni"
           placeholderTextColor="#9CA3AF"
@@ -97,7 +87,7 @@ export default function AnswerBuilder({
         >
           <View style={[styles.checkbox, answer.isCorrect && styles.checkboxChecked]}>
             {answer.isCorrect && (
-              <Ionicons name="checkmark" size={16} color="#fff" />
+              <Ionicons name="checkmark" size={16} color="#fff"/>
             )}
           </View>
           <Text style={styles.correctLabel}>Düzgün cavab</Text>
@@ -183,4 +173,3 @@ const styles = StyleSheet.create({
     color: "#6B7280",
   },
 });
-

@@ -1,15 +1,6 @@
-import { Ionicons } from "@expo/vector-icons";
+import {Ionicons} from "@expo/vector-icons";
 import React from "react";
-import {
-  Alert,
-  Linking,
-  Modal,
-  Platform,
-  StyleSheet,
-  Text,
-  TouchableOpacity,
-  View,
-} from "react-native";
+import {Alert, Linking, Modal, Platform, StyleSheet, Text, TouchableOpacity, View,} from "react-native";
 
 interface PremiumRequestModalProps {
   visible: boolean;
@@ -17,9 +8,9 @@ interface PremiumRequestModalProps {
 }
 
 const PremiumRequestModal: React.FC<PremiumRequestModalProps> = ({
-  visible,
-  onClose,
-}) => {
+                                                                   visible,
+                                                                   onClose,
+                                                                 }) => {
   const teacherPhone = "+994 51 355 51 83";
   const whatsappNumber = "994513555183";
 
@@ -35,7 +26,7 @@ const PremiumRequestModal: React.FC<PremiumRequestModalProps> = ({
 
       try {
         await Linking.openURL(whatsappUrl);
-      } catch (whatsappError) {
+      } catch {
         const alternativeUrl =
           Platform.OS === "android"
             ? `https://wa.me/${whatsappNumber}`
@@ -43,16 +34,14 @@ const PremiumRequestModal: React.FC<PremiumRequestModalProps> = ({
 
         try {
           await Linking.openURL(alternativeUrl);
-        } catch (altError) {
+        } catch {
           await Linking.openURL(`tel:${teacherPhone}`);
         }
       }
-    } catch (error) {
-      console.error("WhatsApp açma hatası:", error);
-
+    } catch {
       try {
         await Linking.openURL(`tel:${teacherPhone}`);
-      } catch (telError) {
+      } catch {
         Alert.alert(
           "Xəta",
           "WhatsApp açıla bilmədi. Zəhmət olmasa WhatsApp-ı yükləyin və ya zəng düyməsini istifadə edin."
@@ -78,11 +67,11 @@ const PremiumRequestModal: React.FC<PremiumRequestModalProps> = ({
         <View style={styles.modalContent}>
           <View style={styles.modalHeader}>
             <View style={styles.iconContainer}>
-              <Ionicons name="star" size={32} color="#F59E0B" />
+              <Ionicons name="star" size={32} color="#F59E0B"/>
             </View>
             <Text style={styles.modalTitle}>Premium Abunəlik</Text>
             <TouchableOpacity onPress={onClose} style={styles.closeButton}>
-              <Ionicons name="close" size={24} color="#6B7280" />
+              <Ionicons name="close" size={24} color="#6B7280"/>
             </TouchableOpacity>
           </View>
 
@@ -93,11 +82,11 @@ const PremiumRequestModal: React.FC<PremiumRequestModalProps> = ({
 
             <View style={styles.teacherInfo}>
               <View style={styles.infoRow}>
-                <Ionicons name="person-outline" size={20} color="#7313e8" />
+                <Ionicons name="person-outline" size={20} color="#7313e8"/>
                 <Text style={styles.infoText}>Fərid Qurbanov</Text>
               </View>
               <View style={styles.infoRow}>
-                <Ionicons name="call-outline" size={20} color="#7313e8" />
+                <Ionicons name="call-outline" size={20} color="#7313e8"/>
                 <Text style={styles.infoText}>{teacherPhone}</Text>
               </View>
             </View>
@@ -107,7 +96,7 @@ const PremiumRequestModal: React.FC<PremiumRequestModalProps> = ({
                 style={styles.whatsappButton}
                 onPress={handleWhatsAppPress}
               >
-                <Ionicons name="logo-whatsapp" size={20} color="#fff" />
+                <Ionicons name="logo-whatsapp" size={20} color="#fff"/>
                 <Text style={styles.whatsappButtonText}>
                   WhatsApp ilə əlaqə
                 </Text>
@@ -117,7 +106,7 @@ const PremiumRequestModal: React.FC<PremiumRequestModalProps> = ({
                 style={styles.callButton}
                 onPress={handleCallPress}
               >
-                <Ionicons name="call" size={20} color="#fff" />
+                <Ionicons name="call" size={20} color="#fff"/>
                 <Text style={styles.callButtonText}>Zəng et</Text>
               </TouchableOpacity>
             </View>
@@ -125,17 +114,17 @@ const PremiumRequestModal: React.FC<PremiumRequestModalProps> = ({
             <View style={styles.benefitsContainer}>
               <Text style={styles.benefitsTitle}>Premium üstünlüklər:</Text>
               <View style={styles.benefitItem}>
-                <Ionicons name="checkmark-circle" size={18} color="#10B981" />
+                <Ionicons name="checkmark-circle" size={18} color="#10B981"/>
                 <Text style={styles.benefitText}>Bütün testlərə çıxış</Text>
               </View>
               <View style={styles.benefitItem}>
-                <Ionicons name="checkmark-circle" size={18} color="#10B981" />
+                <Ionicons name="checkmark-circle" size={18} color="#10B981"/>
                 <Text style={styles.benefitText}>
                   Sınaqları sınırsız dəfə verə bilərsiniz
                 </Text>
               </View>
               <View style={styles.benefitItem}>
-                <Ionicons name="checkmark-circle" size={18} color="#10B981" />
+                <Ionicons name="checkmark-circle" size={18} color="#10B981"/>
                 <Text style={styles.benefitText}>Ətraflı statistika</Text>
               </View>
             </View>

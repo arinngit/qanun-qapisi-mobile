@@ -1,20 +1,21 @@
-import { Ionicons } from "@expo/vector-icons";
-import { Redirect, Tabs } from "expo-router";
+import {Ionicons} from "@expo/vector-icons";
+import {Redirect, Tabs} from "expo-router";
 import React from "react";
-import { useAuth } from "../../context/auth-context";
+import {BRAND_PRIMARY} from "@/constants/colors";
+import {useAuth} from "@/context/auth-context";
 
 export default function TabLayout() {
-  const { user, isAuthenticated, loading } = useAuth();
+  const {user, isAuthenticated, loading} = useAuth();
   const isAdmin = user?.role === "ADMIN";
 
   if (!loading && !isAuthenticated) {
-    return <Redirect href="/(auth)/login" />;
+    return <Redirect href="/(auth)/login"/>;
   }
 
   return (
     <Tabs
       screenOptions={{
-        tabBarActiveTintColor: "#7313e8",
+        tabBarActiveTintColor: BRAND_PRIMARY,
         tabBarInactiveTintColor: "gray",
       }}
     >
@@ -23,8 +24,8 @@ export default function TabLayout() {
         options={{
           title: "Ana səhifə",
           headerShown: false,
-          tabBarIcon: ({ color, size }) => (
-            <Ionicons name="home" size={size} color={color} />
+          tabBarIcon: ({color, size}) => (
+            <Ionicons name="home" size={size} color={color}/>
           ),
         }}
       />
@@ -33,8 +34,8 @@ export default function TabLayout() {
         options={{
           title: "Testlər",
           headerShown: false,
-          tabBarIcon: ({ color, size }) => (
-            <Ionicons name="document-text" size={size} color={color} />
+          tabBarIcon: ({color, size}) => (
+            <Ionicons name="document-text" size={size} color={color}/>
           ),
         }}
       />
@@ -44,8 +45,8 @@ export default function TabLayout() {
           title: "Admin",
           headerShown: false,
           href: isAdmin ? "/(tabs)/admin" : null,
-          tabBarIcon: ({ color, size }) => (
-            <Ionicons name="shield-checkmark" size={size} color={color} />
+          tabBarIcon: ({color, size}) => (
+            <Ionicons name="shield-checkmark" size={size} color={color}/>
           ),
         }}
       />
@@ -54,8 +55,8 @@ export default function TabLayout() {
         options={{
           title: "Müəllim",
           headerShown: false,
-          tabBarIcon: ({ color, size }) => (
-            <Ionicons name="information-circle" size={size} color={color} />
+          tabBarIcon: ({color, size}) => (
+            <Ionicons name="information-circle" size={size} color={color}/>
           ),
         }}
       />
@@ -64,8 +65,8 @@ export default function TabLayout() {
         options={{
           title: "Profil",
           headerShown: false,
-          tabBarIcon: ({ color, size }) => (
-            <Ionicons name="person" size={size} color={color} />
+          tabBarIcon: ({color, size}) => (
+            <Ionicons name="person" size={size} color={color}/>
           ),
         }}
       />

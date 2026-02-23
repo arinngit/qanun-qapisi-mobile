@@ -1,6 +1,6 @@
 import React from "react";
-import { View, Text, StyleSheet, TouchableOpacity } from "react-native";
-import { Ionicons } from "@expo/vector-icons";
+import {StyleSheet, Text, TouchableOpacity, View} from "react-native";
+import {Ionicons} from "@expo/vector-icons";
 
 interface EmptyStateProps {
   icon: keyof typeof Ionicons.glyphMap;
@@ -11,18 +11,18 @@ interface EmptyStateProps {
 }
 
 export default function EmptyState({
-  icon,
-  title,
-  message,
-  actionLabel,
-  onAction,
-}: EmptyStateProps) {
+                                     icon,
+                                     title,
+                                     message,
+                                     actionLabel,
+                                     onAction,
+                                   }: EmptyStateProps) {
   return (
     <View style={styles.container}>
       <View style={styles.iconContainer}>
-        <Ionicons name={icon} size={64} color="#9CA3AF" />
+        <Ionicons name={icon} size={64} color="#9CA3AF"/>
       </View>
-      
+
       <Text style={styles.title}>{title}</Text>
       <Text style={styles.message}>{message}</Text>
 
@@ -77,4 +77,3 @@ const styles = StyleSheet.create({
     fontWeight: "600",
   },
 });
-

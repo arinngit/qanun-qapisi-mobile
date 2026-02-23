@@ -1,13 +1,5 @@
 import React from "react";
-import {
-  Modal,
-  View,
-  Text,
-  TouchableOpacity,
-  StyleSheet,
-  ActivityIndicator,
-} from "react-native";
-import { Ionicons } from "@expo/vector-icons";
+import {ActivityIndicator, Modal, StyleSheet, Text, TouchableOpacity, View,} from "react-native";
 
 interface ConfirmDialogProps {
   visible: boolean;
@@ -22,16 +14,16 @@ interface ConfirmDialogProps {
 }
 
 export default function ConfirmDialog({
-  visible,
-  title,
-  message,
-  confirmText = "Təsdiqlə",
-  cancelText = "Ləğv et",
-  onConfirm,
-  onCancel,
-  loading = false,
-  confirmColor = "#7313e8",
-}: ConfirmDialogProps) {
+                                        visible,
+                                        title,
+                                        message,
+                                        confirmText = "Təsdiqlə",
+                                        cancelText = "Ləğv et",
+                                        onConfirm,
+                                        onCancel,
+                                        loading = false,
+                                        confirmColor = "#7313e8",
+                                      }: ConfirmDialogProps) {
   return (
     <Modal
       visible={visible}
@@ -44,7 +36,7 @@ export default function ConfirmDialog({
           <View style={styles.header}>
             <Text style={styles.title}>{title}</Text>
           </View>
-          
+
           <View style={styles.body}>
             <Text style={styles.message}>{message}</Text>
           </View>
@@ -59,12 +51,12 @@ export default function ConfirmDialog({
             </TouchableOpacity>
 
             <TouchableOpacity
-              style={[styles.button, styles.confirmButton, { backgroundColor: confirmColor }]}
+              style={[styles.button, styles.confirmButton, {backgroundColor: confirmColor}]}
               onPress={onConfirm}
               disabled={loading}
             >
               {loading ? (
-                <ActivityIndicator color="#fff" size="small" />
+                <ActivityIndicator color="#fff" size="small"/>
               ) : (
                 <Text style={styles.confirmText}>{confirmText}</Text>
               )}
@@ -90,7 +82,7 @@ const styles = StyleSheet.create({
     width: "100%",
     maxWidth: 400,
     shadowColor: "#000",
-    shadowOffset: { width: 0, height: 4 },
+    shadowOffset: {width: 0, height: 4},
     shadowOpacity: 0.2,
     shadowRadius: 12,
     elevation: 8,
@@ -145,4 +137,3 @@ const styles = StyleSheet.create({
     color: "#fff",
   },
 });
-

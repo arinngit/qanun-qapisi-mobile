@@ -1,12 +1,12 @@
-import { Redirect, Stack } from "expo-router";
-import { useAuth } from "../../context/auth-context";
-import { fadeTransitionConfig } from "../../utils/navigation-transitions";
+import {Redirect, Stack} from "expo-router";
+import {useAuth} from "@/context/auth-context";
+import {fadeTransitionConfig} from "@/utils/navigation-transitions";
 
 export default function AuthLayout() {
-  const { isAuthenticated, loading } = useAuth();
+  const {isAuthenticated, loading} = useAuth();
 
   if (!loading && isAuthenticated) {
-    return <Redirect href="/(tabs)" />;
+    return <Redirect href="/(tabs)"/>;
   }
 
   return (

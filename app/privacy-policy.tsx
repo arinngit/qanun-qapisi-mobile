@@ -1,21 +1,11 @@
-import { Ionicons } from "@expo/vector-icons";
-import { useRouter } from "expo-router";
+import {Ionicons} from "@expo/vector-icons";
+import {useRouter} from "expo-router";
 import React from "react";
-import {
-  ScrollView,
-  StyleSheet,
-  Text,
-  TouchableOpacity,
-  View,
-} from "react-native";
-import {
-  SafeAreaView,
-  useSafeAreaInsets,
-} from "react-native-safe-area-context";
+import {ScrollView, StyleSheet, Text, TouchableOpacity, View,} from "react-native";
+import {SafeAreaView} from "react-native-safe-area-context";
 
 export default function PrivacyPolicy() {
   const router = useRouter();
-  const insets = useSafeAreaInsets();
 
   return (
     <SafeAreaView style={styles.container} edges={["top", "bottom"]}>
@@ -25,10 +15,10 @@ export default function PrivacyPolicy() {
           onPress={() => router.back()}
           style={styles.backButton}
         >
-          <Ionicons name="arrow-back" size={24} color="#111827" />
+          <Ionicons name="arrow-back" size={24} color="#111827"/>
         </TouchableOpacity>
         <Text style={styles.headerTitle}>Məxfilik Siyasəti</Text>
-        <View style={styles.placeholder} />
+        <View style={styles.placeholder}/>
       </View>
 
       <ScrollView
@@ -219,7 +209,7 @@ export default function PrivacyPolicy() {
           <Text style={styles.sectionTitle}>Dəyişikliklər</Text>
           <Text style={styles.paragraph}>
             Bu Məxfilik Siyasətini vaxtaşırı yeniləyə bilərik. Dəyişiklikləri bu
-            səhifədə yerləşdirəcəyik və "Son yenilənmə" tarixini yeniləyəcəyik.
+            səhifədə yerləşdirəcəyik və {'"Son yenilənmə"'} tarixini yeniləyəcəyik.
             Dəyişiklikləri dəqiqləşdirmək üçün bu səhifəni müntəzəm olaraq
             yoxlamanızı tövsiyə edirik.
           </Text>
@@ -234,11 +224,11 @@ export default function PrivacyPolicy() {
           </Text>
           <View style={styles.contactInfo}>
             <View style={styles.contactItem}>
-              <Ionicons name="mail-outline" size={18} color="#7313e8" />
+              <Ionicons name="mail-outline" size={18} color="#7313e8"/>
               <Text style={styles.contactText}>fakhri.gezalov24@gmail.com</Text>
             </View>
             <View style={styles.contactItem}>
-              <Ionicons name="call-outline" size={18} color="#7313e8" />
+              <Ionicons name="call-outline" size={18} color="#7313e8"/>
               <Text style={styles.contactText}>+994 50 988 89 72</Text>
             </View>
           </View>

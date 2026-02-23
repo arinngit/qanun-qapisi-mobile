@@ -1,19 +1,51 @@
-import { Ionicons } from "@expo/vector-icons";
-import { useFocusEffect, useRouter } from "expo-router";
-import React, { useCallback, useState } from "react";
+import {Ionicons} from "@expo/vector-icons";
+import {useFocusEffect, useRouter} from "expo-router";
+import React, {useCallback, useState} from "react";
+import {ActivityIndicator, FlatList, RefreshControl, StyleSheet, Text, TouchableOpacity, View,} from "react-native";
+import {SafeAreaView} from "react-native-safe-area-context";
 import {
-  ActivityIndicator,
-  FlatList,
-  RefreshControl,
-  StyleSheet,
-  Text,
-  TouchableOpacity,
-  View,
-} from "react-native";
-import { SafeAreaView } from "react-native-safe-area-context";
-import { TestResponse, testsAPI } from "../services/api";
-import { bookmarksService } from "../services/bookmarks";
-import { handleApiError, showSuccess } from "../utils/errorHandler";
+  BACKGROUND_CARD,
+  BACKGROUND_PAGE,
+  BORDER_LIGHT,
+  BRAND_PRIMARY,
+  TEXT_PRIMARY,
+  TEXT_SECONDARY,
+  TEXT_TERTIARY,
+} from "@/constants/colors";
+import {TestResponse, testsAPI} from "@/services/api";
+import {bookmarksService} from "@/services/bookmarks";
+import {ApiError, handleApiError, showSuccess} from "@/utils/errorHandler";
+import {formatDate} from "@/utils/formatDate";
+
+function BookmarksEmptyState({
+                               loading,
+                               onBrowse,
+                             }: {
+  loading: boolean;
+  onBrowse: () => void;
+}) {
+  if (loading) {
+    return (
+      <View style={styles.emptyContainer}>
+        <ActivityIndicator size="large" color={BRAND_PRIMARY}/>
+      </View>
+    );
+  }
+
+  return (
+    <View style={styles.emptyContainer}>
+      <Ionicons name="heart-outline" size={64} color={TEXT_TERTIARY}/>
+      <Text style={styles.emptyTitle}>Sevimli test yoxdur</Text>
+      <Text style={styles.emptyText}>
+        Test səhifələrində ürək ikonasına toxunaraq testləri sevimlilərə əlavə
+        edin
+      </Text>
+      <TouchableOpacity style={styles.browseButton} onPress={onBrowse}>
+        <Text style={styles.browseButtonText}>Testlərə bax</Text>
+      </TouchableOpacity>
+    </View>
+  );
+}
 
 export default function BookmarksScreen() {
   const router = useRouter();
@@ -36,18 +68,19 @@ export default function BookmarksScreen() {
         return;
       }
 
-      // Fetch test details for each bookmarked test
       const testPromises = bookmarkIds.map((id) => testsAPI.getTestById(id));
       const tests = await Promise.allSettled(testPromises);
 
-      // Filter out failed requests
       const successfulTests = tests
-        .filter((result) => result.status === "fulfilled")
-        .map((result: any) => result.value);
+        .filter(
+          (result): result is PromiseFulfilledResult<TestResponse> =>
+            result.status === "fulfilled"
+        )
+        .map((result) => result.value);
 
       setBookmarkedTests(successfulTests);
-    } catch (error: any) {
-      handleApiError(error, "Sevimlilər yüklənə bilmədi");
+    } catch (error: unknown) {
+      handleApiError(error as ApiError, "Sevimlilər yüklənə bilmədi");
     } finally {
       setLoading(false);
       setRefreshing(false);
@@ -64,137 +97,102 @@ export default function BookmarksScreen() {
       await bookmarksService.removeBookmark(testId);
       setBookmarkedTests((prev) => prev.filter((test) => test.id !== testId));
       showSuccess("Test sevimlilərdən silindi");
-    } catch (error: any) {
-      handleApiError(error, "Test silinə bilmədi");
+    } catch (error: unknown) {
+      handleApiError(error as ApiError, "Test silinə bilmədi");
     }
   };
 
-  const formatDate = (dateString: string) => {
-    const date = new Date(dateString);
-    const months = [
-      "Yanvar",
-      "Fevral",
-      "Mart",
-      "Aprel",
-      "May",
-      "İyun",
-      "İyul",
-      "Avqust",
-      "Sentyabr",
-      "Oktyabr",
-      "Noyabr",
-      "Dekabr",
-    ];
-    return `${date.getDate()} ${months[date.getMonth()]} ${date.getFullYear()}`;
-  };
-
-  const renderTestCard = ({ item }: { item: TestResponse }) => (
-    <View style={styles.testCard}>
-      <TouchableOpacity
-        style={styles.testContent}
-        onPress={() => router.push(`/test/${item.id}` as any)}
-      >
-        <View style={styles.testHeader}>
-          <Text style={styles.testTitle}>{item.title}</Text>
-          {item.isPremium && (
-            <View style={styles.premiumBadge}>
-              <Text style={styles.premiumText}>Premium</Text>
-            </View>
-          )}
-        </View>
-
-        <Text style={styles.testDescription} numberOfLines={2}>
-          {item.description}
-        </Text>
-
-        <View style={styles.testMeta}>
-          <View style={styles.metaItem}>
-            <Ionicons name="help-circle-outline" size={14} color="#6B7280" />
-            <Text style={styles.metaText}>{item.questionCount} sual</Text>
-          </View>
-          <View style={styles.metaItem}>
-            <Ionicons name="star-outline" size={14} color="#6B7280" />
-            <Text style={styles.metaText}>{item.totalPossibleScore} xal</Text>
-          </View>
-          <View style={styles.metaItem}>
-            <Ionicons name="time-outline" size={14} color="#6B7280" />
-            <Text style={styles.metaText}>{item.estimatedMinutes} dəq</Text>
-          </View>
-        </View>
-
-        <View style={styles.testFooter}>
-          <View style={styles.publishDate}>
-            <Ionicons name="calendar-outline" size={14} color="#9CA3AF" />
-            <Text style={styles.publishDateText}>
-              {formatDate(item.publishedAt)}
-            </Text>
-          </View>
-        </View>
-      </TouchableOpacity>
-
-      <TouchableOpacity
-        style={styles.removeButton}
-        onPress={() => handleRemoveBookmark(item.id)}
-      >
-        <Ionicons name="heart" size={24} color="#EF4444" />
-      </TouchableOpacity>
-    </View>
-  );
-
-  const ListEmpty = () => {
-    if (loading) {
-      return (
-        <View style={styles.emptyContainer}>
-          <ActivityIndicator size="large" color="#7313e8" />
-        </View>
-      );
-    }
-
-    return (
-      <View style={styles.emptyContainer}>
-        <Ionicons name="heart-outline" size={64} color="#9CA3AF" />
-        <Text style={styles.emptyTitle}>Sevimli test yoxdur</Text>
-        <Text style={styles.emptyText}>
-          Test səhifələrində ürək ikonasına toxunaraq testləri sevimlilərə əlavə
-          edin
-        </Text>
+  const renderTestCard = useCallback(
+    ({item}: { item: TestResponse }) => (
+      <View style={styles.testCard}>
         <TouchableOpacity
-          style={styles.browseButton}
-          onPress={() => router.push("/(tabs)/tests")}
+          style={styles.testContent}
+          onPress={() => router.push(`/test/${item.id}` as any)}
         >
-          <Text style={styles.browseButtonText}>Testlərə bax</Text>
+          <View style={styles.testHeader}>
+            <Text style={styles.testTitle}>{item.title}</Text>
+            {item.isPremium && (
+              <View style={styles.premiumBadge}>
+                <Text style={styles.premiumText}>Premium</Text>
+              </View>
+            )}
+          </View>
+
+          <Text style={styles.testDescription} numberOfLines={2}>
+            {item.description}
+          </Text>
+
+          <View style={styles.testMeta}>
+            <View style={styles.metaItem}>
+              <Ionicons name="help-circle-outline" size={14} color={TEXT_SECONDARY}/>
+              <Text style={styles.metaText}>{item.questionCount} sual</Text>
+            </View>
+            <View style={styles.metaItem}>
+              <Ionicons name="star-outline" size={14} color={TEXT_SECONDARY}/>
+              <Text style={styles.metaText}>{item.totalPossibleScore} xal</Text>
+            </View>
+            <View style={styles.metaItem}>
+              <Ionicons name="time-outline" size={14} color={TEXT_SECONDARY}/>
+              <Text style={styles.metaText}>{item.estimatedMinutes} dəq</Text>
+            </View>
+          </View>
+
+          <View style={styles.testFooter}>
+            <View style={styles.publishDate}>
+              <Ionicons name="calendar-outline" size={14} color={TEXT_TERTIARY}/>
+              <Text style={styles.publishDateText}>
+                {formatDate(item.publishedAt)}
+              </Text>
+            </View>
+          </View>
+        </TouchableOpacity>
+
+        <TouchableOpacity
+          style={styles.removeButton}
+          onPress={() => handleRemoveBookmark(item.id)}
+        >
+          <Ionicons name="heart" size={24} color="#EF4444"/>
         </TouchableOpacity>
       </View>
-    );
-  };
+    ),
+    [router]
+  );
+
+  const listEmpty = useCallback(
+    () => (
+      <BookmarksEmptyState
+        loading={loading}
+        onBrowse={() => router.push("/(tabs)/tests")}
+      />
+    ),
+    [loading, router]
+  );
 
   return (
     <SafeAreaView style={styles.container} edges={["top", "bottom"]}>
-      {/* Header */}
       <View style={styles.header}>
         <TouchableOpacity
           style={styles.backButton}
           onPress={() => router.back()}
         >
-          <Ionicons name="arrow-back" size={24} color="#111827" />
+          <Ionicons name="arrow-back" size={24} color={TEXT_PRIMARY}/>
         </TouchableOpacity>
         <Text style={styles.headerTitle}>Sevimlilər</Text>
-        <View style={styles.headerRight} />
+        <View style={styles.headerRight}/>
       </View>
 
-      {/* Tests List */}
       <FlatList
         data={bookmarkedTests}
         keyExtractor={(item) => item.id}
         renderItem={renderTestCard}
-        ListEmptyComponent={ListEmpty}
+        ListEmptyComponent={listEmpty}
         showsVerticalScrollIndicator={false}
         contentContainerStyle={styles.listContent}
         refreshControl={
           <RefreshControl
             refreshing={refreshing}
             onRefresh={onRefresh}
-            colors={["#7313e8"]}
+            colors={[BRAND_PRIMARY]}
           />
         }
       />
@@ -205,16 +203,16 @@ export default function BookmarksScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#F9FAFB",
+    backgroundColor: BACKGROUND_PAGE,
   },
   header: {
     flexDirection: "row",
     alignItems: "center",
     paddingHorizontal: 16,
     paddingVertical: 12,
-    backgroundColor: "#FFFFFF",
+    backgroundColor: BACKGROUND_CARD,
     borderBottomWidth: 1,
-    borderBottomColor: "#F3F4F6",
+    borderBottomColor: BORDER_LIGHT,
   },
   backButton: {
     padding: 4,
@@ -222,7 +220,7 @@ const styles = StyleSheet.create({
   headerTitle: {
     fontSize: 18,
     fontWeight: "bold",
-    color: "#111827",
+    color: TEXT_PRIMARY,
     flex: 1,
     marginLeft: 12,
   },
@@ -234,13 +232,13 @@ const styles = StyleSheet.create({
   },
   testCard: {
     flexDirection: "row",
-    backgroundColor: "#FFFFFF",
+    backgroundColor: BACKGROUND_CARD,
     marginHorizontal: 16,
     marginVertical: 6,
     borderRadius: 16,
     elevation: 1,
     shadowColor: "#000",
-    shadowOffset: { width: 0, height: 1 },
+    shadowOffset: {width: 0, height: 1},
     shadowOpacity: 0.02,
     shadowRadius: 1,
   },
@@ -257,7 +255,7 @@ const styles = StyleSheet.create({
   testTitle: {
     fontSize: 16,
     fontWeight: "bold",
-    color: "#111827",
+    color: TEXT_PRIMARY,
     flex: 1,
   },
   premiumBadge: {
@@ -274,7 +272,7 @@ const styles = StyleSheet.create({
   },
   testDescription: {
     fontSize: 13,
-    color: "#6B7280",
+    color: TEXT_SECONDARY,
     lineHeight: 18,
     marginBottom: 12,
   },
@@ -290,7 +288,7 @@ const styles = StyleSheet.create({
   },
   metaText: {
     fontSize: 12,
-    color: "#6B7280",
+    color: TEXT_SECONDARY,
   },
   testFooter: {
     marginBottom: 0,
@@ -302,7 +300,7 @@ const styles = StyleSheet.create({
   },
   publishDateText: {
     fontSize: 12,
-    color: "#9CA3AF",
+    color: TEXT_TERTIARY,
   },
   removeButton: {
     padding: 16,
@@ -317,18 +315,18 @@ const styles = StyleSheet.create({
   emptyTitle: {
     fontSize: 18,
     fontWeight: "600",
-    color: "#111827",
+    color: TEXT_PRIMARY,
     marginTop: 16,
     marginBottom: 8,
   },
   emptyText: {
     fontSize: 14,
-    color: "#6B7280",
+    color: TEXT_SECONDARY,
     textAlign: "center",
     marginBottom: 24,
   },
   browseButton: {
-    backgroundColor: "#7313e8",
+    backgroundColor: BRAND_PRIMARY,
     paddingHorizontal: 24,
     paddingVertical: 12,
     borderRadius: 10,

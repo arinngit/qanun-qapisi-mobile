@@ -1,6 +1,6 @@
-import { Ionicons } from "@expo/vector-icons";
-import { useRouter } from "expo-router";
-import React, { useEffect, useState } from "react";
+import {Ionicons} from "@expo/vector-icons";
+import {useRouter} from "expo-router";
+import React, {useCallback, useEffect, useState} from "react";
 import {
   ActivityIndicator,
   FlatList,
@@ -11,12 +11,18 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
+import {SafeAreaView, useSafeAreaInsets,} from "react-native-safe-area-context";
 import {
-  SafeAreaView,
-  useSafeAreaInsets,
-} from "react-native-safe-area-context";
-import { GetTestsParams, TestResponse, testsAPI } from "../../services/api";
-import { handleApiError } from "../../utils/errorHandler";
+  BACKGROUND_CARD,
+  BACKGROUND_PAGE,
+  BORDER_LIGHT,
+  BRAND_PRIMARY,
+  GRAY,
+  TEXT_PRIMARY,
+  TEXT_SECONDARY,
+} from "@/constants/colors";
+import {GetTestsParams, TestResponse, testsAPI} from "@/services/api";
+import {handleApiError} from "@/utils/errorHandler";
 
 interface FilterItem {
   id: string;
@@ -44,16 +50,75 @@ const filterTests = (items: TestResponse[], filter: string): TestResponse[] => {
 };
 
 const filters: FilterItem[] = [
-  { id: FILTER_ALL, label: "Hamısı" },
-  { id: FILTER_PREMIUM, label: "Premium" },
-  { id: FILTER_FREE, label: "Pulsuz" },
+  {id: FILTER_ALL, label: "Hamısı"},
+  {id: FILTER_PREMIUM, label: "Premium"},
+  {id: FILTER_FREE, label: "Pulsuz"},
 ];
 
 const sortOptions = [
-  { id: "publishedAt", label: "Tarix", icon: "calendar-outline" },
-  { id: "questionCount", label: "Sual sayı", icon: "help-circle-outline" },
-  { id: "totalPossibleScore", label: "Xal", icon: "star-outline" },
+  {id: "publishedAt", label: "Tarix", icon: "calendar-outline"},
+  {id: "questionCount", label: "Sual sayı", icon: "help-circle-outline"},
+  {id: "totalPossibleScore", label: "Xal", icon: "star-outline"},
 ];
+
+const MONTHS_FULL = [
+  "Yanvar", "Fevral", "Mart", "Aprel", "May", "İyun",
+  "İyul", "Avqust", "Sentyabr", "Oktyabr", "Noyabr", "Dekabr",
+];
+
+const formatPublishDate = (dateString: string) => {
+  const date = new Date(dateString);
+  return `Nəşr tarixi: ${date.getDate()} ${MONTHS_FULL[date.getMonth()]} ${date.getFullYear()}`;
+};
+
+const TestCard = React.memo(({item, onPress}: { item: TestResponse; onPress: (id: string) => void }) => (
+  <View style={styles.testCard}>
+    <View style={styles.testCardHeader}>
+      <Text style={styles.testTitle}>{item.title}</Text>
+      {item.isPremium && (
+        <View style={styles.premiumBadge}>
+          <Text style={styles.premiumText}>Premium</Text>
+        </View>
+      )}
+    </View>
+
+    <Text style={styles.testDescription} numberOfLines={2}>
+      {item.description}
+    </Text>
+
+    <View style={styles.testMeta}>
+      <View style={styles.metaItem}>
+        <Ionicons name="help-circle-outline" size={14} color={TEXT_SECONDARY}/>
+        <Text style={styles.metaText}>{item.questionCount} sual</Text>
+      </View>
+      <View style={styles.metaItem}>
+        <Ionicons name="star-outline" size={14} color={TEXT_SECONDARY}/>
+        <Text style={styles.metaText}>{item.totalPossibleScore} xal</Text>
+      </View>
+      <View style={styles.metaItem}>
+        <Ionicons name="time-outline" size={14} color={TEXT_SECONDARY}/>
+        <Text style={styles.metaText}>{item.estimatedMinutes} dəq</Text>
+      </View>
+    </View>
+
+    <View style={styles.testFooter}>
+      <View style={styles.publishDate}>
+        <Ionicons name="calendar-outline" size={14} color={GRAY[400]}/>
+        <Text style={styles.publishDateText}>
+          {formatPublishDate(item.publishedAt)}
+        </Text>
+      </View>
+    </View>
+
+    <TouchableOpacity
+      style={styles.startButton}
+      onPress={() => onPress(item.id)}
+    >
+      <Text style={styles.startButtonText}>Testə başla</Text>
+    </TouchableOpacity>
+  </View>
+));
+TestCard.displayName = "TestCard";
 
 const TestScreen: React.FC = () => {
   const [selectedFilter, setSelectedFilter] = useState(FILTER_ALL);
@@ -71,6 +136,7 @@ const TestScreen: React.FC = () => {
 
   useEffect(() => {
     loadTests(true);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selectedFilter, sortBy]);
 
   const loadTests = async (reset = false, targetPage?: number) => {
@@ -111,7 +177,7 @@ const TestScreen: React.FC = () => {
         reset ? filteredContent.length : prev + filteredContent.length
       );
       setPage(currentPage);
-    } catch (error: any) {
+    } catch (error: unknown) {
       handleApiError(error, "Testləri yükləmək mümkün olmadı");
     } finally {
       setLoading(false);
@@ -143,83 +209,15 @@ const TestScreen: React.FC = () => {
     setSortModalVisible(false);
   };
 
-  const formatDate = (dateString: string) => {
-    const date = new Date(dateString);
-    const months = [
-      "Yanvar",
-      "Fevral",
-      "Mart",
-      "Aprel",
-      "May",
-      "İyun",
-      "İyul",
-      "Avqust",
-      "Sentyabr",
-      "Oktyabr",
-      "Noyabr",
-      "Dekabr",
-    ];
-    return `Nəşr tarixi: ${date.getDate()} ${
-      months[date.getMonth()]
-    } ${date.getFullYear()}`;
-  };
+  const handleTestPress = useCallback((testId: string) => {
+    router.push(`/test/${testId}` as any);
+  }, [router]);
 
-  // Оптимизированный компонент карточки
-  const TestCard = React.memo(({ item }: { item: TestResponse }) => (
-    <View style={styles.testCard}>
-      <View style={styles.testCardHeader}>
-        <Text style={styles.testTitle}>{item.title}</Text>
-        {item.isPremium && (
-          <View style={styles.premiumBadge}>
-            <Text style={styles.premiumText}>Premium</Text>
-          </View>
-        )}
-      </View>
+  const renderTestCard = useCallback(({item}: { item: TestResponse }) => (
+    <TestCard item={item} onPress={handleTestPress}/>
+  ), [handleTestPress]);
 
-      <Text style={styles.testDescription} numberOfLines={2}>
-        {item.description}
-      </Text>
-
-      <View style={styles.testMeta}>
-        <View style={styles.metaItem}>
-          <Ionicons name="help-circle-outline" size={14} color="#6B7280" />
-          <Text style={styles.metaText}>{item.questionCount} sual</Text>
-        </View>
-        <View style={styles.metaItem}>
-          <Ionicons name="star-outline" size={14} color="#6B7280" />
-          <Text style={styles.metaText}>{item.totalPossibleScore} xal</Text>
-        </View>
-        <View style={styles.metaItem}>
-          <Ionicons name="time-outline" size={14} color="#6B7280" />
-          <Text style={styles.metaText}>{item.estimatedMinutes} dəq</Text>
-        </View>
-      </View>
-
-      <View style={styles.testFooter}>
-        <View style={styles.publishDate}>
-          <Ionicons name="calendar-outline" size={14} color="#9CA3AF" />
-          <Text style={styles.publishDateText}>
-            {formatDate(item.publishedAt)}
-          </Text>
-        </View>
-      </View>
-
-      <TouchableOpacity
-        style={styles.startButton}
-        onPress={() => router.push(`/test/${item.id}` as any)}
-      >
-        <Text style={styles.startButtonText}>Testə başla</Text>
-      </TouchableOpacity>
-    </View>
-  ));
-  TestCard.displayName = "TestCard";
-
-  const renderTestCard = ({ item }: { item: TestResponse }) => (
-    <TestCard item={item} />
-  );
-
-  // Для горизонтального списка фильтров тоже используем FlatList
-  const renderFilter = ({ item }: { item: FilterItem }) => {
+  const renderFilter = ({item}: { item: FilterItem }) => {
     const isActive = selectedFilter === item.id;
 
     return (
@@ -259,7 +257,7 @@ const TestScreen: React.FC = () => {
     if (loadingMore) {
       return (
         <View style={styles.loadMoreContainer}>
-          <ActivityIndicator size="small" color="#7313e8" />
+          <ActivityIndicator size="small" color={BRAND_PRIMARY}/>
         </View>
       );
     }
@@ -270,17 +268,17 @@ const TestScreen: React.FC = () => {
           <TouchableOpacity style={styles.loadMoreButton} onPress={loadMore}>
             <Text style={styles.loadMoreText}>Daha çox yüklə</Text>
           </TouchableOpacity>
-          <View style={styles.bottomSpacer} />
+          <View style={styles.bottomSpacer}/>
         </View>
       );
     }
 
-    return <View style={styles.bottomSpacer} />;
+    return <View style={styles.bottomSpacer}/>;
   };
 
   const ListEmpty = () => (
     <View style={styles.emptyState}>
-      <Ionicons name="document-text-outline" size={64} color="#9CA3AF" />
+      <Ionicons name="document-text-outline" size={64} color="#9CA3AF"/>
       <Text style={styles.emptyStateTitle}>Test tapılmadı</Text>
       <Text style={styles.emptyStateText}>
         Seçdiyiniz filtrə uyğun test mövcud deyil
@@ -291,16 +289,16 @@ const TestScreen: React.FC = () => {
   if (loading) {
     return (
       <SafeAreaView style={styles.container} edges={["top", "bottom"]}>
-        <View style={[styles.header, { paddingTop: Math.max(insets.top, 12) }]}>
+        <View style={[styles.header, {paddingTop: Math.max(insets.top, 12)}]}>
           <Text style={styles.headerTitle}>Testlər</Text>
           <View style={styles.headerRight}>
             <TouchableOpacity style={styles.iconButton}>
-              <Ionicons name="search" size={24} color="#111827" />
+              <Ionicons name="search" size={24} color="#111827"/>
             </TouchableOpacity>
           </View>
         </View>
         <View style={styles.loadingContainer}>
-          <ActivityIndicator size="large" color="#7313e8" />
+          <ActivityIndicator size="large" color={BRAND_PRIMARY}/>
         </View>
       </SafeAreaView>
     );
@@ -309,20 +307,20 @@ const TestScreen: React.FC = () => {
   return (
     <SafeAreaView style={styles.container} edges={["top", "bottom"]}>
       {/* Header */}
-      <View style={[styles.header, { paddingTop: Math.max(insets.top, 12) }]}>
+      <View style={[styles.header, {paddingTop: Math.max(insets.top, 12)}]}>
         <Text style={styles.headerTitle}>Testlər</Text>
         <View style={styles.headerRight}>
           <TouchableOpacity
             style={styles.iconButton}
             onPress={() => setSortModalVisible(true)}
           >
-            <Ionicons name="swap-vertical" size={24} color="#111827" />
+            <Ionicons name="swap-vertical" size={24} color="#111827"/>
           </TouchableOpacity>
           <TouchableOpacity
             style={styles.iconButton}
             onPress={() => router.push("/search" as any)}
           >
-            <Ionicons name="search" size={24} color="#111827" />
+            <Ionicons name="search" size={24} color="#111827"/>
           </TouchableOpacity>
         </View>
       </View>
@@ -345,7 +343,7 @@ const TestScreen: React.FC = () => {
           <RefreshControl
             refreshing={refreshing}
             onRefresh={onRefresh}
-            colors={["#7313e8"]}
+            colors={[BRAND_PRIMARY]}
           />
         }
       />
@@ -366,7 +364,7 @@ const TestScreen: React.FC = () => {
             <View style={styles.sortModalHeader}>
               <Text style={styles.sortModalTitle}>Sıralama</Text>
               <TouchableOpacity onPress={() => setSortModalVisible(false)}>
-                <Ionicons name="close" size={24} color="#6B7280" />
+                <Ionicons name="close" size={24} color="#6B7280"/>
               </TouchableOpacity>
             </View>
             {sortOptions.map((option) => (
@@ -379,12 +377,12 @@ const TestScreen: React.FC = () => {
                   <Ionicons
                     name={option.icon as any}
                     size={20}
-                    color="#7313e8"
+                    color={BRAND_PRIMARY}
                   />
                   <Text style={styles.sortOptionText}>{option.label}</Text>
                 </View>
                 {sortBy === option.id && (
-                  <Ionicons name="checkmark" size={24} color="#7313e8" />
+                  <Ionicons name="checkmark" size={24} color={BRAND_PRIMARY}/>
                 )}
               </TouchableOpacity>
             ))}
@@ -398,7 +396,7 @@ const TestScreen: React.FC = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#F9FAFB",
+    backgroundColor: BACKGROUND_PAGE,
   },
   header: {
     flexDirection: "row",
@@ -406,14 +404,14 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
     paddingHorizontal: 16,
     paddingBottom: 12,
-    backgroundColor: "#FFFFFF",
+    backgroundColor: BACKGROUND_CARD,
     borderBottomWidth: 1,
-    borderBottomColor: "#F3F4F6",
+    borderBottomColor: BORDER_LIGHT,
   },
   headerTitle: {
     fontSize: 18,
     fontWeight: "bold",
-    color: "#111827",
+    color: TEXT_PRIMARY,
     flex: 1,
     marginLeft: 12,
   },
@@ -425,9 +423,9 @@ const styles = StyleSheet.create({
     padding: 4,
   },
   filtersContainer: {
-    backgroundColor: "#FFFFFF",
+    backgroundColor: BACKGROUND_CARD,
     borderBottomWidth: 1,
-    borderBottomColor: "#F3F4F6",
+    borderBottomColor: BORDER_LIGHT,
   },
   filtersScroll: {
     paddingHorizontal: 16,
@@ -441,7 +439,7 @@ const styles = StyleSheet.create({
     marginRight: 8,
   },
   filterButtonActive: {
-    backgroundColor: "#7313e8",
+    backgroundColor: BRAND_PRIMARY,
   },
   filterText: {
     fontSize: 14,
@@ -454,21 +452,21 @@ const styles = StyleSheet.create({
   countContainer: {
     paddingHorizontal: 20,
     paddingVertical: 12,
-    backgroundColor: "#FFFFFF",
+    backgroundColor: BACKGROUND_CARD,
   },
   countText: {
     fontSize: 13,
     color: "#6B7280",
   },
   testCard: {
-    backgroundColor: "#FFFFFF",
+    backgroundColor: BACKGROUND_CARD,
     marginHorizontal: 16,
     marginTop: 12,
     padding: 16,
     borderRadius: 16,
     elevation: 1,
     shadowColor: "#000",
-    shadowOffset: { width: 0, height: 1 },
+    shadowOffset: {width: 0, height: 1},
     shadowOpacity: 0.02,
     shadowRadius: 1,
   },
@@ -481,7 +479,7 @@ const styles = StyleSheet.create({
   testTitle: {
     fontSize: 16,
     fontWeight: "bold",
-    color: "#111827",
+    color: TEXT_PRIMARY,
     flex: 1,
   },
   premiumBadge: {
@@ -529,7 +527,7 @@ const styles = StyleSheet.create({
     color: "#9CA3AF",
   },
   startButton: {
-    backgroundColor: "#7313e8",
+    backgroundColor: BRAND_PRIMARY,
     paddingVertical: 12,
     borderRadius: 10,
     alignItems: "center",
@@ -548,7 +546,7 @@ const styles = StyleSheet.create({
   loadMoreText: {
     fontSize: 14,
     fontWeight: "600",
-    color: "#7313e8",
+    color: BRAND_PRIMARY,
   },
   loadMoreContainer: {
     paddingVertical: 20,
@@ -570,7 +568,7 @@ const styles = StyleSheet.create({
   emptyStateTitle: {
     fontSize: 18,
     fontWeight: "600",
-    color: "#111827",
+    color: TEXT_PRIMARY,
     marginTop: 16,
     marginBottom: 8,
   },
@@ -585,7 +583,7 @@ const styles = StyleSheet.create({
     justifyContent: "flex-end",
   },
   sortModal: {
-    backgroundColor: "#fff",
+    backgroundColor: BACKGROUND_CARD,
     borderTopLeftRadius: 20,
     borderTopRightRadius: 20,
     paddingBottom: 40,
@@ -602,7 +600,7 @@ const styles = StyleSheet.create({
   sortModalTitle: {
     fontSize: 18,
     fontWeight: "600",
-    color: "#111827",
+    color: TEXT_PRIMARY,
   },
   sortOption: {
     flexDirection: "row",
@@ -618,7 +616,7 @@ const styles = StyleSheet.create({
   },
   sortOptionText: {
     fontSize: 16,
-    color: "#111827",
+    color: TEXT_PRIMARY,
   },
 });
 

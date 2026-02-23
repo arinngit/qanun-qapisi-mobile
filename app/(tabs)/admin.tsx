@@ -1,8 +1,9 @@
-import { Ionicons } from "@expo/vector-icons";
-import { useRouter } from "expo-router";
-import React, { useEffect, useState } from "react";
+import {Ionicons} from "@expo/vector-icons";
+import {useRouter} from "expo-router";
+import React, {useEffect, useState} from "react";
 import {
   ActivityIndicator,
+  Alert,
   RefreshControl,
   ScrollView,
   StyleSheet,
@@ -10,35 +11,33 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
-import { SafeAreaView } from "react-native-safe-area-context";
-import { useAuth } from "../../context/auth-context";
-import { adminAPI, DashboardStatsResponse } from "../../services/api";
+import {SafeAreaView} from "react-native-safe-area-context";
+import {BACKGROUND_CARD, BACKGROUND_PAGE, BORDER_LIGHT, BRAND_PRIMARY, TEXT_PRIMARY,} from "@/constants/colors";
+import {useAuth} from "@/context/auth-context";
+import {adminAPI, DashboardStatsResponse} from "@/services/api";
 
 export default function AdminDashboardScreen() {
   const router = useRouter();
-  const { user } = useAuth();
+  const {user} = useAuth();
 
   const [stats, setStats] = useState<DashboardStatsResponse | null>(null);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
 
   useEffect(() => {
-    // Only load if user is admin
     if (user?.role === "ADMIN") {
       loadDashboardStats();
     } else {
-      // Redirect non-admin users
       router.replace("/(tabs)/tests");
     }
-  }, [user]);
+  }, [user, router]);
 
   const loadDashboardStats = async () => {
     try {
       const data = await adminAPI.getDashboardStats();
       setStats(data);
-    } catch (error) {
-      console.error("Error loading dashboard stats:", error);
-      alert("Statistika məlumatlarını yükləmək mümkün olmadı");
+    } catch {
+      Alert.alert("Xəta", "Statistika məlumatlarını yükləmək mümkün olmadı");
     } finally {
       setLoading(false);
       setRefreshing(false);
@@ -57,7 +56,7 @@ export default function AdminDashboardScreen() {
           <Text style={styles.headerTitle}>Admin Panel</Text>
         </View>
         <View style={styles.loadingContainer}>
-          <ActivityIndicator size="large" color="#7313e8" />
+          <ActivityIndicator size="large" color={BRAND_PRIMARY}/>
         </View>
       </SafeAreaView>
     );
@@ -76,14 +75,14 @@ export default function AdminDashboardScreen() {
           <RefreshControl
             refreshing={refreshing}
             onRefresh={onRefresh}
-            colors={["#7313e8"]}
+            colors={[BRAND_PRIMARY]}
           />
         }
       >
         {/* Welcome Card */}
         <View style={styles.welcomeCard}>
           <View style={styles.welcomeIcon}>
-            <Ionicons name="shield-checkmark" size={32} color="#7313e8" />
+            <Ionicons name="shield-checkmark" size={32} color="#FFFFFF"/>
           </View>
           <View style={styles.welcomeContent}>
             <Text style={styles.welcomeTitle}>
@@ -99,40 +98,40 @@ export default function AdminDashboardScreen() {
 
           <View style={styles.statsGrid}>
             <View style={styles.statCard}>
-              <View style={[styles.statIcon, { backgroundColor: "#DBEAFE" }]}>
-                <Ionicons name="people" size={28} color="#2563EB" />
+              <View style={[styles.statIcon, {backgroundColor: "#DBEAFE"}]}>
+                <Ionicons name="people" size={28} color="#2563EB"/>
               </View>
               <Text style={styles.statValue}>{stats?.totalUsers || 0}</Text>
               <Text style={styles.statLabel}>Ümumi İstifadəçi</Text>
             </View>
 
             <View style={styles.statCard}>
-              <View style={[styles.statIcon, { backgroundColor: "#D1FAE5" }]}>
-                <Ionicons name="document-text" size={28} color="#10B981" />
+              <View style={[styles.statIcon, {backgroundColor: "#D1FAE5"}]}>
+                <Ionicons name="document-text" size={28} color="#10B981"/>
               </View>
               <Text style={styles.statValue}>{stats?.totalTests || 0}</Text>
               <Text style={styles.statLabel}>Ümumi Test</Text>
             </View>
 
             <View style={styles.statCard}>
-              <View style={[styles.statIcon, { backgroundColor: "#FEF3C7" }]}>
-                <Ionicons name="checkmark-circle" size={28} color="#F59E0B" />
+              <View style={[styles.statIcon, {backgroundColor: "#FEF3C7"}]}>
+                <Ionicons name="checkmark-circle" size={28} color="#F59E0B"/>
               </View>
               <Text style={styles.statValue}>{stats?.publishedTests || 0}</Text>
               <Text style={styles.statLabel}>Dərc edilmiş</Text>
             </View>
 
             <View style={styles.statCard}>
-              <View style={[styles.statIcon, { backgroundColor: "#E9D5FF" }]}>
-                <Ionicons name="create" size={28} color="#9333EA" />
+              <View style={[styles.statIcon, {backgroundColor: "#E9D5FF"}]}>
+                <Ionicons name="create" size={28} color="#9333EA"/>
               </View>
               <Text style={styles.statValue}>{stats?.draftTests || 0}</Text>
               <Text style={styles.statLabel}>Qaralama</Text>
             </View>
 
             <View style={styles.statCardWide}>
-              <View style={[styles.statIcon, { backgroundColor: "#FECACA" }]}>
-                <Ionicons name="list" size={28} color="#DC2626" />
+              <View style={[styles.statIcon, {backgroundColor: "#FECACA"}]}>
+                <Ionicons name="list" size={28} color="#DC2626"/>
               </View>
               <Text style={styles.statValue}>{stats?.totalAttempts || 0}</Text>
               <Text style={styles.statLabel}>Ümumi Cəhdlər</Text>
@@ -149,8 +148,8 @@ export default function AdminDashboardScreen() {
               style={styles.actionCard}
               onPress={() => router.push("/admin/tests/create" as any)}
             >
-              <View style={[styles.actionIcon, { backgroundColor: "#DBEAFE" }]}>
-                <Ionicons name="add-circle" size={32} color="#2563EB" />
+              <View style={[styles.actionIcon, {backgroundColor: "#DBEAFE"}]}>
+                <Ionicons name="add-circle" size={32} color="#2563EB"/>
               </View>
               <Text style={styles.actionTitle}>Test Yarat</Text>
               <Text style={styles.actionSubtitle}>Yeni test əlavə et</Text>
@@ -160,8 +159,8 @@ export default function AdminDashboardScreen() {
               style={styles.actionCard}
               onPress={() => router.push("/admin/tests" as any)}
             >
-              <View style={[styles.actionIcon, { backgroundColor: "#D1FAE5" }]}>
-                <Ionicons name="list" size={32} color="#10B981" />
+              <View style={[styles.actionIcon, {backgroundColor: "#D1FAE5"}]}>
+                <Ionicons name="list" size={32} color="#10B981"/>
               </View>
               <Text style={styles.actionTitle}>Testləri İdarə Et</Text>
               <Text style={styles.actionSubtitle}>Bütün testlər</Text>
@@ -171,8 +170,8 @@ export default function AdminDashboardScreen() {
               style={styles.actionCard}
               onPress={() => router.push("/admin/users" as any)}
             >
-              <View style={[styles.actionIcon, { backgroundColor: "#FEF3C7" }]}>
-                <Ionicons name="people" size={32} color="#F59E0B" />
+              <View style={[styles.actionIcon, {backgroundColor: "#FEF3C7"}]}>
+                <Ionicons name="people" size={32} color="#F59E0B"/>
               </View>
               <Text style={styles.actionTitle}>İstifadəçilər</Text>
               <Text style={styles.actionSubtitle}>İdarəetmə</Text>
@@ -182,8 +181,8 @@ export default function AdminDashboardScreen() {
               style={styles.actionCard}
               onPress={() => router.push("/statistics" as any)}
             >
-              <View style={[styles.actionIcon, { backgroundColor: "#E9D5FF" }]}>
-                <Ionicons name="stats-chart" size={32} color="#9333EA" />
+              <View style={[styles.actionIcon, {backgroundColor: "#E9D5FF"}]}>
+                <Ionicons name="stats-chart" size={32} color="#9333EA"/>
               </View>
               <Text style={styles.actionTitle}>Statistika</Text>
               <Text style={styles.actionSubtitle}>Tam hesabat</Text>
@@ -233,7 +232,7 @@ export default function AdminDashboardScreen() {
                       <Text style={styles.badgeText}>Premium</Text>
                     </View>
                   )}
-                  {user.isVerified && (
+                  {user.verified && (
                     <Ionicons
                       name="checkmark-circle"
                       size={20}
@@ -246,7 +245,7 @@ export default function AdminDashboardScreen() {
           </View>
         )}
 
-        <View style={styles.bottomSpacer} />
+        <View style={styles.bottomSpacer}/>
       </ScrollView>
     </SafeAreaView>
   );
@@ -255,19 +254,19 @@ export default function AdminDashboardScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#F9FAFB",
+    backgroundColor: BACKGROUND_PAGE,
   },
   header: {
     paddingHorizontal: 20,
     paddingVertical: 16,
-    backgroundColor: "#FFFFFF",
+    backgroundColor: BACKGROUND_CARD,
     borderBottomWidth: 1,
-    borderBottomColor: "#F3F4F6",
+    borderBottomColor: BORDER_LIGHT,
   },
   headerTitle: {
     fontSize: 24,
     fontWeight: "bold",
-    color: "#111827",
+    color: TEXT_PRIMARY,
   },
   loadingContainer: {
     flex: 1,
@@ -277,7 +276,7 @@ const styles = StyleSheet.create({
   welcomeCard: {
     flexDirection: "row",
     alignItems: "center",
-    backgroundColor: "#7313e8",
+    backgroundColor: BRAND_PRIMARY,
     marginHorizontal: 20,
     marginTop: 20,
     marginBottom: 24,
@@ -329,7 +328,7 @@ const styles = StyleSheet.create({
   seeAllText: {
     fontSize: 14,
     fontWeight: "600",
-    color: "#7313e8",
+    color: BRAND_PRIMARY,
   },
   statsGrid: {
     flexDirection: "row",
@@ -416,7 +415,7 @@ const styles = StyleSheet.create({
     width: 48,
     height: 48,
     borderRadius: 24,
-    backgroundColor: "#7313e8",
+    backgroundColor: BRAND_PRIMARY,
     justifyContent: "center",
     alignItems: "center",
   },

@@ -1,18 +1,10 @@
-import { Ionicons } from "@expo/vector-icons";
-import { useLocalSearchParams, useRouter } from "expo-router";
-import React, { useState } from "react";
-import {
-  ActivityIndicator,
-  Alert,
-  SafeAreaView,
-  ScrollView,
-  StyleSheet,
-  Text,
-  TextInput,
-  TouchableOpacity,
-  View,
-} from "react-native";
-import { authAPI } from "../../services/api";
+import {Ionicons} from "@expo/vector-icons";
+import {useLocalSearchParams, useRouter} from "expo-router";
+import React, {useState} from "react";
+import {ActivityIndicator, Alert, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View,} from "react-native";
+import {SafeAreaView} from "react-native-safe-area-context";
+import {BACKGROUND_PAGE, BRAND_PRIMARY} from "@/constants/colors";
+import {authAPI} from "@/services/api";
 
 export default function ResetPasswordScreen() {
   const params = useLocalSearchParams();
@@ -40,12 +32,13 @@ export default function ResetPasswordScreen() {
 
     setLoading(true);
     try {
-      await authAPI.resetPassword({ email: email.trim() });
+      await authAPI.resetPassword({email: email.trim()});
       Alert.alert("Uğurlu", "Şifrə yeniləmə kodu e-poçtunuza göndərildi", [
-        { text: "OK", onPress: () => setStep("confirm") },
+        {text: "OK", onPress: () => setStep("confirm")},
       ]);
-    } catch (error: any) {
-      const errorMessage = error.response?.data?.message || "Xəta baş verdi";
+    } catch (error: unknown) {
+      const axiosError = error as { response?: { data?: { message?: string } } };
+      const errorMessage = axiosError.response?.data?.message || "Xəta baş verdi";
       Alert.alert("Xəta", errorMessage);
     } finally {
       setLoading(false);
@@ -82,9 +75,10 @@ export default function ResetPasswordScreen() {
           onPress: () => router.replace("/(auth)/login"),
         },
       ]);
-    } catch (error: any) {
+    } catch (error: unknown) {
+      const axiosError = error as { response?: { data?: { message?: string } } };
       const errorMessage =
-        error.response?.data?.message || "Kod yanlışdır və ya vaxtı bitib";
+        axiosError.response?.data?.message || "Kod yanlışdır və ya vaxtı bitib";
       Alert.alert("Xəta", errorMessage);
     } finally {
       setLoading(false);
@@ -99,7 +93,7 @@ export default function ResetPasswordScreen() {
           style={styles.backButton}
           onPress={() => router.back()}
         >
-          <Ionicons name="arrow-back" size={24} color="#111827" />
+          <Ionicons name="arrow-back" size={24} color="#111827"/>
         </TouchableOpacity>
 
         {/* Header */}
@@ -108,7 +102,7 @@ export default function ResetPasswordScreen() {
             <Ionicons
               name={step === "request" ? "key-outline" : "lock-closed-outline"}
               size={48}
-              color="#7313e8"
+              color={BRAND_PRIMARY}
             />
           </View>
           <Text style={styles.title}>
@@ -153,7 +147,7 @@ export default function ResetPasswordScreen() {
                 disabled={loading}
               >
                 {loading ? (
-                  <ActivityIndicator color="#FFFFFF" />
+                  <ActivityIndicator color="#FFFFFF"/>
                 ) : (
                   <Text style={styles.submitButtonText}>Kod Göndər</Text>
                 )}
@@ -238,7 +232,7 @@ export default function ResetPasswordScreen() {
                 disabled={loading}
               >
                 {loading ? (
-                  <ActivityIndicator color="#FFFFFF" />
+                  <ActivityIndicator color="#FFFFFF"/>
                 ) : (
                   <Text style={styles.submitButtonText}>Şifrəni Yenilə</Text>
                 )}
@@ -273,7 +267,7 @@ export default function ResetPasswordScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#F9FAFB",
+    backgroundColor: BACKGROUND_PAGE,
   },
   scrollContent: {
     flexGrow: 1,
@@ -318,7 +312,7 @@ const styles = StyleSheet.create({
     padding: 24,
     marginBottom: 24,
     shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
+    shadowOffset: {width: 0, height: 2},
     shadowOpacity: 0.1,
     shadowRadius: 8,
     elevation: 3,
@@ -351,7 +345,7 @@ const styles = StyleSheet.create({
     color: "#111827",
   },
   submitButton: {
-    backgroundColor: "#7313e8",
+    backgroundColor: BRAND_PRIMARY,
     borderRadius: 12,
     height: 50,
     justifyContent: "center",
@@ -377,7 +371,7 @@ const styles = StyleSheet.create({
   },
   resendLink: {
     fontSize: 14,
-    color: "#7313e8",
+    color: BRAND_PRIMARY,
     fontWeight: "600",
   },
   loginContainer: {
@@ -386,7 +380,7 @@ const styles = StyleSheet.create({
   },
   loginLink: {
     fontSize: 16,
-    color: "#7313e8",
+    color: BRAND_PRIMARY,
     fontWeight: "600",
   },
 });

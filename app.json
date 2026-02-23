@@ -4,7 +4,7 @@
     "slug": "qanun-qapisi",
     "version": "2.1.7",
     "orientation": "portrait",
-    "icon": "./assets/images/farid-logo.jpg",
+    "icon": "./assets/images/icon.png",
     "scheme": "qanunqapisimobile",
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
@@ -31,7 +31,7 @@
       "package": "com.qanunqapisi.mobile",
       "adaptiveIcon": {
         "backgroundColor": "#7313e8",
-        "foregroundImage": "./assets/images/farid-logo.jpg"
+        "foregroundImage": "./assets/images/android-icon-foreground.png"
       },
       "usesCleartextTraffic": false,
       "edgeToEdgeEnabled": true,
@@ -54,7 +54,7 @@
       [
         "expo-splash-screen",
         {
-          "image": "./assets/images/farid-logo.jpg",
+          "image": "./assets/images/splash-icon.png",
           "imageWidth": 200,
           "resizeMode": "contain",
           "backgroundColor": "#7313e8",
@@ -72,7 +72,8 @@
             "usesCleartextTraffic": false
           }
         }
-      ]
+      ],
+      "expo-web-browser"
     ],
     "experiments": {
       "typedRoutes": true,

@@ -1,19 +1,11 @@
-import { Ionicons } from "@expo/vector-icons";
-import { useRouter } from "expo-router";
-import React, { useEffect, useState } from "react";
-import {
-  ActivityIndicator,
-  RefreshControl,
-  ScrollView,
-  StyleSheet,
-  Text,
-  TouchableOpacity,
-  View,
-} from "react-native";
-import { SafeAreaView } from "react-native-safe-area-context";
-import { useAuth } from "../context/auth-context";
-import { TestAttemptResponse, testsAPI } from "../services/api";
-import { handleApiError } from "../utils/errorHandler";
+import {Ionicons} from "@expo/vector-icons";
+import {useRouter} from "expo-router";
+import React, {useEffect, useState} from "react";
+import {ActivityIndicator, RefreshControl, ScrollView, StyleSheet, Text, TouchableOpacity, View,} from "react-native";
+import {SafeAreaView} from "react-native-safe-area-context";
+import {BACKGROUND_CARD, BACKGROUND_PAGE, BORDER_LIGHT, BRAND_PRIMARY,} from "@/constants/colors";
+import {TestAttemptResponse, testsAPI} from "@/services/api";
+import {handleApiError} from "@/utils/errorHandler";
 
 interface TestAttemptWithTest extends TestAttemptResponse {
   testTitle: string;
@@ -21,7 +13,6 @@ interface TestAttemptWithTest extends TestAttemptResponse {
 
 export default function StatisticsScreen() {
   const router = useRouter();
-  const { user } = useAuth();
 
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
@@ -42,28 +33,24 @@ export default function StatisticsScreen() {
 
   const loadStatistics = async () => {
     try {
-      // Since we don't have a dedicated user statistics endpoint,
-      // we'll need to fetch all published tests and their attempts
-      const testsResponse = await testsAPI.getTests({ page: 0, size: 100 });
+      const testsResponse = await testsAPI.getTests({page: 0, size: 100});
       const tests = testsResponse.content;
 
-      let allAttempts: TestAttemptWithTest[] = [];
+      const attemptResults = await Promise.allSettled(
+        tests.map((test) => testsAPI.getTestAttempts(test.id))
+      );
 
-      // Fetch attempts for each test
-      for (const test of tests) {
-        try {
-          const testAttempts = await testsAPI.getTestAttempts(test.id);
-          const attemptsWithTitle = testAttempts.map((attempt) => ({
+      let allAttempts: TestAttemptWithTest[] = [];
+      attemptResults.forEach((result, index) => {
+        if (result.status === "fulfilled") {
+          const attemptsWithTitle = result.value.map((attempt) => ({
             ...attempt,
-            testTitle: test.title,
+            testTitle: tests[index].title,
           }));
           allAttempts = [...allAttempts, ...attemptsWithTitle];
-        } catch (error) {
-          // Test not attempted, continue
         }
-      }
+      });
 
-      // Sort by submission date (most recent first)
       allAttempts.sort((a, b) => {
         const dateA = a.submittedAt ? new Date(a.submittedAt).getTime() : 0;
         const dateB = b.submittedAt ? new Date(b.submittedAt).getTime() : 0;
@@ -72,7 +59,6 @@ export default function StatisticsScreen() {
 
       setAttempts(allAttempts);
 
-      // Calculate statistics
       const completedAttempts = allAttempts.filter(
         (attempt) => attempt.status === "COMPLETED"
       );
@@ -103,7 +89,7 @@ export default function StatisticsScreen() {
         bestScore,
         worstScore,
       });
-    } catch (error: any) {
+    } catch (error: unknown) {
       handleApiError(error, "Statistika yüklənə bilmədi");
     } finally {
       setLoading(false);
@@ -174,7 +160,7 @@ export default function StatisticsScreen() {
 
           {attempt.status === "COMPLETED" ? (
             <View
-              style={[styles.attemptScore, { backgroundColor: scoreColor }]}
+              style={[styles.attemptScore, {backgroundColor: scoreColor}]}
             >
               <Text style={styles.attemptScoreText}>{percentage}%</Text>
             </View>
@@ -190,7 +176,7 @@ export default function StatisticsScreen() {
             <Text style={styles.attemptScoreDetail}>
               {attempt.totalScore} / {attempt.maxPossibleScore} xal
             </Text>
-            <Ionicons name="chevron-forward" size={20} color="#9CA3AF" />
+            <Ionicons name="chevron-forward" size={20} color="#9CA3AF"/>
           </View>
         )}
       </TouchableOpacity>
@@ -205,13 +191,13 @@ export default function StatisticsScreen() {
             style={styles.backButton}
             onPress={() => router.back()}
           >
-            <Ionicons name="arrow-back" size={24} color="#111827" />
+            <Ionicons name="arrow-back" size={24} color="#111827"/>
           </TouchableOpacity>
           <Text style={styles.headerTitle}>Statistika</Text>
-          <View style={styles.headerRight} />
+          <View style={styles.headerRight}/>
         </View>
         <View style={styles.loadingContainer}>
-          <ActivityIndicator size="large" color="#7313e8" />
+          <ActivityIndicator size="large" color={BRAND_PRIMARY}/>
         </View>
       </SafeAreaView>
     );
@@ -230,10 +216,10 @@ export default function StatisticsScreen() {
           style={styles.backButton}
           onPress={() => router.back()}
         >
-          <Ionicons name="arrow-back" size={24} color="#111827" />
+          <Ionicons name="arrow-back" size={24} color="#111827"/>
         </TouchableOpacity>
         <Text style={styles.headerTitle}>Statistika</Text>
-        <View style={styles.headerRight} />
+        <View style={styles.headerRight}/>
       </View>
 
       <ScrollView
@@ -242,7 +228,7 @@ export default function StatisticsScreen() {
           <RefreshControl
             refreshing={refreshing}
             onRefresh={onRefresh}
-            colors={["#7313e8"]}
+            colors={[BRAND_PRIMARY]}
           />
         }
       >
@@ -276,38 +262,38 @@ export default function StatisticsScreen() {
         {/* Stats Grid */}
         <View style={styles.statsGrid}>
           <View style={styles.statCard}>
-            <View style={[styles.statIcon, { backgroundColor: "#D1FAE5" }]}>
-              <Ionicons name="trending-up" size={24} color="#10B981" />
+            <View style={[styles.statIcon, {backgroundColor: "#D1FAE5"}]}>
+              <Ionicons name="trending-up" size={24} color="#10B981"/>
             </View>
             <Text style={styles.statValue}>{stats.bestScore}</Text>
             <Text style={styles.statLabel}>Ən yaxşı nəticə</Text>
           </View>
 
           <View style={styles.statCard}>
-            <View style={[styles.statIcon, { backgroundColor: "#FEE2E2" }]}>
-              <Ionicons name="trending-down" size={24} color="#EF4444" />
+            <View style={[styles.statIcon, {backgroundColor: "#FEE2E2"}]}>
+              <Ionicons name="trending-down" size={24} color="#EF4444"/>
             </View>
             <Text style={styles.statValue}>{stats.worstScore}</Text>
             <Text style={styles.statLabel}>Ən aşağı nəticə</Text>
           </View>
 
           <View style={styles.statCard}>
-            <View style={[styles.statIcon, { backgroundColor: "#DBEAFE" }]}>
-              <Ionicons name="calculator" size={24} color="#3B82F6" />
+            <View style={[styles.statIcon, {backgroundColor: "#DBEAFE"}]}>
+              <Ionicons name="calculator" size={24} color="#3B82F6"/>
             </View>
             <Text style={styles.statValue}>{stats.totalScore}</Text>
             <Text style={styles.statLabel}>Toplam xal</Text>
           </View>
 
           <View style={styles.statCard}>
-            <View style={[styles.statIcon, { backgroundColor: "#E9D5FF" }]}>
-              <Ionicons name="checkmark-done" size={24} color="#9333EA" />
+            <View style={[styles.statIcon, {backgroundColor: "#E9D5FF"}]}>
+              <Ionicons name="checkmark-done" size={24} color="#9333EA"/>
             </View>
             <Text style={styles.statValue}>
               {stats.completedAttempts > 0
                 ? `${Math.round(
-                    (stats.completedAttempts / stats.totalAttempts) * 100
-                  )}%`
+                  (stats.completedAttempts / stats.totalAttempts) * 100
+                )}%`
                 : "0%"}
             </Text>
             <Text style={styles.statLabel}>Tamamlanma</Text>
@@ -319,7 +305,7 @@ export default function StatisticsScreen() {
           <Text style={styles.sectionTitle}>Son Cəhdlər</Text>
           {attempts.length === 0 ? (
             <View style={styles.emptyState}>
-              <Ionicons name="stats-chart-outline" size={64} color="#9CA3AF" />
+              <Ionicons name="stats-chart-outline" size={64} color="#9CA3AF"/>
               <Text style={styles.emptyStateText}>
                 Hələ test cəhdiniz yoxdur
               </Text>
@@ -335,7 +321,7 @@ export default function StatisticsScreen() {
           )}
         </View>
 
-        <View style={styles.bottomSpacer} />
+        <View style={styles.bottomSpacer}/>
       </ScrollView>
     </SafeAreaView>
   );
@@ -344,16 +330,16 @@ export default function StatisticsScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#F9FAFB",
+    backgroundColor: BACKGROUND_PAGE,
   },
   header: {
     flexDirection: "row",
     alignItems: "center",
     paddingHorizontal: 16,
     paddingVertical: 12,
-    backgroundColor: "#FFFFFF",
+    backgroundColor: BACKGROUND_CARD,
     borderBottomWidth: 1,
-    borderBottomColor: "#F3F4F6",
+    borderBottomColor: BORDER_LIGHT,
   },
   backButton: {
     padding: 4,
@@ -374,7 +360,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   overviewCard: {
-    backgroundColor: "#7313e8",
+    backgroundColor: BRAND_PRIMARY,
     marginHorizontal: 20,
     marginTop: 20,
     marginBottom: 16,
@@ -528,7 +514,7 @@ const styles = StyleSheet.create({
     marginBottom: 24,
   },
   browseButton: {
-    backgroundColor: "#7313e8",
+    backgroundColor: BRAND_PRIMARY,
     paddingHorizontal: 24,
     paddingVertical: 12,
     borderRadius: 10,

@@ -1,12 +1,11 @@
-import { Ionicons } from "@expo/vector-icons";
+import {Ionicons} from "@expo/vector-icons";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import { useRouter } from "expo-router";
-import React, { useState } from "react";
+import {useRouter} from "expo-router";
+import React, {useState} from "react";
 import {
   ActivityIndicator,
   Alert,
   Image,
-  SafeAreaView,
   ScrollView,
   StyleSheet,
   Text,
@@ -14,14 +13,14 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
-import { useAuth } from "../../context/auth-context";
-import { useLanguage } from "../../context/language-context";
-import { useTheme } from "../../context/theme-context";
+import {SafeAreaView} from "react-native-safe-area-context";
+import {BACKGROUND_PAGE, BRAND_PRIMARY} from "@/constants/colors";
+import {useAuth} from "@/context/auth-context";
+import {useLanguage} from "@/context/language-context";
 
 export default function Login() {
-  const { t } = useLanguage();
-  const { colors, isDark } = useTheme();
-  const { login: loginWithContext } = useAuth();
+  const {t} = useLanguage();
+  const {login: loginWithContext} = useAuth();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [rememberMe, setRememberMe] = useState(false);
@@ -60,19 +59,9 @@ export default function Login() {
       }
 
       router.replace("/(tabs)");
-    } catch (error: any) {
-      let errorMessage = t.loginFailed;
-
-      if (error.response?.data?.message) {
-        errorMessage = error.response.data.message;
-      } else if (error.response?.status === 400) {
-        errorMessage = t.invalidCredentials;
-      } else if (error.response?.status === 401) {
-        errorMessage = t.emailNotVerified;
-      } else if (error instanceof Error && error.message) {
-        errorMessage = error.message;
-      }
-
+    } catch (error: unknown) {
+      const errorMessage =
+        error instanceof Error ? error.message : t.loginFailed;
       Alert.alert(t.error, errorMessage);
     } finally {
       setLoading(false);
@@ -82,7 +71,7 @@ export default function Login() {
   const handleForgotPassword = () => {
     router.push({
       pathname: "/(auth)/reset-password",
-      params: { email: email.trim() },
+      params: {email: email.trim()},
     });
   };
 
@@ -174,7 +163,7 @@ export default function Login() {
                 style={[styles.checkbox, rememberMe && styles.checkboxChecked]}
               >
                 {rememberMe && (
-                  <Ionicons name="checkmark" size={14} color="#FFFFFF" />
+                  <Ionicons name="checkmark" size={14} color="#FFFFFF"/>
                 )}
               </View>
               <Text style={styles.checkboxLabel}>Məni xatırla</Text>
@@ -190,16 +179,16 @@ export default function Login() {
             disabled={loading}
           >
             {loading ? (
-              <ActivityIndicator color="#FFFFFF" />
+              <ActivityIndicator color="#FFFFFF"/>
             ) : (
               <Text style={styles.loginButtonText}>Daxil ol</Text>
             )}
           </TouchableOpacity>
 
           <View style={styles.divider}>
-            <View style={styles.dividerLine} />
+            <View style={styles.dividerLine}/>
             <Text style={styles.dividerText}>və ya</Text>
-            <View style={styles.dividerLine} />
+            <View style={styles.dividerLine}/>
           </View>
 
           <View style={styles.signupContainer}>
@@ -237,7 +226,7 @@ export default function Login() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#F9FAFB",
+    backgroundColor: BACKGROUND_PAGE,
   },
   scrollContent: {
     flexGrow: 1,
@@ -251,7 +240,7 @@ const styles = StyleSheet.create({
   logoContainer: {
     width: 80,
     height: 80,
-    backgroundColor: "#7313e8",
+    backgroundColor: BRAND_PRIMARY,
     borderRadius: 40,
     justifyContent: "center",
     alignItems: "center",
@@ -274,7 +263,7 @@ const styles = StyleSheet.create({
     padding: 24,
     marginBottom: 24,
     shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
+    shadowOffset: {width: 0, height: 2},
     shadowOpacity: 0.1,
     shadowRadius: 8,
     elevation: 3,
@@ -340,8 +329,8 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   checkboxChecked: {
-    backgroundColor: "#7313e8",
-    borderColor: "#7313e8",
+    backgroundColor: BRAND_PRIMARY,
+    borderColor: BRAND_PRIMARY,
   },
   checkboxLabel: {
     fontSize: 14,
@@ -349,11 +338,11 @@ const styles = StyleSheet.create({
   },
   forgotPassword: {
     fontSize: 14,
-    color: "#7313e8",
+    color: BRAND_PRIMARY,
     fontWeight: "500",
   },
   loginButton: {
-    backgroundColor: "#7313e8",
+    backgroundColor: BRAND_PRIMARY,
     borderRadius: 12,
     height: 50,
     justifyContent: "center",
@@ -394,7 +383,7 @@ const styles = StyleSheet.create({
   },
   signupLink: {
     fontSize: 14,
-    color: "#7313e8",
+    color: BRAND_PRIMARY,
     fontWeight: "600",
   },
   footer: {
@@ -413,7 +402,7 @@ const styles = StyleSheet.create({
     lineHeight: 18,
   },
   footerLink: {
-    color: "#7313e8",
+    color: BRAND_PRIMARY,
     fontWeight: "500",
   },
   copyright: {

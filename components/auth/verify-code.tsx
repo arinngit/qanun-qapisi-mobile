@@ -1,18 +1,13 @@
-import { Ionicons } from "@expo/vector-icons";
+import {Ionicons} from "@expo/vector-icons";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import { useLocalSearchParams, useRouter } from "expo-router";
-import React, { useRef, useState } from "react";
-import {
-  ActivityIndicator,
-  Alert,
-  SafeAreaView,
-  StyleSheet,
-  Text,
-  TextInput,
-  TouchableOpacity,
-  View,
-} from "react-native";
-import { authAPI, profileAPI } from "../../services/api";
+import {useLocalSearchParams, useRouter} from "expo-router";
+import React, {useRef, useState} from "react";
+import {ActivityIndicator, Alert, StyleSheet, Text, TextInput, TouchableOpacity, View,} from "react-native";
+import {SafeAreaView} from "react-native-safe-area-context";
+import {BACKGROUND_PAGE, BRAND_PRIMARY} from "@/constants/colors";
+import {authAPI, profileAPI} from "@/services/api";
+
+const CODE_LENGTH = 6;
 
 export default function VerifyScreen() {
   const params = useLocalSearchParams();
@@ -24,29 +19,25 @@ export default function VerifyScreen() {
   const [resending, setResending] = useState(false);
   const inputRefs = useRef<(TextInput | null)[]>([]);
 
-  // Инициализируем refs массив
   React.useEffect(() => {
-    inputRefs.current = inputRefs.current.slice(0, 6);
+    inputRefs.current = inputRefs.current.slice(0, CODE_LENGTH);
   }, []);
 
   const handleCodeChange = (text: string, index: number) => {
-    // Only allow numbers
     if (text && !/^\d+$/.test(text)) return;
 
     const newCode = [...code];
     newCode[index] = text;
     setCode(newCode);
 
-    // Auto-focus next input
     if (text && index < 5) {
       inputRefs.current[index + 1]?.focus();
     }
 
-    // Auto-submit when all fields are filled
-    if (text && index === 5) {
+    if (text && index === CODE_LENGTH - 1) {
       const fullCode = newCode.join("");
-      if (fullCode.length === 6) {
-        handleVerify();
+      if (fullCode.length === CODE_LENGTH) {
+        submitVerification(fullCode);
       }
     }
   };
@@ -57,26 +48,19 @@ export default function VerifyScreen() {
     }
   };
 
-  const handleVerify = async () => {
-    const verificationCode = code.join("");
-
-    if (verificationCode.length !== 6) {
-      Alert.alert("Xəta", "6 rəqəmli kodu daxil edin");
+  const submitVerification = async (verificationCode: string) => {
+    if (verificationCode.length !== CODE_LENGTH) {
+      Alert.alert("Xəta", `${CODE_LENGTH} rəqəmli kodu daxil edin`);
       return;
     }
 
     setLoading(true);
     try {
-      const response = await authAPI.verify({
+      await authAPI.verify({
         email,
         code: parseInt(verificationCode),
       });
 
-      // Save tokens
-      await AsyncStorage.setItem("accessToken", response.accessToken);
-      await AsyncStorage.setItem("refreshToken", response.refreshToken);
-
-      // Fetch and save user profile data (important for verified status)
       try {
         const profileData = await profileAPI.getProfile();
         const userData = {
@@ -93,7 +77,6 @@ export default function VerifyScreen() {
         await AsyncStorage.setItem("user", JSON.stringify(userData));
       } catch (profileError) {
         console.error("Error fetching profile after verification:", profileError);
-        // Continue anyway, auth context will fetch it
       }
 
       Alert.alert("Təbriklər!", "E-poçtunuz uğurla təsdiqləndi", [
@@ -102,9 +85,10 @@ export default function VerifyScreen() {
           onPress: () => router.replace("/(tabs)"),
         },
       ]);
-    } catch (error: any) {
+    } catch (error: unknown) {
+      const axiosError = error as { response?: { data?: { message?: string } } };
       const errorMessage =
-        error.response?.data?.message ||
+        axiosError.response?.data?.message ||
         "Təsdiq kodu yanlışdır və ya vaxtı bitib";
       Alert.alert("Xəta", errorMessage);
     } finally {
@@ -117,11 +101,12 @@ export default function VerifyScreen() {
     try {
       await authAPI.resend(email);
       Alert.alert("Uğurlu", "Təsdiq kodu yenidən göndərildi");
-      setCode(["", "", "", "", "", ""]);
+      setCode(Array(CODE_LENGTH).fill(""));
       inputRefs.current[0]?.focus();
-    } catch (error: any) {
+    } catch (error: unknown) {
+      const axiosError = error as { response?: { data?: { message?: string } } };
       const errorMessage =
-        error.response?.data?.message || "Kod göndərilərkən xəta baş verdi";
+        axiosError.response?.data?.message || "Kod göndərilərkən xəta baş verdi";
       Alert.alert("Xəta", errorMessage);
     } finally {
       setResending(false);
@@ -159,13 +144,13 @@ export default function VerifyScreen() {
           style={styles.backButton}
           onPress={() => router.back()}
         >
-          <Ionicons name="arrow-back" size={24} color="#111827" />
+          <Ionicons name="arrow-back" size={24} color="#111827"/>
         </TouchableOpacity>
 
         {/* Header */}
         <View style={styles.header}>
           <View style={styles.iconContainer}>
-            <Ionicons name="mail-outline" size={48} color="#7313e8" />
+            <Ionicons name="mail-outline" size={48} color={BRAND_PRIMARY}/>
           </View>
           <Text style={styles.title}>E-poçtu Təsdiqlə</Text>
           <Text style={styles.subtitle}>
@@ -181,13 +166,13 @@ export default function VerifyScreen() {
         <TouchableOpacity
           style={[
             styles.verifyButton,
-            (loading || code.join("").length !== 6) && styles.buttonDisabled,
+            (loading || code.join("").length !== CODE_LENGTH) && styles.buttonDisabled,
           ]}
-          onPress={handleVerify}
-          disabled={loading || code.join("").length !== 6}
+          onPress={() => submitVerification(code.join(""))}
+          disabled={loading || code.join("").length !== CODE_LENGTH}
         >
           {loading ? (
-            <ActivityIndicator color="#FFFFFF" />
+            <ActivityIndicator color="#FFFFFF"/>
           ) : (
             <Text style={styles.verifyButtonText}>Təsdiqlə</Text>
           )}
@@ -201,7 +186,7 @@ export default function VerifyScreen() {
             disabled={resending || loading}
           >
             {resending ? (
-              <ActivityIndicator size="small" color="#7313e8" />
+              <ActivityIndicator size="small" color={BRAND_PRIMARY}/>
             ) : (
               <Text style={styles.resendLink}>Yenidən göndər</Text>
             )}
@@ -225,7 +210,7 @@ export default function VerifyScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#F9FAFB",
+    backgroundColor: BACKGROUND_PAGE,
   },
   content: {
     flex: 1,
@@ -266,7 +251,7 @@ const styles = StyleSheet.create({
   },
   email: {
     fontSize: 16,
-    color: "#7313e8",
+    color: BRAND_PRIMARY,
     fontWeight: "600",
   },
   codeContainer: {
@@ -287,11 +272,11 @@ const styles = StyleSheet.create({
     backgroundColor: "#FFFFFF",
   },
   codeInputFilled: {
-    borderColor: "#7313e8",
+    borderColor: BRAND_PRIMARY,
     backgroundColor: "#EFF6FF",
   },
   verifyButton: {
-    backgroundColor: "#7313e8",
+    backgroundColor: BRAND_PRIMARY,
     borderRadius: 12,
     height: 50,
     justifyContent: "center",
@@ -318,7 +303,7 @@ const styles = StyleSheet.create({
   },
   resendLink: {
     fontSize: 14,
-    color: "#7313e8",
+    color: BRAND_PRIMARY,
     fontWeight: "600",
   },
   infoContainer: {

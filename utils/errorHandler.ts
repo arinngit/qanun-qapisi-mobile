@@ -91,7 +91,6 @@ export const showWarning = (message: string, title = 'Diqqət') => {
   });
 };
 
-// Network status checker
 export const checkNetworkStatus = async (): Promise<boolean> => {
   try {
     const response = await fetch('https://www.google.com', {
@@ -105,7 +104,6 @@ export const checkNetworkStatus = async (): Promise<boolean> => {
   }
 };
 
-// Retry logic for failed requests
 export const retryRequest = async <T>(
   requestFn: () => Promise<T>,
   maxRetries = 3,
@@ -118,7 +116,7 @@ export const retryRequest = async <T>(
       return await requestFn();
     } catch (error) {
       lastError = error;
-      
+
       if (i < maxRetries - 1) {
         await new Promise(resolve => setTimeout(resolve, delay * (i + 1)));
       }
@@ -128,7 +126,6 @@ export const retryRequest = async <T>(
   throw lastError;
 };
 
-// Premium content error handler
 export const handlePremiumError = () => {
   Toast.show({
     type: 'error',
@@ -138,4 +135,3 @@ export const handlePremiumError = () => {
     visibilityTime: 4000,
   });
 };
-

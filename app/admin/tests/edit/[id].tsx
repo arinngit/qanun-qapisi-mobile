@@ -1,25 +1,16 @@
-import React, { useState, useEffect } from "react";
-import {
-  View,
-  Text,
-  TextInput,
-  TouchableOpacity,
-  StyleSheet,
-  ScrollView,
-  ActivityIndicator,
-  Alert,
-} from "react-native";
-import { SafeAreaView } from "react-native-safe-area-context";
-import { Ionicons } from "@expo/vector-icons";
-import { useRouter, useLocalSearchParams } from "expo-router";
-import QuestionBuilder, { QuestionData } from "../../../../components/admin/QuestionBuilder";
-import ConfirmDialog from "../../../../components/admin/ConfirmDialog";
-import { adminAPI } from "../../../../services/api/admin";
-import { handleApiError, showSuccess } from "../../../../utils/errorHandler";
+import React, {useEffect, useState} from "react";
+import {ActivityIndicator, Alert, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View,} from "react-native";
+import {SafeAreaView} from "react-native-safe-area-context";
+import {Ionicons} from "@expo/vector-icons";
+import {useLocalSearchParams, useRouter} from "expo-router";
+import QuestionBuilder, {QuestionData} from "@/components/admin/QuestionBuilder";
+import ConfirmDialog from "@/components/admin/ConfirmDialog";
+import {adminAPI} from "@/services/api";
+import {handleApiError, showSuccess} from "@/utils/errorHandler";
 
 export default function EditTestScreen() {
   const router = useRouter();
-  const { id } = useLocalSearchParams();
+  const {id} = useLocalSearchParams();
   const testId = Array.isArray(id) ? id[0] : id;
 
   const [initialLoading, setInitialLoading] = useState(true);
@@ -35,18 +26,18 @@ export default function EditTestScreen() {
     if (testId) {
       loadTest();
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [testId]);
 
   const loadTest = async () => {
     try {
       setInitialLoading(true);
       const test = await adminAPI.getAdminTestById(testId);
-      
+
       setTitle(test.title);
       setDescription(test.description);
       setIsPremium(test.isPremium);
-      
-      // Map backend questions to our format
+
       const mappedQuestions: QuestionData[] = test.questions.map((q: any) => ({
         id: q.id,
         questionType: q.questionType,
@@ -56,7 +47,7 @@ export default function EditTestScreen() {
         correctAnswer: q.correctAnswer,
         answers: q.answers || [],
       }));
-      
+
       setQuestions(mappedQuestions);
     } catch (error) {
       handleApiError(error, "Test yüklənərkən xəta baş verdi");
@@ -88,16 +79,17 @@ export default function EditTestScreen() {
       "Əminsiniz?",
       "Bu sualı silmək istədiyinizdən əminsiniz?",
       [
-        { text: "Xeyr", style: "cancel" },
+        {text: "Xeyr", style: "cancel"},
         {
           text: "Bəli",
           style: "destructive",
           onPress: () => {
             const newQuestions = questions.filter((_, idx) => idx !== index);
-            // Recalculate order indices
+
             newQuestions.forEach((q, idx) => {
               q.orderIndex = idx;
             });
+
             setQuestions(newQuestions);
           },
         },
@@ -109,10 +101,11 @@ export default function EditTestScreen() {
     if (index === 0) return;
     const newQuestions = [...questions];
     [newQuestions[index], newQuestions[index - 1]] = [newQuestions[index - 1], newQuestions[index]];
-    // Recalculate order indices
+
     newQuestions.forEach((q, idx) => {
       q.orderIndex = idx;
     });
+
     setQuestions(newQuestions);
   };
 
@@ -120,10 +113,11 @@ export default function EditTestScreen() {
     if (index === questions.length - 1) return;
     const newQuestions = [...questions];
     [newQuestions[index], newQuestions[index + 1]] = [newQuestions[index + 1], newQuestions[index]];
-    // Recalculate order indices
+
     newQuestions.forEach((q, idx) => {
       q.orderIndex = idx;
     });
+
     setQuestions(newQuestions);
   };
 
@@ -194,12 +188,12 @@ export default function EditTestScreen() {
           questionType: q.questionType,
           questionText: q.questionText.trim(),
           score: q.score,
-          orderIndex: qIdx, // Always use sequential index
+          orderIndex: qIdx,
           correctAnswer: q.correctAnswer,
           answers: q.answers.map((a, aIdx) => ({
             answerText: a.answerText.trim(),
             isCorrect: a.isCorrect,
-            orderIndex: aIdx, // Always use sequential index
+            orderIndex: aIdx,
           })),
         })),
       };
@@ -226,13 +220,13 @@ export default function EditTestScreen() {
             style={styles.backButton}
             onPress={() => router.back()}
           >
-            <Ionicons name="arrow-back" size={24} color="#111827" />
+            <Ionicons name="arrow-back" size={24} color="#111827"/>
           </TouchableOpacity>
           <Text style={styles.headerTitle}>Testi Redaktə Et</Text>
-          <View style={styles.headerRight} />
+          <View style={styles.headerRight}/>
         </View>
         <View style={styles.loadingContainer}>
-          <ActivityIndicator size="large" color="#7313e8" />
+          <ActivityIndicator size="large" color="#7313e8"/>
           <Text style={styles.loadingText}>Test yüklənir...</Text>
         </View>
       </SafeAreaView>
@@ -246,7 +240,7 @@ export default function EditTestScreen() {
           style={styles.backButton}
           onPress={() => setShowCancelDialog(true)}
         >
-          <Ionicons name="arrow-back" size={24} color="#111827" />
+          <Ionicons name="arrow-back" size={24} color="#111827"/>
         </TouchableOpacity>
         <Text style={styles.headerTitle}>Testi Redaktə Et</Text>
         <TouchableOpacity
@@ -255,9 +249,9 @@ export default function EditTestScreen() {
           disabled={loading || !title.trim() || !description.trim()}
         >
           {loading ? (
-            <ActivityIndicator color="#fff" size="small" />
+            <ActivityIndicator color="#fff" size="small"/>
           ) : (
-            <Ionicons name="checkmark" size={22} color="#fff" />
+            <Ionicons name="checkmark" size={22} color="#fff"/>
           )}
         </TouchableOpacity>
       </View>
@@ -299,7 +293,7 @@ export default function EditTestScreen() {
             onPress={() => setIsPremium(!isPremium)}
           >
             <View style={[styles.checkbox, isPremium && styles.checkboxChecked]}>
-              {isPremium && <Ionicons name="checkmark" size={18} color="#fff" />}
+              {isPremium && <Ionicons name="checkmark" size={18} color="#fff"/>}
             </View>
             <Text style={styles.premiumLabel}>Premium test</Text>
           </TouchableOpacity>
@@ -339,7 +333,7 @@ export default function EditTestScreen() {
           ))}
 
           <TouchableOpacity style={styles.addQuestionButton} onPress={handleAddQuestion}>
-            <Ionicons name="add-circle" size={24} color="#7313e8" />
+            <Ionicons name="add-circle" size={24} color="#7313e8"/>
             <Text style={styles.addQuestionText}>Sual əlavə et</Text>
           </TouchableOpacity>
         </View>
@@ -360,7 +354,7 @@ export default function EditTestScreen() {
             disabled={loading || !title.trim() || !description.trim()}
           >
             {loading ? (
-              <ActivityIndicator color="#fff" size="small" />
+              <ActivityIndicator color="#fff" size="small"/>
             ) : (
               <Text style={styles.updateButtonText}>Yenilə</Text>
             )}
@@ -572,4 +566,3 @@ const styles = StyleSheet.create({
     color: "#fff",
   },
 });
-

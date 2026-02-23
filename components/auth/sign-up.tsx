@@ -1,13 +1,12 @@
-import { useLanguage } from "@/context/language-context";
-import { authAPI } from "@/services/api";
-import { Ionicons } from "@expo/vector-icons";
-import { useRouter } from "expo-router";
-import React, { useState } from "react";
+import {useLanguage} from "@/context/language-context";
+import {authAPI} from "@/services/api";
+import {Ionicons} from "@expo/vector-icons";
+import {useRouter} from "expo-router";
+import React, {useState} from "react";
 import {
   ActivityIndicator,
   Alert,
   Image,
-  SafeAreaView,
   ScrollView,
   StatusBar,
   StyleSheet,
@@ -16,9 +15,11 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
+import {SafeAreaView} from "react-native-safe-area-context";
+import {BRAND_PRIMARY, BRAND_PRIMARY_LIGHT} from "@/constants/colors";
 
 export default function SignUpScreen() {
-  const { language, setLanguage, t } = useLanguage();
+  const {language, setLanguage, t} = useLanguage();
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
   const [email, setEmail] = useState("");
@@ -27,26 +28,23 @@ export default function SignUpScreen() {
   const [showPassword, setShowPassword] = useState(false);
   const [agreeToTerms, setAgreeToTerms] = useState(false);
   const [loading, setLoading] = useState(false);
-  const [passwordStrength, setPasswordStrength] = useState<any>(null);
+  const [passwordStrength, setPasswordStrength] = useState<{
+    score: number;
+    level: string;
+    message: string;
+    suggestions: string[];
+    crackTime: string;
+  } | null>(null);
   const router = useRouter();
 
-  // Локальная функция для оценки силы пароля
-  const estimatePasswordStrength = (password: string) => {
+  const estimatePasswordStrength = (pwd: string) => {
     let score = 0;
-    const suggestions = [];
 
-    // Длина пароля
-    if (password.length >= 8) score += 1;
-    if (password.length >= 12) score += 1;
-
-    // Наличие цифр
-    if (/\d/.test(password)) score += 1;
-
-    // Наличие букв в разных регистрах
-    if (/[a-z]/.test(password) && /[A-Z]/.test(password)) score += 1;
-
-    // Наличие специальных символов
-    if (/[!@#$%^&*(),.?":{}|<>]/.test(password)) score += 1;
+    if (pwd.length >= 8) score += 1;
+    if (pwd.length >= 12) score += 1;
+    if (/\d/.test(pwd)) score += 1;
+    if (/[a-z]/.test(pwd) && /[A-Z]/.test(pwd)) score += 1;
+    if (/[!@#$%^&*(),.?":{}|<>]/.test(pwd)) score += 1;
 
     const levels = ["Çox zəif", "Zəif", "Orta", "Güclü", "Çox güclü"];
     const crackTimes = [
@@ -64,21 +62,18 @@ export default function SignUpScreen() {
       suggestions:
         score < 3
           ? [
-              "Şifrəni gücləndirmək üçün rəqəm, böyük hərf və xüsusi simvollar əlavə edin",
-            ]
+            "Şifrəni gücləndirmək üçün rəqəm, böyük hərf və xüsusi simvollar əlavə edin",
+          ]
           : [],
       crackTime: crackTimes[score] || "Bir neçə dəqiqə",
     };
   };
 
-  // Check password strength in real-time (только локальная проверка)
   const handlePasswordChange = (text: string) => {
     setPassword(text);
 
     if (text.length >= 3) {
-      // Используем только локальную оценку
-      const localStrength = estimatePasswordStrength(text);
-      setPasswordStrength(localStrength);
+      setPasswordStrength(estimatePasswordStrength(text));
     } else {
       setPasswordStrength(null);
     }
@@ -131,12 +126,12 @@ export default function SignUpScreen() {
 
       router.push({
         pathname: "/(auth)/verify-code",
-        params: { email: email.trim() },
+        params: {email: email.trim()},
       });
-    } catch (error: any) {
-      console.error("Sign up error:", error);
+    } catch (error: unknown) {
+      const axiosError = error as { response?: { data?: { message?: string } } };
       const errorMessage =
-        error.response?.data?.message || "Qeydiyyat zamanı xəta baş verdi";
+        axiosError.response?.data?.message || "Qeydiyyat zamanı xəta baş verdi";
       Alert.alert("Xəta", errorMessage);
     } finally {
       setLoading(false);
@@ -154,7 +149,7 @@ export default function SignUpScreen() {
 
   return (
     <SafeAreaView style={styles.container}>
-      <StatusBar barStyle="dark-content" />
+      <StatusBar barStyle="dark-content"/>
       <ScrollView showsVerticalScrollIndicator={false} bounces={false}>
         {/* Header */}
         <View style={styles.header}>
@@ -176,7 +171,7 @@ export default function SignUpScreen() {
         {/* Hero Section */}
         <View style={styles.heroSection}>
           <View style={styles.iconCircle}>
-            <Ionicons name="person-add-outline" size={48} color="#fff" />
+            <Ionicons name="person-add-outline" size={48} color="#fff"/>
           </View>
           <Text style={styles.heroTitle}>Hesab Yaradın</Text>
           <Text style={styles.heroSubtitle}>
@@ -265,7 +260,7 @@ export default function SignUpScreen() {
                     style={[
                       styles.strengthFill,
                       {
-                        width: `${(passwordStrength.score / 4) * 100}%`,
+                        width: `${(passwordStrength.score / 5) * 100}%`,
                         backgroundColor: getPasswordStrengthColor(),
                       },
                     ]}
@@ -274,7 +269,7 @@ export default function SignUpScreen() {
                 <Text
                   style={[
                     styles.strengthText,
-                    { color: getPasswordStrengthColor() },
+                    {color: getPasswordStrengthColor()},
                   ]}
                 >
                   {passwordStrength.level} - {passwordStrength.crackTime}
@@ -314,7 +309,7 @@ export default function SignUpScreen() {
               style={[styles.checkbox, agreeToTerms && styles.checkboxChecked]}
             >
               {agreeToTerms && (
-                <Ionicons name="checkmark" size={16} color="#fff" />
+                <Ionicons name="checkmark" size={16} color="#fff"/>
               )}
             </View>
             <Text style={styles.checkboxText}>
@@ -369,7 +364,7 @@ export default function SignUpScreen() {
             disabled={!agreeToTerms || loading}
           >
             {loading ? (
-              <ActivityIndicator color="#fff" />
+              <ActivityIndicator color="#fff"/>
             ) : (
               <Text style={styles.signUpButtonText}>{t.createAccount} →</Text>
             )}
@@ -394,9 +389,9 @@ export default function SignUpScreen() {
           <View style={styles.featureItem}>
             <View style={styles.featureIconContainer}>
               <View
-                style={[styles.featureIcon, { backgroundColor: "#E3F2FD" }]}
+                style={[styles.featureIcon, {backgroundColor: "#E3F2FD"}]}
               >
-                <Ionicons name="clipboard-outline" size={24} color="#1976D2" />
+                <Ionicons name="clipboard-outline" size={24} color="#1976D2"/>
               </View>
             </View>
             <View style={styles.featureContent}>
@@ -410,7 +405,7 @@ export default function SignUpScreen() {
           <View style={styles.featureItem}>
             <View style={styles.featureIconContainer}>
               <View
-                style={[styles.featureIcon, { backgroundColor: "#E8F5E9" }]}
+                style={[styles.featureIcon, {backgroundColor: "#E8F5E9"}]}
               >
                 <Ionicons
                   name="trending-up-outline"
@@ -430,9 +425,9 @@ export default function SignUpScreen() {
           <View style={styles.featureItem}>
             <View style={styles.featureIconContainer}>
               <View
-                style={[styles.featureIcon, { backgroundColor: "#FFF3E0" }]}
+                style={[styles.featureIcon, {backgroundColor: "#FFF3E0"}]}
               >
-                <Ionicons name="diamond-outline" size={24} color="#F57C00" />
+                <Ionicons name="diamond-outline" size={24} color="#F57C00"/>
               </View>
             </View>
             <View style={styles.featureContent}>
@@ -463,7 +458,7 @@ const styles = StyleSheet.create({
     width: 40,
     height: 40,
     borderRadius: 20,
-    backgroundColor: "#7313e8",
+    backgroundColor: BRAND_PRIMARY,
     alignItems: "center",
     justifyContent: "center",
     marginLeft: 8,
@@ -475,7 +470,7 @@ const styles = StyleSheet.create({
     color: "#000",
   },
   heroSection: {
-    backgroundColor: "#7313e8",
+    backgroundColor: BRAND_PRIMARY,
     paddingVertical: 40,
     paddingHorizontal: 20,
     alignItems: "center",
@@ -569,14 +564,14 @@ const styles = StyleSheet.create({
     width: 20,
     height: 20,
     borderWidth: 2,
-    borderColor: "#7313e8",
+    borderColor: BRAND_PRIMARY,
     borderRadius: 4,
     alignItems: "center",
     justifyContent: "center",
     marginRight: 8,
   },
   checkboxChecked: {
-    backgroundColor: "#7313e8",
+    backgroundColor: BRAND_PRIMARY,
   },
   checkboxText: {
     fontSize: 13,
@@ -584,7 +579,7 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   link: {
-    color: "#7313e8",
+    color: BRAND_PRIMARY,
     fontWeight: "500",
   },
   languageContainer: {
@@ -603,8 +598,8 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   languageButtonActive: {
-    borderColor: "#7313e8",
-    backgroundColor: "#F3E8FF",
+    borderColor: BRAND_PRIMARY,
+    backgroundColor: BRAND_PRIMARY_LIGHT,
   },
   languageButtonText: {
     fontSize: 14,
@@ -612,10 +607,10 @@ const styles = StyleSheet.create({
     color: "#6B7280",
   },
   languageButtonTextActive: {
-    color: "#7313e8",
+    color: BRAND_PRIMARY,
   },
   signUpButton: {
-    backgroundColor: "#7313e8",
+    backgroundColor: BRAND_PRIMARY,
     borderRadius: 12,
     paddingVertical: 16,
     alignItems: "center",
@@ -642,7 +637,7 @@ const styles = StyleSheet.create({
   },
   signInLink: {
     fontSize: 14,
-    color: "#7313e8",
+    color: BRAND_PRIMARY,
     fontWeight: "600",
   },
   featuresSection: {

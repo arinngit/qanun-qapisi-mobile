@@ -1,36 +1,28 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import axios, { AxiosRequestConfig } from "axios";
+import axios, {AxiosRequestConfig} from "axios";
 
-export const API_BASE_URL = "https://vmi2809419.contaboserver.net/api/v1";
+export const API_BASE_URL = process.env.EXPO_PUBLIC_API_URL || "http://localhost:8080/api/v1";
 
-// Device ID bypass email - set this to the email that should bypass device restrictions
-export const DEVICE_BYPASS_EMAIL = "appreview.qanunqapisi@gmail.com";
-
-// Create axios instance with optimized defaults
 export const api = axios.create({
   baseURL: API_BASE_URL,
-  timeout: 15000, // 15 second timeout
+  timeout: 15000,
   headers: {
     "Content-Type": "application/json",
   },
 });
 
-// Request cache to prevent duplicate requests
 const requestCache = new Map<string, Promise<any>>();
 const cacheExpiry = new Map<string, number>();
-const CACHE_DURATION = 30000; // 30 seconds
+const CACHE_DURATION = 30000;
 
-// Helper function to generate cache key
 const getCacheKey = (config: AxiosRequestConfig): string => {
   return `${config.method}-${config.url}-${JSON.stringify(config.params || {})}-${JSON.stringify(config.data || {})}`;
 };
 
-// Helper functions for AsyncStorage
 export const getToken = async (): Promise<string | null> => {
   try {
     return await AsyncStorage.getItem("accessToken");
-  } catch (error) {
-    console.error("Error getting token:", error);
+  } catch {
     return null;
   }
 };
@@ -44,107 +36,68 @@ export const setTokens = async (
       AsyncStorage.setItem("accessToken", accessToken),
       AsyncStorage.setItem("refreshToken", refreshToken),
     ]);
-  } catch (error) {
-    console.error("Error saving tokens:", error);
+  } catch {
+    // Token save failed — will require re-login
   }
 };
 
 export const removeTokens = async (): Promise<void> => {
   try {
     await AsyncStorage.multiRemove(["accessToken", "refreshToken"]);
-  } catch (error) {
-    console.error("Error removing tokens:", error);
+  } catch {
+    // Token removal failed
   }
 };
 
 export const getRefreshToken = async (): Promise<string | null> => {
   try {
     return await AsyncStorage.getItem("refreshToken");
-  } catch (error) {
-    console.error("Error getting refresh token:", error);
+  } catch {
     return null;
   }
 };
 
-// Request interceptor: add auth token and handle caching
 api.interceptors.request.use(
   async (config) => {
-    try {
-      // Add auth token
-      const token = await getToken();
-      if (token) {
-        config.headers.Authorization = `Bearer ${token}`;
-      }
-
-      // Request deduplication for GET requests
-      if (config.method?.toLowerCase() === 'get') {
-        const cacheKey = getCacheKey(config);
-        const cachedExpiry = cacheExpiry.get(cacheKey);
-
-        // Check if we have a valid cached request
-        if (cachedExpiry && Date.now() < cachedExpiry) {
-          const cachedRequest = requestCache.get(cacheKey);
-          if (cachedRequest) {
-            console.log('Using cached request:', cacheKey.substring(0, 50));
-            return cachedRequest as any;
-          }
-        }
-      }
-    } catch (error) {
-      console.error("Error in request interceptor:", error);
+    const token = await getToken();
+    if (token) {
+      config.headers.Authorization = `Bearer ${token}`;
     }
     return config;
   },
   (error) => Promise.reject(error)
 );
 
-// Response interceptor: handle token refresh and update cache
+let isRefreshing = false;
+let refreshSubscribers: Array<(token: string) => void> = [];
+
+const onRefreshed = (token: string) => {
+  refreshSubscribers.forEach((callback) => callback(token));
+  refreshSubscribers = [];
+};
+
+const addRefreshSubscriber = (callback: (token: string) => void) => {
+  refreshSubscribers.push(callback);
+};
+
 api.interceptors.response.use(
-  (response) => {
-    // Update cache for successful GET requests
-    if (response.config.method?.toLowerCase() === 'get') {
-      const cacheKey = getCacheKey(response.config);
-      requestCache.delete(cacheKey);
-    }
-    return response;
-  },
+  (response) => response,
   async (error) => {
     const originalRequest = error.config;
 
-    // Enhanced error logging for debugging
-    if (!error.response) {
-      // Network error (no response received)
-      console.error('❌ Network Error:', {
-        message: error.message,
-        code: error.code,
-        url: originalRequest?.url,
-        baseURL: originalRequest?.baseURL,
-      });
-      
-      // Common network errors
-      if (error.message.includes('Network request failed')) {
-        console.error('Possible causes: SSL certificate issue, DNS resolution failed, or server unreachable');
-      }
-    } else {
-      // Server responded with error status
-      console.error('❌ Server Error:', {
-        status: error.response.status,
-        statusText: error.response.statusText,
-        url: originalRequest?.url,
-        data: error.response.data,
-      });
-    }
-
-    // Clear cache for failed requests
-    if (originalRequest?.method?.toLowerCase() === 'get') {
-      const cacheKey = getCacheKey(originalRequest);
-      requestCache.delete(cacheKey);
-      cacheExpiry.delete(cacheKey);
-    }
-
-    // Handle 401 errors with token refresh
     if (error.response?.status === 401 && !originalRequest._retry) {
       originalRequest._retry = true;
+
+      if (isRefreshing) {
+        return new Promise((resolve) => {
+          addRefreshSubscriber((newToken: string) => {
+            originalRequest.headers.Authorization = `Bearer ${newToken}`;
+            resolve(api(originalRequest));
+          });
+        });
+      }
+
+      isRefreshing = true;
 
       try {
         const refreshToken = await getRefreshToken();
@@ -153,15 +106,19 @@ api.interceptors.response.use(
             refreshToken,
           });
 
-          const { accessToken, refreshToken: newRefreshToken } = response.data;
+          const {accessToken, refreshToken: newRefreshToken} = response.data;
           await setTokens(accessToken, newRefreshToken);
 
           originalRequest.headers.Authorization = `Bearer ${accessToken}`;
+          onRefreshed(accessToken);
           return api(originalRequest);
         }
       } catch (refreshError) {
+        refreshSubscribers = [];
         await removeTokens();
         return Promise.reject(refreshError);
+      } finally {
+        isRefreshing = false;
       }
     }
 
@@ -169,15 +126,13 @@ api.interceptors.response.use(
   }
 );
 
-// Create a wrapper for GET requests with caching
 export const cachedGet = async <T = any>(
   url: string,
   config?: AxiosRequestConfig
 ): Promise<T> => {
-  const requestConfig = { ...config, method: 'GET', url };
+  const requestConfig = {...config, method: 'GET', url};
   const cacheKey = getCacheKey(requestConfig);
 
-  // Check for valid cached request
   const cachedExpiry = cacheExpiry.get(cacheKey);
   if (cachedExpiry && Date.now() < cachedExpiry) {
     const cachedRequest = requestCache.get(cacheKey);
@@ -186,12 +141,10 @@ export const cachedGet = async <T = any>(
     }
   }
 
-  // Create new request and cache it
   const request = api.get<T>(url, config).then((response) => response.data);
   requestCache.set(cacheKey, request);
   cacheExpiry.set(cacheKey, Date.now() + CACHE_DURATION);
 
-  // Clean up cache entry after completion
   request.finally(() => {
     setTimeout(() => {
       requestCache.delete(cacheKey);
@@ -202,7 +155,6 @@ export const cachedGet = async <T = any>(
   return request;
 };
 
-// Clear cache manually (useful after mutations)
 export const clearCache = (pattern?: string) => {
   if (pattern) {
     for (const key of requestCache.keys()) {

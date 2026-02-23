@@ -1,16 +1,16 @@
 import GBottomSheet from "@/components/common/GBottomSheet";
 import PremiumRequestModal from "@/components/premium/PremiumRequestModal";
-import { ThemedText } from "@/components/theme/themed-text";
-import { translations } from "@/constants/translations";
-import { useAuth } from "@/context/auth-context";
-import { useLanguage } from "@/context/language-context";
-import { useTheme } from "@/context/theme-context";
-import { useThemeColor } from "@/hooks/use-theme-color";
-import { profileAPI } from "@/services/api";
-import { Ionicons } from "@expo/vector-icons";
+import {ThemedText} from "@/components/theme/themed-text";
+import {translations} from "@/constants/translations";
+import {useAuth} from "@/context/auth-context";
+import {useLanguage} from "@/context/language-context";
+import {useTheme} from "@/context/theme-context";
+import {useThemeColor} from "@/hooks/use-theme-color";
+import {profileAPI} from "@/services/api";
+import {Ionicons} from "@expo/vector-icons";
 import Constants from "expo-constants";
-import { router } from "expo-router";
-import React, { useState } from "react";
+import {router} from "expo-router";
+import React, {useState} from "react";
 import {
   ActivityIndicator,
   Alert,
@@ -21,16 +21,15 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
-import { useSafeAreaInsets } from "react-native-safe-area-context";
+import {useSafeAreaInsets} from "react-native-safe-area-context";
 
 export default function Profile() {
-  const { user, logout, refreshUser, updateUser } = useAuth();
-  const { language, setLanguage, t } = useLanguage();
-  const { themeMode, isDark, colors, setThemeMode } = useTheme();
+  const {user, logout, refreshUser, updateUser} = useAuth();
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars -- used in JSX (lines 467, 478, 488)
+  const {language, setLanguage, t} = useLanguage();
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars -- used in JSX (lines 456, 462, 465, 467)
+  const {isDark, colors, setThemeMode} = useTheme();
   const tintColor = useThemeColor({}, "tint");
-  const backgroundColor = useThemeColor({}, "background");
-  const textColor = useThemeColor({}, "text");
-  const borderColor = useThemeColor({}, "icon");
   const insets = useSafeAreaInsets();
   const appVersion = Constants.expoConfig?.version ?? "1.0.0";
   const [refreshing, setRefreshing] = useState(false);
@@ -52,7 +51,6 @@ export default function Profile() {
   const [deletePassword, setDeletePassword] = useState("");
   const [loading, setLoading] = useState(false);
 
-  // Avatar helper functions
   const getInitials = (firstName?: string, lastName?: string) => {
     const first = firstName?.charAt(0).toUpperCase() || '';
     const last = lastName?.charAt(0).toUpperCase() || '';
@@ -100,7 +98,7 @@ export default function Profile() {
 
     setLoading(true);
     try {
-      await profileAPI.deleteAccount({ password: deletePassword });
+      await profileAPI.deleteAccount({password: deletePassword});
       setDeleteAccountModal(false);
       Alert.alert(t.success, t.deleteAccountSuccess);
 
@@ -232,7 +230,7 @@ export default function Profile() {
 
     setLoading(true);
     try {
-      await profileAPI.requestEmailChange({ newEmail: newEmail.trim() });
+      await profileAPI.requestEmailChange({newEmail: newEmail.trim()});
 
       Alert.alert("Uğurlu", "Təsdiq kodu yeni e-poçt ünvanınıza göndərildi");
       setChangeEmailModal(false);
@@ -263,7 +261,7 @@ export default function Profile() {
 
     setLoading(true);
     try {
-      await profileAPI.verifyEmailChange({ code });
+      await profileAPI.verifyEmailChange({code});
 
       Alert.alert("Uğurlu", "E-poçt ünvanı uğurla dəyişdirildi");
       setVerifyEmailModal(false);
@@ -291,7 +289,7 @@ export default function Profile() {
         month: "long",
         day: "numeric",
       });
-    } catch (error) {
+    } catch {
       return "Tarix məlum deyil";
     }
   };
@@ -299,9 +297,9 @@ export default function Profile() {
   return (
     <>
       <ScrollView
-        style={[styles.container, { backgroundColor: "#f5f5f5" }]}
+        style={[styles.container, {backgroundColor: "#f5f5f5"}]}
         showsVerticalScrollIndicator={false}
-        contentContainerStyle={{ paddingBottom: Math.max(insets.bottom, 20) }}
+        contentContainerStyle={{paddingBottom: Math.max(insets.bottom, 20)}}
         refreshControl={
           <RefreshControl
             refreshing={refreshing}
@@ -315,8 +313,8 @@ export default function Profile() {
           <View style={styles.headerContent}>
             {/* Avatar with ring */}
             <View style={styles.avatarWrapper}>
-              <View style={[styles.avatarRing, { borderColor: "#7313e8" }]}>
-                <View style={[styles.avatarContainer, { backgroundColor: getAvatarColor(user?.firstName || 'U') }]}>
+              <View style={[styles.avatarRing, {borderColor: "#7313e8"}]}>
+                <View style={[styles.avatarContainer, {backgroundColor: getAvatarColor(user?.firstName || 'U')}]}>
                   <ThemedText style={styles.avatarText}>
                     {getInitials(user?.firstName, user?.lastName)}
                   </ThemedText>
@@ -333,7 +331,7 @@ export default function Profile() {
               style={styles.editProfileButton}
               onPress={handleEditProfile}
             >
-              <Ionicons name="create-outline" size={16} color="#7313e8" />
+              <Ionicons name="create-outline" size={16} color="#7313e8"/>
               <ThemedText style={styles.editProfileText}>
                 Profili Redaktə Et
               </ThemedText>
@@ -343,15 +341,15 @@ export default function Profile() {
 
         {/* Statistics cards */}
         <View style={styles.statsContainer}>
-          <View style={[styles.statCard, { backgroundColor: "#fff" }]}>
-            <Ionicons name="calendar-outline" size={24} color="#7313e8" />
+          <View style={[styles.statCard, {backgroundColor: "#fff"}]}>
+            <Ionicons name="calendar-outline" size={24} color="#7313e8"/>
             <ThemedText type="subtitle" style={styles.statNumber}>
               {user ? formatDate(user.createdAt) : "-"}
             </ThemedText>
             <ThemedText style={styles.statLabel}>Qeydiyyat Tarixi</ThemedText>
           </View>
 
-          <View style={[styles.statCard, { backgroundColor: "#fff" }]}>
+          <View style={[styles.statCard, {backgroundColor: "#fff"}]}>
             <Ionicons
               name={user?.isPremium ? "star" : "star-outline"}
               size={24}
@@ -373,7 +371,7 @@ export default function Profile() {
             >
               <View style={styles.premiumButtonContent}>
                 <View style={styles.premiumIconContainer}>
-                  <Ionicons name="star" size={24} color="#F59E0B" />
+                  <Ionicons name="star" size={24} color="#F59E0B"/>
                 </View>
                 <View style={styles.premiumTextContainer}>
                   <ThemedText style={styles.premiumButtonTitle}>
@@ -383,7 +381,7 @@ export default function Profile() {
                     Bütün testlərə giriş əldə edin
                   </ThemedText>
                 </View>
-                <Ionicons name="chevron-forward" size={20} color="#9CA3AF" />
+                <Ionicons name="chevron-forward" size={20} color="#9CA3AF"/>
               </View>
             </TouchableOpacity>
           </View>
@@ -395,55 +393,55 @@ export default function Profile() {
             Tənzimləmələr
           </ThemedText>
 
-          <View style={[styles.menuCard, { backgroundColor: "#fff" }]}>
+          <View style={[styles.menuCard, {backgroundColor: "#fff"}]}>
             <TouchableOpacity
               style={[
                 styles.menuItem,
-                { borderBottomColor: "#E5E7EB", borderBottomWidth: 1 },
+                {borderBottomColor: "#E5E7EB", borderBottomWidth: 1},
               ]}
               onPress={handleEditProfile}
             >
               <View
-                style={[styles.iconContainer, { backgroundColor: `#7313e8` }]}
+                style={[styles.iconContainer, {backgroundColor: `#7313e8`}]}
               >
-                <Ionicons name="person-outline" size={22} color={"#fff"} />
+                <Ionicons name="person-outline" size={22} color={"#fff"}/>
               </View>
               <ThemedText style={styles.menuText}>
                 Profil Məlumatları
               </ThemedText>
-              <Ionicons name="chevron-forward" size={20} color="#9CA3AF" />
+              <Ionicons name="chevron-forward" size={20} color="#9CA3AF"/>
             </TouchableOpacity>
 
             <TouchableOpacity
               style={[
                 styles.menuItem,
-                { borderBottomColor: "#E5E7EB", borderBottomWidth: 1 },
+                {borderBottomColor: "#E5E7EB", borderBottomWidth: 1},
               ]}
               onPress={handleChangePassword}
             >
               <View
-                style={[styles.iconContainer, { backgroundColor: "#7313e8" }]}
+                style={[styles.iconContainer, {backgroundColor: "#7313e8"}]}
               >
-                <Ionicons name="lock-closed-outline" size={22} color="#fff" />
+                <Ionicons name="lock-closed-outline" size={22} color="#fff"/>
               </View>
               <ThemedText style={styles.menuText}>Şifrəni Dəyiş</ThemedText>
-              <Ionicons name="chevron-forward" size={20} color="#9CA3AF" />
+              <Ionicons name="chevron-forward" size={20} color="#9CA3AF"/>
             </TouchableOpacity>
 
             <TouchableOpacity
               style={[
                 styles.menuItem,
-                { borderBottomColor: "#E5E7EB", borderBottomWidth: 1 },
+                {borderBottomColor: "#E5E7EB", borderBottomWidth: 1},
               ]}
               onPress={handleChangeEmail}
             >
               <View
-                style={[styles.iconContainer, { backgroundColor: "#7313e8" }]}
+                style={[styles.iconContainer, {backgroundColor: "#7313e8"}]}
               >
-                <Ionicons name="mail-outline" size={22} color="#fff" />
+                <Ionicons name="mail-outline" size={22} color="#fff"/>
               </View>
               <ThemedText style={styles.menuText}>E-poçtu Dəyiş</ThemedText>
-              <Ionicons name="chevron-forward" size={20} color="#9CA3AF" />
+              <Ionicons name="chevron-forward" size={20} color="#9CA3AF"/>
             </TouchableOpacity>
 
             {/* Dark Mode Toggle */}
@@ -503,28 +501,28 @@ export default function Profile() {
             Əlavə
           </ThemedText>
 
-          <View style={[styles.menuCard, { backgroundColor: "#fff" }]}>
+          <View style={[styles.menuCard, {backgroundColor: "#fff"}]}>
             <TouchableOpacity
               style={[
                 styles.menuItem,
-                { borderBottomColor: "#E5E7EB", borderBottomWidth: 1 },
+                {borderBottomColor: "#E5E7EB", borderBottomWidth: 1},
               ]}
               onPress={() => router.push("/legal")}
             >
               <View
-                style={[styles.iconContainer, { backgroundColor: `#7313e8` }]}
+                style={[styles.iconContainer, {backgroundColor: `#7313e8`}]}
               >
-                <Ionicons name="document-text-outline" size={22} color={"#fff"} />
+                <Ionicons name="document-text-outline" size={22} color={"#fff"}/>
               </View>
               <ThemedText style={styles.menuText}>Hüquqi Məlumat</ThemedText>
-              <Ionicons name="chevron-forward" size={20} color="#9CA3AF" />
+              <Ionicons name="chevron-forward" size={20} color="#9CA3AF"/>
             </TouchableOpacity>
 
             <TouchableOpacity
               style={[
                 styles.menuItem,
                 styles.menuItem,
-                { borderBottomColor: "#E5E7EB", borderBottomWidth: 1 },
+                {borderBottomColor: "#E5E7EB", borderBottomWidth: 1},
               ]}
               onPress={() =>
                 Alert.alert(
@@ -534,18 +532,18 @@ export default function Profile() {
               }
             >
               <View
-                style={[styles.iconContainer, { backgroundColor: `#7313e8` }]}
+                style={[styles.iconContainer, {backgroundColor: `#7313e8`}]}
               >
-                <Ionicons name="help-circle-outline" size={22} color={"#fff"} />
+                <Ionicons name="help-circle-outline" size={22} color={"#fff"}/>
               </View>
               <ThemedText style={styles.menuText}>Kömək və Dəstək</ThemedText>
-              <Ionicons name="chevron-forward" size={20} color="#9CA3AF" />
+              <Ionicons name="chevron-forward" size={20} color="#9CA3AF"/>
             </TouchableOpacity>
 
             <TouchableOpacity
               style={[
                 styles.menuItem,
-                { borderBottomColor: "#E5E7EB", borderBottomWidth: 1 },
+                {borderBottomColor: "#E5E7EB", borderBottomWidth: 1},
               ]}
               onPress={() =>
                 Alert.alert(
@@ -555,7 +553,7 @@ export default function Profile() {
               }
             >
               <View
-                style={[styles.iconContainer, { backgroundColor: `#7313e8` }]}
+                style={[styles.iconContainer, {backgroundColor: `#7313e8`}]}
               >
                 <Ionicons
                   name="information-circle-outline"
@@ -564,37 +562,37 @@ export default function Profile() {
                 />
               </View>
               <ThemedText style={styles.menuText}>Tətbiq Haqqında</ThemedText>
-              <Ionicons name="chevron-forward" size={20} color="#9CA3AF" />
+              <Ionicons name="chevron-forward" size={20} color="#9CA3AF"/>
             </TouchableOpacity>
 
             <TouchableOpacity
               style={[
                 styles.menuItem,
-                { borderBottomColor: "#E5E7EB", borderBottomWidth: 1 },
+                {borderBottomColor: "#E5E7EB", borderBottomWidth: 1},
               ]}
               onPress={handleDeleteAccount}
             >
               <View
-                style={[styles.iconContainer, { backgroundColor: "#FEF2F2" }]}
+                style={[styles.iconContainer, {backgroundColor: "#FEF2F2"}]}
               >
-                <Ionicons name="trash-outline" size={22} color="#DC2626" />
+                <Ionicons name="trash-outline" size={22} color="#DC2626"/>
               </View>
-              <ThemedText style={[styles.menuText, { color: "#DC2626" }]}>
+              <ThemedText style={[styles.menuText, {color: "#DC2626"}]}>
                 {t.deleteAccount}
               </ThemedText>
-              <Ionicons name="chevron-forward" size={20} color="#DC2626" />
+              <Ionicons name="chevron-forward" size={20} color="#DC2626"/>
             </TouchableOpacity>
 
             <TouchableOpacity style={styles.menuItem} onPress={handleLogout}>
               <View
-                style={[styles.iconContainer, { backgroundColor: "#FEE2E2" }]}
+                style={[styles.iconContainer, {backgroundColor: "#FEE2E2"}]}
               >
-                <Ionicons name="log-out-outline" size={22} color="#EF4444" />
+                <Ionicons name="log-out-outline" size={22} color="#EF4444"/>
               </View>
-              <ThemedText style={[styles.menuText, { color: "#EF4444" }]}>
+              <ThemedText style={[styles.menuText, {color: "#EF4444"}]}>
                 {translations.logout}
               </ThemedText>
-              <Ionicons name="chevron-forward" size={20} color="#EF4444" />
+              <Ionicons name="chevron-forward" size={20} color="#EF4444"/>
             </TouchableOpacity>
           </View>
         </View>
@@ -650,7 +648,7 @@ export default function Profile() {
             disabled={loading}
           >
             {loading ? (
-              <ActivityIndicator color="#fff" />
+              <ActivityIndicator color="#fff"/>
             ) : (
               <ThemedText style={styles.modalButtonText}>
                 Yadda saxla
@@ -725,7 +723,7 @@ export default function Profile() {
             disabled={loading}
           >
             {loading ? (
-              <ActivityIndicator color="#fff" />
+              <ActivityIndicator color="#fff"/>
             ) : (
               <ThemedText style={styles.modalButtonText}>
                 Şifrəni Dəyiş
@@ -771,7 +769,7 @@ export default function Profile() {
             disabled={loading}
           >
             {loading ? (
-              <ActivityIndicator color="#fff" />
+              <ActivityIndicator color="#fff"/>
             ) : (
               <ThemedText style={styles.modalButtonText}>
                 Təsdiq Kodu Göndər
@@ -817,7 +815,7 @@ export default function Profile() {
             disabled={loading}
           >
             {loading ? (
-              <ActivityIndicator color="#fff" />
+              <ActivityIndicator color="#fff"/>
             ) : (
               <ThemedText style={styles.modalButtonText}>Təsdiqlə</ThemedText>
             )}
@@ -834,7 +832,7 @@ export default function Profile() {
       >
         <View style={styles.modalBody}>
           <View style={styles.warningContainer}>
-            <Ionicons name="warning" size={48} color="#DC2626" />
+            <Ionicons name="warning" size={48} color="#DC2626"/>
             <ThemedText style={styles.warningTitle}>
               {t.deleteAccountConfirmation}
             </ThemedText>
@@ -864,7 +862,7 @@ export default function Profile() {
 
           <View style={styles.modalButtonGroup}>
             <TouchableOpacity
-              style={[styles.modalButtonSecondary, { flex: 1 }]}
+              style={[styles.modalButtonSecondary, {flex: 1}]}
               onPress={() => setDeleteAccountModal(false)}
               disabled={loading}
             >
@@ -876,14 +874,14 @@ export default function Profile() {
             <TouchableOpacity
               style={[
                 styles.modalButtonDanger,
-                { flex: 1 },
+                {flex: 1},
                 loading && styles.modalButtonDisabled,
               ]}
               onPress={handleConfirmDeleteAccount}
               disabled={loading}
             >
               {loading ? (
-                <ActivityIndicator color="#fff" />
+                <ActivityIndicator color="#fff"/>
               ) : (
                 <ThemedText style={styles.modalButtonText}>
                   {t.deleteAccount}
@@ -1002,7 +1000,7 @@ const styles = StyleSheet.create({
     paddingVertical: 10,
     borderRadius: 25,
     shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
+    shadowOffset: {width: 0, height: 2},
     shadowOpacity: 0.1,
     shadowRadius: 8,
     elevation: 3,
@@ -1027,7 +1025,7 @@ const styles = StyleSheet.create({
     borderRadius: 16,
     alignItems: "center",
     shadowColor: "#000",
-    shadowOffset: { width: 0, height: 4 },
+    shadowOffset: {width: 0, height: 4},
     shadowOpacity: 0.1,
     shadowRadius: 8,
     elevation: 5,
@@ -1060,7 +1058,7 @@ const styles = StyleSheet.create({
     borderRadius: 16,
     overflow: "hidden",
     shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
+    shadowOffset: {width: 0, height: 2},
     shadowOpacity: 0.08,
     shadowRadius: 8,
     elevation: 3,
@@ -1221,7 +1219,7 @@ const styles = StyleSheet.create({
     borderRadius: 16,
     overflow: "hidden",
     shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
+    shadowOffset: {width: 0, height: 2},
     shadowOpacity: 0.08,
     shadowRadius: 8,
     elevation: 3,

@@ -1,6 +1,5 @@
-import { api, setTokens, removeTokens } from './config';
+import {api, removeTokens, setTokens} from './config';
 
-// Types
 export interface SignupRequest {
   email: string;
   password: string;
@@ -56,43 +55,36 @@ export interface MeResponse {
   verified: boolean;
 }
 
-// Auth API
 export const authAPI = {
-  // Signup
   signup: async (data: SignupRequest): Promise<void> => {
     await api.post("/auth/signup", data);
   },
 
-  // Verify email
   verify: async (data: VerifyRequest): Promise<AuthResponse> => {
     const response = await api.post("/auth/verify", data);
-    const { accessToken, refreshToken } = response.data;
+    const {accessToken, refreshToken} = response.data;
     await setTokens(accessToken, refreshToken);
     return response.data;
   },
 
-  // Resend verification code
   resend: async (email: string): Promise<void> => {
-    await api.post("/auth/resend", { email });
+    await api.post("/auth/resend", {email});
   },
 
-  // Login
   login: async (data: LoginRequest): Promise<AuthResponse> => {
     const response = await api.post("/auth/login", data);
-    const { accessToken, refreshToken } = response.data;
+    const {accessToken, refreshToken} = response.data;
     await setTokens(accessToken, refreshToken);
     return response.data;
   },
 
-  // Refresh token
   refresh: async (refreshToken: string): Promise<AuthResponse> => {
-    const response = await api.post("/auth/refresh", { refreshToken });
-    const { accessToken: newAccessToken, refreshToken: newRefreshToken } = response.data;
+    const response = await api.post("/auth/refresh", {refreshToken});
+    const {accessToken: newAccessToken, refreshToken: newRefreshToken} = response.data;
     await setTokens(newAccessToken, newRefreshToken);
     return response.data;
   },
 
-  // Logout
   logout: async (): Promise<void> => {
     try {
       await api.post("/auth/logout");
@@ -103,18 +95,15 @@ export const authAPI = {
     }
   },
 
-  // Get current user
   me: async (): Promise<MeResponse> => {
     const response = await api.get("/auth/me");
     return response.data;
   },
 
-  // Request password reset
   resetPassword: async (data: ResetPasswordRequest): Promise<void> => {
     await api.post("/auth/reset-password", data);
   },
 
-  // Confirm password reset
   confirmResetPassword: async (
     data: ConfirmResetPasswordRequest
   ): Promise<void> => {

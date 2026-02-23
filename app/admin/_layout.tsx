@@ -1,17 +1,17 @@
-import { Stack, useRouter } from "expo-router";
-import { useEffect } from "react";
-import { useAuth } from "../../context/auth-context";
-import { fadeTransitionConfig } from "../../utils/navigation-transitions";
+import {Stack, useRouter} from "expo-router";
+import {useEffect} from "react";
+import {useAuth} from "../../context/auth-context";
+import {fadeTransitionConfig} from "../../utils/navigation-transitions";
 
 export default function AdminLayout() {
-  const { user } = useAuth();
+  const {user} = useAuth();
   const router = useRouter();
 
   useEffect(() => {
     if (user && user.role !== "ADMIN") {
       router.replace("/(tabs)");
     }
-  }, [user]);
+  }, [user, router]);
 
   return (
     <Stack

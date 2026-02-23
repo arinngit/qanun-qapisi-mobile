@@ -1,7 +1,6 @@
 export type Language = "az" | "en";
 
 export interface Translations {
-  // Common
   error: string;
   success: string;
   loading: string;
@@ -33,7 +32,6 @@ export interface Translations {
   premium: string;
   ok: string;
 
-  // Navigation
   home: string;
   tests: string;
   profile: string;
@@ -41,7 +39,6 @@ export interface Translations {
   statistics: string;
   admin: string;
 
-  // Settings
   settings: string;
   notifications: string;
   language: string;
@@ -62,7 +59,6 @@ export interface Translations {
   deleteAccountFailed: string;
   deleteAccountIncorrectPassword: string;
 
-  // Auth
   welcomeBack: string;
   signInToContinue: string;
   email: string;
@@ -84,13 +80,11 @@ export interface Translations {
   enterFirstName: string;
   enterLastName: string;
 
-  // Validation
   fillAllFields: string;
   invalidEmail: string;
   passwordTooShort: string;
   passwordsDoNotMatch: string;
 
-  // Test Related
   startTest: string;
   submitTest: string;
   returnToTests: string;
@@ -111,21 +105,18 @@ export interface Translations {
   published: string;
   draft: string;
 
-  // Premium
   premiumSubscription: string;
   getPremium: string;
   premiumFeatures: string;
   unlimitedAccess: string;
   detailedStatistics: string;
 
-  // Profile
   registrationDate: string;
   subscription: string;
   standard: string;
   verified: string;
   notVerified: string;
 
-  // Info Page
   teacherInfo: string;
   mainPhone: string;
   secondaryPhone: string;
@@ -136,7 +127,6 @@ export interface Translations {
   quickActions: string;
   contactNote: string;
 
-  // Admin
   dashboard: string;
   users: string;
   createTest: string;
@@ -154,7 +144,6 @@ export interface Translations {
   draftTests: string;
   totalAttempts: string;
 
-  // Statistics
   overallResult: string;
   averageSuccessRate: string;
   attempts: string;
@@ -168,7 +157,6 @@ export interface Translations {
   noAttemptsYet: string;
   startTakingTests: string;
 
-  // Errors
   loginFailed: string;
   signupFailed: string;
   invalidCredentials: string;
@@ -178,13 +166,11 @@ export interface Translations {
   networkError: string;
   serverError: string;
 
-  // Success Messages
   loginSuccessful: string;
   signupSuccessful: string;
   profileUpdated: string;
   passwordChanged: string;
 
-  // Verification
   verificationCode: string;
   enterVerificationCode: string;
   verifyCode: string;
@@ -193,7 +179,6 @@ export interface Translations {
   verificationFailed: string;
   emailVerified: string;
 
-  // Test Results
   testResults: string;
   passed: string;
   failed: string;
@@ -201,23 +186,19 @@ export interface Translations {
   retake: string;
   submittedOn: string;
 
-  // Sorting
   sortBy: string;
   date: string;
   questionCount: string;
 
-  // Device Restriction
   deviceRestrictionError: string;
   logoutFromOtherDevice: string;
 
-  // Screenshot Protection
   screenshotBlocked: string;
   contentProtected: string;
 }
 
 export const translations: Record<Language, Translations> = {
   az: {
-    // Common
     error: "Xəta",
     success: "Uğurlu",
     loading: "Yüklənir...",
@@ -249,7 +230,6 @@ export const translations: Record<Language, Translations> = {
     premium: "Premium",
     ok: "Tamam",
 
-    // Navigation
     home: "Ana səhifə",
     tests: "Testlər",
     profile: "Profil",
@@ -257,7 +237,6 @@ export const translations: Record<Language, Translations> = {
     statistics: "Statistika",
     admin: "Admin",
 
-    // Settings
     settings: "Parametrlər",
     notifications: "Bildirişlər",
     language: "Dil",
@@ -279,7 +258,6 @@ export const translations: Record<Language, Translations> = {
     deleteAccountFailed: "Hesab silinmədi. Yenidən cəhd edin.",
     deleteAccountIncorrectPassword: "Yanlış şifrə",
 
-    // Auth
     welcomeBack: "Xoş gəldiniz!",
     signInToContinue: "Davam etmək üçün daxil olun",
     email: "E-poçt",
@@ -301,13 +279,11 @@ export const translations: Record<Language, Translations> = {
     enterFirstName: "Adınızı daxil edin",
     enterLastName: "Soyadınızı daxil edin",
 
-    // Validation
     fillAllFields: "Bütün xanaları doldurun",
     invalidEmail: "Düzgün e-poçt ünvanı daxil edin",
     passwordTooShort: "Şifrə ən azı 6 simvol olmalıdır",
     passwordsDoNotMatch: "Şifrələr uyğun gəlmir",
 
-    // Test Related
     startTest: "Testə başla",
     submitTest: "Testi təqdim et",
     returnToTests: "Testlərə qayıt",
@@ -328,21 +304,18 @@ export const translations: Record<Language, Translations> = {
     published: "Dərc edilib",
     draft: "Qaralama",
 
-    // Premium
     premiumSubscription: "Premium Abunəlik",
     getPremium: "Premium Abunəlik Al",
     premiumFeatures: "Premium xüsusiyyətlər",
     unlimitedAccess: "Bütün testlərə giriş",
     detailedStatistics: "Ətraflı statistika",
 
-    // Profile
     registrationDate: "Qeydiyyat Tarixi",
     subscription: "Abunəlik",
     standard: "Standart",
     verified: "Təsdiqlənib",
     notVerified: "Təsdiqlənməyib",
 
-    // Info Page
     teacherInfo: "Müəllim Məlumatları",
     mainPhone: "Əsas telefon",
     secondaryPhone: "Əlavə telefon",
@@ -353,7 +326,6 @@ export const translations: Record<Language, Translations> = {
     quickActions: "Tez əməliyyatlar",
     contactNote: "Suallarınız olduqda, istənilən vaxt əlaqə saxlaya bilərsiniz",
 
-    // Admin
     dashboard: "İdarə paneli",
     users: "İstifadəçilər",
     createTest: "Test Yarat",
@@ -371,7 +343,6 @@ export const translations: Record<Language, Translations> = {
     draftTests: "Qaralama",
     totalAttempts: "Ümumi Cəhdlər",
 
-    // Statistics
     overallResult: "Ümumi Nəticə",
     averageSuccessRate: "Orta uğur faizi",
     attempts: "Cəhd",
@@ -385,7 +356,6 @@ export const translations: Record<Language, Translations> = {
     noAttemptsYet: "Hələ cəhd yoxdur",
     startTakingTests: "Test həll etməyə başlayın",
 
-    // Errors
     loginFailed: "Giriş uğursuz oldu",
     signupFailed: "Qeydiyyat uğursuz oldu",
     invalidCredentials: "E-poçt və ya şifrə yanlışdır",
@@ -395,13 +365,11 @@ export const translations: Record<Language, Translations> = {
     networkError: "İnternet bağlantısını yoxlayın",
     serverError: "Server xətası baş verdi",
 
-    // Success Messages
     loginSuccessful: "Giriş uğurla tamamlandı",
     signupSuccessful: "Qeydiyyat uğurla tamamlandı",
     profileUpdated: "Profil yeniləndi",
     passwordChanged: "Şifrə dəyişdirildi",
 
-    // Verification
     verificationCode: "Təsdiq kodu",
     enterVerificationCode: "Təsdiq kodunu daxil edin",
     verifyCode: "Kodu təsdiqlə",
@@ -410,7 +378,6 @@ export const translations: Record<Language, Translations> = {
     verificationFailed: "Təsdiq uğursuz oldu",
     emailVerified: "E-poçt təsdiqləndi",
 
-    // Test Results
     testResults: "Test Nəticələri",
     passed: "Keçdi",
     failed: "Uğursuz",
@@ -418,22 +385,18 @@ export const translations: Record<Language, Translations> = {
     retake: "Yenidən cəhd et",
     submittedOn: "Təqdim tarixi",
 
-    // Sorting
     sortBy: "Sıralama",
     date: "Tarix",
     questionCount: "Sual sayı",
 
-    // Device Restriction
     deviceRestrictionError:
       "Bu hesab artıq başqa cihazda istifadə olunur. Əvvəlcə digər cihazdan çıxış edin.",
     logoutFromOtherDevice: "Digər cihazdan çıxış edin",
 
-    // Screenshot Protection
     screenshotBlocked: "Ekran görüntüsü bloklandı",
     contentProtected: "Məzmun qorunur",
   },
   en: {
-    // Common
     error: "Error",
     success: "Success",
     loading: "Loading...",
@@ -465,7 +428,6 @@ export const translations: Record<Language, Translations> = {
     premium: "Premium",
     ok: "OK",
 
-    // Navigation
     home: "Home",
     tests: "Tests",
     profile: "Profile",
@@ -473,7 +435,6 @@ export const translations: Record<Language, Translations> = {
     statistics: "Statistics",
     admin: "Admin",
 
-    // Settings
     settings: "Settings",
     notifications: "Notifications",
     language: "Language",
@@ -495,7 +456,6 @@ export const translations: Record<Language, Translations> = {
     deleteAccountFailed: "Failed to delete account. Please try again.",
     deleteAccountIncorrectPassword: "Incorrect password",
 
-    // Auth
     welcomeBack: "Welcome Back!",
     signInToContinue: "Sign in to continue",
     email: "Email",
@@ -517,13 +477,11 @@ export const translations: Record<Language, Translations> = {
     enterFirstName: "Enter your first name",
     enterLastName: "Enter your last name",
 
-    // Validation
     fillAllFields: "Please fill all fields",
     invalidEmail: "Please enter a valid email",
     passwordTooShort: "Password must be at least 6 characters",
     passwordsDoNotMatch: "Passwords do not match",
 
-    // Test Related
     startTest: "Start Test",
     submitTest: "Submit Test",
     returnToTests: "Return to Tests",
@@ -544,21 +502,18 @@ export const translations: Record<Language, Translations> = {
     published: "Published",
     draft: "Draft",
 
-    // Premium
     premiumSubscription: "Premium Subscription",
     getPremium: "Get Premium",
     premiumFeatures: "Premium Features",
     unlimitedAccess: "Unlimited access to all tests",
     detailedStatistics: "Detailed statistics",
 
-    // Profile
     registrationDate: "Registration Date",
     subscription: "Subscription",
     standard: "Standard",
     verified: "Verified",
     notVerified: "Not Verified",
 
-    // Info Page
     teacherInfo: "Teacher Information",
     mainPhone: "Main Phone",
     secondaryPhone: "Secondary Phone",
@@ -569,7 +524,6 @@ export const translations: Record<Language, Translations> = {
     quickActions: "Quick Actions",
     contactNote: "Feel free to contact us anytime if you have any questions",
 
-    // Admin
     dashboard: "Dashboard",
     users: "Users",
     createTest: "Create Test",
@@ -587,7 +541,6 @@ export const translations: Record<Language, Translations> = {
     draftTests: "Drafts",
     totalAttempts: "Total Attempts",
 
-    // Statistics
     overallResult: "Overall Result",
     averageSuccessRate: "Average success rate",
     attempts: "Attempts",
@@ -601,7 +554,6 @@ export const translations: Record<Language, Translations> = {
     noAttemptsYet: "No attempts yet",
     startTakingTests: "Start taking tests",
 
-    // Errors
     loginFailed: "Login failed",
     signupFailed: "Sign up failed",
     invalidCredentials: "Invalid email or password",
@@ -611,13 +563,11 @@ export const translations: Record<Language, Translations> = {
     networkError: "Please check your internet connection",
     serverError: "Server error occurred",
 
-    // Success Messages
     loginSuccessful: "Login successful",
     signupSuccessful: "Sign up successful",
     profileUpdated: "Profile updated",
     passwordChanged: "Password changed",
 
-    // Verification
     verificationCode: "Verification Code",
     enterVerificationCode: "Enter verification code",
     verifyCode: "Verify Code",
@@ -626,7 +576,6 @@ export const translations: Record<Language, Translations> = {
     verificationFailed: "Verification failed",
     emailVerified: "Email verified",
 
-    // Test Results
     testResults: "Test Results",
     passed: "Passed",
     failed: "Failed",
@@ -634,17 +583,14 @@ export const translations: Record<Language, Translations> = {
     retake: "Retake",
     submittedOn: "Submitted on",
 
-    // Sorting
     sortBy: "Sort By",
     date: "Date",
     questionCount: "Question Count",
 
-    // Device Restriction
     deviceRestrictionError:
       "This account is already in use on another device. Please logout from the other device first.",
     logoutFromOtherDevice: "Logout from other device",
 
-    // Screenshot Protection
     screenshotBlocked: "Screenshot blocked",
     contentProtected: "Content protected",
   },

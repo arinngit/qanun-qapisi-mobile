@@ -1,10 +1,7 @@
-import { useTheme } from "@/context/theme-context";
-import BottomSheet, {
-  BottomSheetBackdrop,
-  BottomSheetScrollView,
-} from "@gorhom/bottom-sheet";
-import React, { useCallback, useEffect, useMemo, useRef } from "react";
-import { Keyboard, StyleSheet, Text, View } from "react-native";
+import {useTheme} from "@/context/theme-context";
+import BottomSheet, {BottomSheetBackdrop, BottomSheetScrollView,} from "@gorhom/bottom-sheet";
+import React, {useCallback, useEffect, useMemo, useRef} from "react";
+import {Keyboard, StyleSheet, Text, View} from "react-native";
 
 type SheetType = "form" | "list" | "confirm";
 
@@ -17,14 +14,14 @@ interface GBottomSheetProps {
 }
 
 const GBottomSheet: React.FC<GBottomSheetProps> = ({
-  visible,
-  onClose,
-  title,
-  type = "form",
-  children,
-}) => {
+                                                     visible,
+                                                     onClose,
+                                                     title,
+                                                     type = "form",
+                                                     children,
+                                                   }) => {
   const sheetRef = useRef<BottomSheet>(null);
-  const { isDark, colors } = useTheme();
+  const {isDark, colors} = useTheme();
 
   const snapPoints = useMemo(() => {
     switch (type) {

@@ -1,21 +1,21 @@
-import React, { useState, useEffect, useCallback } from "react";
+import React, {useCallback, useEffect, useState} from "react";
 import {
-  View,
+  ActivityIndicator,
+  Alert,
+  FlatList,
+  RefreshControl,
+  StyleSheet,
   Text,
   TouchableOpacity,
-  StyleSheet,
-  FlatList,
-  ActivityIndicator,
-  RefreshControl,
-  Alert,
+  View,
 } from "react-native";
-import { SafeAreaView } from "react-native-safe-area-context";
-import { Ionicons } from "@expo/vector-icons";
-import { useRouter } from "expo-router";
-import { adminAPI } from "../../../services/api/admin";
-import { handleApiError, showSuccess } from "../../../utils/errorHandler";
-import EmptyState from "../../../components/admin/EmptyState";
-import ConfirmDialog from "../../../components/admin/ConfirmDialog";
+import {SafeAreaView} from "react-native-safe-area-context";
+import {Ionicons} from "@expo/vector-icons";
+import {useRouter} from "expo-router";
+import {adminAPI} from "@/services/api";
+import {handleApiError, showSuccess} from "@/utils/errorHandler";
+import EmptyState from "@/components/admin/EmptyState";
+import ConfirmDialog from "@/components/admin/ConfirmDialog";
 
 interface TestItem {
   id: string;
@@ -35,13 +35,11 @@ export default function TestManagementScreen() {
   const [loadingMore, setLoadingMore] = useState(false);
   const [page, setPage] = useState(0);
   const [hasMore, setHasMore] = useState(true);
-  
-  // Filters
+
   const [statusFilter, setStatusFilter] = useState<string>("all");
   const [premiumFilter, setPremiumFilter] = useState<string>("all");
   const [showFilters, setShowFilters] = useState(false);
 
-  // Action dialogs
   const [deleteDialog, setDeleteDialog] = useState<{ visible: boolean; testId: string | null }>({
     visible: false,
     testId: null,
@@ -76,7 +74,7 @@ export default function TestManagementScreen() {
       }
 
       const response = await adminAPI.getAdminTests(params);
-      
+
       if (append) {
         setTests(prev => [...prev, ...response.content]);
       } else {
@@ -96,7 +94,7 @@ export default function TestManagementScreen() {
 
   useEffect(() => {
     fetchTests(0, false);
-  }, [statusFilter, premiumFilter]);
+  }, [fetchTests]);
 
   const handleRefresh = () => {
     setRefreshing(true);
@@ -116,7 +114,7 @@ export default function TestManagementScreen() {
     try {
       await adminAPI.deleteTest(deleteDialog.testId);
       showSuccess("Test uğurla silindi");
-      setDeleteDialog({ visible: false, testId: null });
+      setDeleteDialog({visible: false, testId: null});
       fetchTests(0, false);
     } catch (error) {
       handleApiError(error, "Test silinərkən xəta baş verdi");
@@ -132,7 +130,7 @@ export default function TestManagementScreen() {
     try {
       await adminAPI.publishTest(publishDialog.testId);
       showSuccess("Test uğurla nəşr edildi");
-      setPublishDialog({ visible: false, testId: null });
+      setPublishDialog({visible: false, testId: null});
       fetchTests(0, false);
     } catch (error) {
       handleApiError(error, "Test nəşr edilərkən xəta baş verdi");
@@ -141,18 +139,19 @@ export default function TestManagementScreen() {
     }
   };
 
-  const renderTestCard = ({ item }: { item: TestItem }) => (
+  const renderTestCard = ({item}: { item: TestItem }) => (
     <View style={styles.testCard}>
       <View style={styles.cardHeader}>
         <View style={styles.badges}>
           <View style={[styles.badge, item.status === "PUBLISHED" ? styles.badgePublished : styles.badgeDraft]}>
-            <Text style={[styles.badgeText, item.status === "PUBLISHED" ? styles.badgeTextPublished : styles.badgeTextDraft]}>
+            <Text
+              style={[styles.badgeText, item.status === "PUBLISHED" ? styles.badgeTextPublished : styles.badgeTextDraft]}>
               {item.status === "PUBLISHED" ? "Nəşr edilib" : "Qaralama"}
             </Text>
           </View>
           {item.isPremium && (
             <View style={[styles.badge, styles.badgePremium]}>
-              <Ionicons name="star" size={12} color="#F59E0B" />
+              <Ionicons name="star" size={12} color="#F59E0B"/>
               <Text style={styles.badgeTextPremium}>Premium</Text>
             </View>
           )}
@@ -168,11 +167,11 @@ export default function TestManagementScreen() {
 
       <View style={styles.testInfo}>
         <View style={styles.infoItem}>
-          <Ionicons name="help-circle-outline" size={16} color="#6B7280" />
+          <Ionicons name="help-circle-outline" size={16} color="#6B7280"/>
           <Text style={styles.infoText}>{item.questionCount} sual</Text>
         </View>
         <View style={styles.infoItem}>
-          <Ionicons name="calendar-outline" size={16} color="#6B7280" />
+          <Ionicons name="calendar-outline" size={16} color="#6B7280"/>
           <Text style={styles.infoText}>
             {new Date(item.createdAt).toLocaleDateString("az-AZ")}
           </Text>
@@ -184,16 +183,16 @@ export default function TestManagementScreen() {
           style={[styles.actionButton, styles.editButton]}
           onPress={() => router.push(`/admin/tests/edit/${item.id}`)}
         >
-          <Ionicons name="create-outline" size={18} color="#7313e8" />
+          <Ionicons name="create-outline" size={18} color="#7313e8"/>
           <Text style={styles.editButtonText}>Redaktə</Text>
         </TouchableOpacity>
 
         {item.status === "DRAFT" && (
           <TouchableOpacity
             style={[styles.actionButton, styles.publishActionButton]}
-            onPress={() => setPublishDialog({ visible: true, testId: item.id })}
+            onPress={() => setPublishDialog({visible: true, testId: item.id})}
           >
-            <Ionicons name="cloud-upload-outline" size={18} color="#10B981" />
+            <Ionicons name="cloud-upload-outline" size={18} color="#10B981"/>
             <Text style={styles.publishActionButtonText}>Nəşr et</Text>
           </TouchableOpacity>
         )}
@@ -206,16 +205,16 @@ export default function TestManagementScreen() {
               Alert.alert("Məlumat", "Nəticələr səhifəsi tezliklə əlavə ediləcək");
             }}
           >
-            <Ionicons name="stats-chart-outline" size={18} color="#3B82F6" />
+            <Ionicons name="stats-chart-outline" size={18} color="#3B82F6"/>
             <Text style={styles.resultsButtonText}>Nəticələr</Text>
           </TouchableOpacity>
         )}
 
         <TouchableOpacity
           style={[styles.actionButton, styles.deleteButton]}
-          onPress={() => setDeleteDialog({ visible: true, testId: item.id })}
+          onPress={() => setDeleteDialog({visible: true, testId: item.id})}
         >
-          <Ionicons name="trash-outline" size={18} color="#EF4444" />
+          <Ionicons name="trash-outline" size={18} color="#EF4444"/>
         </TouchableOpacity>
       </View>
     </View>
@@ -282,25 +281,25 @@ export default function TestManagementScreen() {
           style={styles.backButton}
           onPress={() => router.back()}
         >
-          <Ionicons name="arrow-back" size={24} color="#111827" />
+          <Ionicons name="arrow-back" size={24} color="#111827"/>
         </TouchableOpacity>
 
         <View style={styles.headerRight}>
           <TouchableOpacity
-          style={styles.filterToggle}
-          onPress={() => setShowFilters(!showFilters)}
-        >
-          <Ionicons name="options-outline" size={20} color="#7313e8" />
-          <Text style={styles.filterToggleText}>Filtrlər</Text>
-        </TouchableOpacity>
+            style={styles.filterToggle}
+            onPress={() => setShowFilters(!showFilters)}
+          >
+            <Ionicons name="options-outline" size={20} color="#7313e8"/>
+            <Text style={styles.filterToggleText}>Filtrlər</Text>
+          </TouchableOpacity>
 
-        <TouchableOpacity
-          style={styles.createButton}
-          onPress={() => router.push("/admin/tests/create")}
-        >
-          <Ionicons name="add" size={20} color="#fff" />
-          <Text style={styles.createButtonText}>Yeni Test</Text>
-        </TouchableOpacity>
+          <TouchableOpacity
+            style={styles.createButton}
+            onPress={() => router.push("/admin/tests/create")}
+          >
+            <Ionicons name="add" size={20} color="#fff"/>
+            <Text style={styles.createButtonText}>Yeni Test</Text>
+          </TouchableOpacity>
         </View>
       </View>
 
@@ -308,7 +307,7 @@ export default function TestManagementScreen() {
 
       {loading ? (
         <View style={styles.loadingContainer}>
-          <ActivityIndicator size="large" color="#7313e8" />
+          <ActivityIndicator size="large" color="#7313e8"/>
         </View>
       ) : tests.length === 0 ? (
         <EmptyState
@@ -325,14 +324,14 @@ export default function TestManagementScreen() {
           keyExtractor={(item) => item.id}
           contentContainerStyle={styles.listContent}
           refreshControl={
-            <RefreshControl refreshing={refreshing} onRefresh={handleRefresh} colors={["#7313e8"]} />
+            <RefreshControl refreshing={refreshing} onRefresh={handleRefresh} colors={["#7313e8"]}/>
           }
           onEndReached={handleLoadMore}
           onEndReachedThreshold={0.5}
           ListFooterComponent={
             loadingMore ? (
               <View style={styles.loadingMore}>
-                <ActivityIndicator size="small" color="#7313e8" />
+                <ActivityIndicator size="small" color="#7313e8"/>
               </View>
             ) : null
           }
@@ -347,7 +346,7 @@ export default function TestManagementScreen() {
         cancelText="Ləğv et"
         confirmColor="#EF4444"
         onConfirm={handleDelete}
-        onCancel={() => setDeleteDialog({ visible: false, testId: null })}
+        onCancel={() => setDeleteDialog({visible: false, testId: null})}
         loading={actionLoading}
       />
 
@@ -359,7 +358,7 @@ export default function TestManagementScreen() {
         cancelText="Ləğv et"
         confirmColor="#10B981"
         onConfirm={handlePublish}
-        onCancel={() => setPublishDialog({ visible: false, testId: null })}
+        onCancel={() => setPublishDialog({visible: false, testId: null})}
         loading={actionLoading}
       />
     </SafeAreaView>
@@ -464,7 +463,7 @@ const styles = StyleSheet.create({
     padding: 16,
     marginBottom: 12,
     shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
+    shadowOffset: {width: 0, height: 2},
     shadowOpacity: 0.06,
     shadowRadius: 8,
     elevation: 2,
@@ -583,4 +582,3 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
 });
-

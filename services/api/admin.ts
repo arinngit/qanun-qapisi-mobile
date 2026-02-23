@@ -1,7 +1,6 @@
-import { api } from './config';
-import { TestDetailResponse, TestResponse } from './tests';
+import {api} from './config';
+import {TestDetailResponse, TestResponse} from './tests';
 
-// Admin User Types
 export interface AdminUserResponse {
   id: string;
   email: string;
@@ -11,7 +10,6 @@ export interface AdminUserResponse {
   isActive: boolean;
   isPremium: boolean;
   verified: boolean;
-  isVerified?: boolean; // Alias for backward compatibility
   dateOfBirth: string | null;
   lastLoginAt: string | null;
   createdAt: string;
@@ -39,7 +37,6 @@ export interface UpdateUserRequest {
   isVerified?: boolean;
 }
 
-// Dashboard Types
 export interface DashboardStatsResponse {
   totalUsers: number;
   totalTests: number;
@@ -49,7 +46,6 @@ export interface DashboardStatsResponse {
   recentUsers: AdminUserResponse[];
 }
 
-// Test Attempt Admin Response
 export interface TestAttemptAdminResponse {
   id: string;
   userId: string;
@@ -63,7 +59,6 @@ export interface TestAttemptAdminResponse {
   submittedAt: string | null;
 }
 
-// Test Creation/Update Types
 export interface CreateQuestionRequest {
   questionType: string;
   questionText: string;
@@ -120,35 +115,34 @@ export interface GetTestResultsParams {
   sortDir?: string;
 }
 
-// Admin API
 export const adminAPI = {
-  // ==================== Test Management ====================
-  
-  // Create new test
   createTest: async (data: CreateTestRequest): Promise<TestDetailResponse> => {
     const response = await api.post('/admin/tests', data);
     return response.data;
   },
 
-  // Update existing test
   updateTest: async (id: string, data: UpdateTestRequest): Promise<TestDetailResponse> => {
     const response = await api.put(`/admin/tests/${id}`, data);
     return response.data;
   },
 
-  // Delete test
   deleteTest: async (id: string): Promise<void> => {
     await api.delete(`/admin/tests/${id}`);
   },
 
-  // Publish test
   publishTest: async (id: string): Promise<TestDetailResponse> => {
     const response = await api.post(`/admin/tests/${id}/publish`);
     return response.data;
   },
 
-  // Get all tests (including drafts)
-  getAllTests: async (params?: GetAdminTestsParams): Promise<{ content: TestResponse[]; totalPages: number; totalElements: number; number: number; size: number; last: boolean }> => {
+  getAdminTests: async (params?: GetAdminTestsParams): Promise<{
+    content: TestResponse[];
+    totalPages: number;
+    totalElements: number;
+    number: number;
+    size: number;
+    last: boolean
+  }> => {
     const queryParams = new URLSearchParams();
     if (params?.page !== undefined) queryParams.append('page', params.page.toString());
     if (params?.size !== undefined) queryParams.append('size', params.size.toString());
@@ -161,34 +155,19 @@ export const adminAPI = {
     return response.data;
   },
 
-  // Alias for getAllTests (for consistency)
-  getAdminTests: async (params?: GetAdminTestsParams): Promise<{ content: TestResponse[]; totalPages: number; totalElements: number; number: number; size: number; last: boolean }> => {
-    const queryParams = new URLSearchParams();
-    if (params?.page !== undefined) queryParams.append('page', params.page.toString());
-    if (params?.size !== undefined) queryParams.append('size', params.size.toString());
-    if (params?.sortBy) queryParams.append('sortBy', params.sortBy);
-    if (params?.sortDir) queryParams.append('sortDir', params.sortDir);
-    if (params?.status) queryParams.append('status', params.status);
-    if (params?.isPremium !== undefined) queryParams.append('isPremium', params.isPremium.toString());
-
-    const response = await api.get(`/admin/tests?${queryParams.toString()}`);
-    return response.data;
-  },
-
-  // Get test details (admin view)
-  getTestById: async (id: string): Promise<TestDetailResponse> => {
-    const response = await api.get(`/admin/tests/${id}`);
-    return response.data;
-  },
-
-  // Alias for getTestById (for consistency)
   getAdminTestById: async (id: string): Promise<TestDetailResponse> => {
     const response = await api.get(`/admin/tests/${id}`);
     return response.data;
   },
 
-  // Get test results (all attempts for a test)
-  getTestResults: async (testId: string, params?: GetTestResultsParams): Promise<{ content: TestAttemptAdminResponse[]; totalPages: number; totalElements: number; number: number; size: number; last: boolean }> => {
+  getTestResults: async (testId: string, params?: GetTestResultsParams): Promise<{
+    content: TestAttemptAdminResponse[];
+    totalPages: number;
+    totalElements: number;
+    number: number;
+    size: number;
+    last: boolean
+  }> => {
     const queryParams = new URLSearchParams();
     if (params?.page !== undefined) queryParams.append('page', params.page.toString());
     if (params?.size !== undefined) queryParams.append('size', params.size.toString());
@@ -199,10 +178,14 @@ export const adminAPI = {
     return response.data;
   },
 
-  // ==================== User Management ====================
-  
-  // Get all users
-  getUsers: async (params?: GetUsersParams): Promise<{ content: AdminUserResponse[]; totalPages: number; totalElements: number; number: number; size: number; last: boolean }> => {
+  getUsers: async (params?: GetUsersParams): Promise<{
+    content: AdminUserResponse[];
+    totalPages: number;
+    totalElements: number;
+    number: number;
+    size: number;
+    last: boolean
+  }> => {
     const queryParams = new URLSearchParams();
     if (params?.page !== undefined) queryParams.append('page', params.page.toString());
     if (params?.size !== undefined) queryParams.append('size', params.size.toString());
@@ -217,35 +200,27 @@ export const adminAPI = {
     return response.data;
   },
 
-  // Get user by ID
   getUserById: async (id: string): Promise<AdminUserResponse> => {
     const response = await api.get(`/admin/users/${id}`);
     return response.data;
   },
 
-  // Create new user
   createUser: async (data: CreateUserRequest): Promise<AdminUserResponse> => {
     const response = await api.post('/admin/users', data);
     return response.data;
   },
 
-  // Update user
   updateUser: async (id: string, data: UpdateUserRequest): Promise<AdminUserResponse> => {
     const response = await api.put(`/admin/users/${id}`, data);
     return response.data;
   },
 
-  // Delete user
   deleteUser: async (id: string): Promise<void> => {
     await api.delete(`/admin/users/${id}`);
   },
 
-  // ==================== Dashboard ====================
-  
-  // Get dashboard statistics
   getDashboardStats: async (): Promise<DashboardStatsResponse> => {
     const response = await api.get('/admin/dashboard');
     return response.data;
   },
 };
-

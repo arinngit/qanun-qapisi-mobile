@@ -1,25 +1,24 @@
-import React, { useState, useEffect, useCallback } from "react";
+import React, {useCallback, useEffect, useState} from "react";
 import {
-  View,
+  ActivityIndicator,
+  Alert,
+  FlatList,
+  Modal,
+  RefreshControl,
+  StyleSheet,
   Text,
   TextInput,
   TouchableOpacity,
-  StyleSheet,
-  FlatList,
-  ActivityIndicator,
-  RefreshControl,
-  Modal,
-  Alert,
-  Image,
+  View,
 } from "react-native";
-import { SafeAreaView } from "react-native-safe-area-context";
-import { Ionicons } from "@expo/vector-icons";
-import { useRouter } from "expo-router";
-import { adminAPI } from "../../../services/api/admin";
-import { handleApiError, showSuccess } from "../../../utils/errorHandler";
-import EmptyState from "../../../components/admin/EmptyState";
-import ConfirmDialog from "../../../components/admin/ConfirmDialog";
-import { useAuth } from "../../../context/auth-context";
+import {SafeAreaView} from "react-native-safe-area-context";
+import {Ionicons} from "@expo/vector-icons";
+import {useRouter} from "expo-router";
+import {adminAPI} from "@/services/api";
+import {handleApiError, showSuccess} from "@/utils/errorHandler";
+import EmptyState from "@/components/admin/EmptyState";
+import ConfirmDialog from "@/components/admin/ConfirmDialog";
+import {useAuth} from "@/context/auth-context";
 
 interface UserItem {
   id: string;
@@ -45,21 +44,19 @@ interface EditFormData {
 
 export default function UserManagementScreen() {
   const router = useRouter();
-  const { user: currentUser } = useAuth();
+  const {user: currentUser} = useAuth();
   const [users, setUsers] = useState<UserItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [loadingMore, setLoadingMore] = useState(false);
   const [page, setPage] = useState(0);
   const [hasMore, setHasMore] = useState(true);
-  
-  // Filters
+
   const [searchQuery, setSearchQuery] = useState("");
   const [roleFilter, setRoleFilter] = useState<string>("all");
   const [statusFilter, setStatusFilter] = useState<string>("all");
   const [showFilters, setShowFilters] = useState(false);
 
-  // Edit modal
   const [editModalVisible, setEditModalVisible] = useState(false);
   const [editingUser, setEditingUser] = useState<UserItem | null>(null);
   const [editForm, setEditForm] = useState<EditFormData>({
@@ -72,7 +69,6 @@ export default function UserManagementScreen() {
   });
   const [editLoading, setEditLoading] = useState(false);
 
-  // Delete dialog
   const [deleteDialog, setDeleteDialog] = useState<{ visible: boolean; userId: string | null }>({
     visible: false,
     userId: null,
@@ -107,7 +103,7 @@ export default function UserManagementScreen() {
       }
 
       const response = await adminAPI.getUsers(params);
-      
+
       if (append) {
         setUsers(prev => [...prev, ...response.content]);
       } else {
@@ -131,7 +127,7 @@ export default function UserManagementScreen() {
     }, 500);
 
     return () => clearTimeout(delayDebounce);
-  }, [searchQuery, roleFilter, statusFilter]);
+  }, [searchQuery, fetchUsers]);
 
   const handleRefresh = () => {
     setRefreshing(true);
@@ -165,13 +161,11 @@ export default function UserManagementScreen() {
   const handleSaveEdit = async () => {
     if (!editingUser) return;
 
-    // Validation
     if (!editForm.email.trim() || !editForm.firstName.trim() || !editForm.lastName.trim()) {
       Alert.alert("Xəta", "Zəhmət olmasa bütün tələb olunan sahələri doldurun");
       return;
     }
 
-    // Email validation
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!emailRegex.test(editForm.email)) {
       Alert.alert("Xəta", "Düzgün email ünvanı daxil edin");
@@ -188,7 +182,7 @@ export default function UserManagementScreen() {
         isActive: editForm.isActive,
         isPremium: editForm.isPremium,
       });
-      
+
       showSuccess("İstifadəçi uğurla yeniləndi");
       setEditModalVisible(false);
       setEditingUser(null);
@@ -205,7 +199,7 @@ export default function UserManagementScreen() {
 
     if (deleteDialog.userId === currentUser?.id) {
       Alert.alert("Xəbərdarlıq", "Öz hesabınızı silə bilməzsiniz");
-      setDeleteDialog({ visible: false, userId: null });
+      setDeleteDialog({visible: false, userId: null});
       return;
     }
 
@@ -213,7 +207,7 @@ export default function UserManagementScreen() {
     try {
       await adminAPI.deleteUser(deleteDialog.userId);
       showSuccess("İstifadəçi uğurla silindi");
-      setDeleteDialog({ visible: false, userId: null });
+      setDeleteDialog({visible: false, userId: null});
       fetchUsers(0, false, searchQuery);
     } catch (error) {
       handleApiError(error, "İstifadəçi silinərkən xəta baş verdi");
@@ -222,7 +216,7 @@ export default function UserManagementScreen() {
     }
   };
 
-  const renderUserCard = ({ item }: { item: UserItem }) => {
+  const renderUserCard = ({item}: { item: UserItem }) => {
     const isSelf = item.id === currentUser?.id;
 
     return (
@@ -251,7 +245,7 @@ export default function UserManagementScreen() {
               {item.role === "ADMIN" ? "Admin" : "İstifadəçi"}
             </Text>
           </View>
-          
+
           <View style={[styles.badge, item.isActive ? styles.badgeActive : styles.badgeInactive]}>
             <Text style={[styles.badgeText, item.isActive ? styles.badgeTextActive : styles.badgeTextInactive]}>
               {item.isActive ? "Aktiv" : "Qeyri-aktiv"}
@@ -266,7 +260,7 @@ export default function UserManagementScreen() {
 
           {item.isPremium && (
             <View style={[styles.badge, styles.badgePremium]}>
-              <Ionicons name="star" size={10} color="#F59E0B" />
+              <Ionicons name="star" size={10} color="#F59E0B"/>
               <Text style={styles.badgeTextPremium}>Premium</Text>
             </View>
           )}
@@ -274,14 +268,14 @@ export default function UserManagementScreen() {
 
         <View style={styles.userMeta}>
           <View style={styles.metaItem}>
-            <Ionicons name="calendar-outline" size={14} color="#6B7280" />
+            <Ionicons name="calendar-outline" size={14} color="#6B7280"/>
             <Text style={styles.metaText}>
               Qeydiyyat: {new Date(item.createdAt).toLocaleDateString("az-AZ")}
             </Text>
           </View>
           {item.lastLoginAt && (
             <View style={styles.metaItem}>
-              <Ionicons name="time-outline" size={14} color="#6B7280" />
+              <Ionicons name="time-outline" size={14} color="#6B7280"/>
               <Text style={styles.metaText}>
                 Son giriş: {new Date(item.lastLoginAt).toLocaleDateString("az-AZ")}
               </Text>
@@ -295,15 +289,15 @@ export default function UserManagementScreen() {
               style={[styles.actionButton, styles.editButton]}
               onPress={() => handleEditUser(item)}
             >
-              <Ionicons name="create-outline" size={18} color="#7313e8" />
+              <Ionicons name="create-outline" size={18} color="#7313e8"/>
               <Text style={styles.editButtonText}>Redaktə</Text>
             </TouchableOpacity>
 
             <TouchableOpacity
               style={[styles.actionButton, styles.deleteButton]}
-              onPress={() => setDeleteDialog({ visible: true, userId: item.id })}
+              onPress={() => setDeleteDialog({visible: true, userId: item.id})}
             >
-              <Ionicons name="trash-outline" size={18} color="#EF4444" />
+              <Ionicons name="trash-outline" size={18} color="#EF4444"/>
               <Text style={styles.deleteButtonText}>Sil</Text>
             </TouchableOpacity>
           </View>
@@ -381,7 +375,7 @@ export default function UserManagementScreen() {
               onPress={() => setEditModalVisible(false)}
               style={styles.modalClose}
             >
-              <Ionicons name="close" size={24} color="#6B7280" />
+              <Ionicons name="close" size={24} color="#6B7280"/>
             </TouchableOpacity>
           </View>
 
@@ -391,7 +385,7 @@ export default function UserManagementScreen() {
               <TextInput
                 style={styles.formInput}
                 value={editForm.email}
-                onChangeText={(text) => setEditForm({ ...editForm, email: text })}
+                onChangeText={(text) => setEditForm({...editForm, email: text})}
                 placeholder="Email"
                 placeholderTextColor="#9CA3AF"
                 keyboardType="email-address"
@@ -404,7 +398,7 @@ export default function UserManagementScreen() {
               <TextInput
                 style={styles.formInput}
                 value={editForm.firstName}
-                onChangeText={(text) => setEditForm({ ...editForm, firstName: text })}
+                onChangeText={(text) => setEditForm({...editForm, firstName: text})}
                 placeholder="Ad"
                 placeholderTextColor="#9CA3AF"
               />
@@ -415,7 +409,7 @@ export default function UserManagementScreen() {
               <TextInput
                 style={styles.formInput}
                 value={editForm.lastName}
-                onChangeText={(text) => setEditForm({ ...editForm, lastName: text })}
+                onChangeText={(text) => setEditForm({...editForm, lastName: text})}
                 placeholder="Soyad"
                 placeholderTextColor="#9CA3AF"
               />
@@ -431,7 +425,7 @@ export default function UserManagementScreen() {
                       styles.roleOption,
                       editForm.role === role && styles.roleOptionActive,
                     ]}
-                    onPress={() => setEditForm({ ...editForm, role })}
+                    onPress={() => setEditForm({...editForm, role})}
                   >
                     <Text
                       style={[
@@ -449,10 +443,10 @@ export default function UserManagementScreen() {
             <View style={styles.formField}>
               <TouchableOpacity
                 style={styles.toggle}
-                onPress={() => setEditForm({ ...editForm, isActive: !editForm.isActive })}
+                onPress={() => setEditForm({...editForm, isActive: !editForm.isActive})}
               >
                 <View style={[styles.toggleSwitch, editForm.isActive && styles.toggleSwitchActive]}>
-                  <View style={[styles.toggleCircle, editForm.isActive && styles.toggleCircleActive]} />
+                  <View style={[styles.toggleCircle, editForm.isActive && styles.toggleCircleActive]}/>
                 </View>
                 <Text style={styles.toggleLabel}>Aktiv</Text>
               </TouchableOpacity>
@@ -461,10 +455,10 @@ export default function UserManagementScreen() {
             <View style={styles.formField}>
               <TouchableOpacity
                 style={styles.toggle}
-                onPress={() => setEditForm({ ...editForm, isPremium: !editForm.isPremium })}
+                onPress={() => setEditForm({...editForm, isPremium: !editForm.isPremium})}
               >
                 <View style={[styles.toggleSwitch, editForm.isPremium && styles.toggleSwitchActive]}>
-                  <View style={[styles.toggleCircle, editForm.isPremium && styles.toggleCircleActive]} />
+                  <View style={[styles.toggleCircle, editForm.isPremium && styles.toggleCircleActive]}/>
                 </View>
                 <Text style={styles.toggleLabel}>Premium</Text>
               </TouchableOpacity>
@@ -486,7 +480,7 @@ export default function UserManagementScreen() {
               disabled={editLoading}
             >
               {editLoading ? (
-                <ActivityIndicator color="#fff" size="small" />
+                <ActivityIndicator color="#fff" size="small"/>
               ) : (
                 <Text style={styles.modalSaveButtonText}>Yadda saxla</Text>
               )}
@@ -504,11 +498,11 @@ export default function UserManagementScreen() {
           style={styles.backButton}
           onPress={() => router.back()}
         >
-          <Ionicons name="arrow-back" size={24} color="#111827" />
+          <Ionicons name="arrow-back" size={24} color="#111827"/>
         </TouchableOpacity>
 
         <View style={styles.searchContainer}>
-          <Ionicons name="search" size={20} color="#6B7280" />
+          <Ionicons name="search" size={20} color="#6B7280"/>
           <TextInput
             style={styles.searchInput}
             value={searchQuery}
@@ -518,7 +512,7 @@ export default function UserManagementScreen() {
           />
           {searchQuery.length > 0 && (
             <TouchableOpacity onPress={() => setSearchQuery("")}>
-              <Ionicons name="close-circle" size={20} color="#6B7280" />
+              <Ionicons name="close-circle" size={20} color="#6B7280"/>
             </TouchableOpacity>
           )}
         </View>
@@ -527,7 +521,7 @@ export default function UserManagementScreen() {
           style={styles.filterToggle}
           onPress={() => setShowFilters(!showFilters)}
         >
-          <Ionicons name="options-outline" size={20} color="#7313e8" />
+          <Ionicons name="options-outline" size={20} color="#7313e8"/>
         </TouchableOpacity>
       </View>
 
@@ -535,7 +529,7 @@ export default function UserManagementScreen() {
 
       {loading ? (
         <View style={styles.loadingContainer}>
-          <ActivityIndicator size="large" color="#7313e8" />
+          <ActivityIndicator size="large" color="#7313e8"/>
         </View>
       ) : users.length === 0 ? (
         <EmptyState
@@ -550,14 +544,14 @@ export default function UserManagementScreen() {
           keyExtractor={(item) => item.id}
           contentContainerStyle={styles.listContent}
           refreshControl={
-            <RefreshControl refreshing={refreshing} onRefresh={handleRefresh} colors={["#7313e8"]} />
+            <RefreshControl refreshing={refreshing} onRefresh={handleRefresh} colors={["#7313e8"]}/>
           }
           onEndReached={handleLoadMore}
           onEndReachedThreshold={0.5}
           ListFooterComponent={
             loadingMore ? (
               <View style={styles.loadingMore}>
-                <ActivityIndicator size="small" color="#7313e8" />
+                <ActivityIndicator size="small" color="#7313e8"/>
               </View>
             ) : null
           }
@@ -574,7 +568,7 @@ export default function UserManagementScreen() {
         cancelText="Ləğv et"
         confirmColor="#EF4444"
         onConfirm={handleDeleteUser}
-        onCancel={() => setDeleteDialog({ visible: false, userId: null })}
+        onCancel={() => setDeleteDialog({visible: false, userId: null})}
         loading={deleteLoading}
       />
     </SafeAreaView>
@@ -676,7 +670,7 @@ const styles = StyleSheet.create({
     padding: 16,
     marginBottom: 12,
     shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
+    shadowOffset: {width: 0, height: 2},
     shadowOpacity: 0.06,
     shadowRadius: 8,
     elevation: 2,
@@ -973,4 +967,3 @@ const styles = StyleSheet.create({
     color: "#fff",
   },
 });
-

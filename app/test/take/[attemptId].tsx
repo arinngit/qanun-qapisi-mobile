@@ -1,24 +1,10 @@
-import { Ionicons } from "@expo/vector-icons";
+import {Ionicons} from "@expo/vector-icons";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import { useLocalSearchParams, useRouter } from "expo-router";
-import React, { useEffect, useState } from "react";
-import {
-  ActivityIndicator,
-  Alert,
-  Image,
-  ScrollView,
-  StyleSheet,
-  Text,
-  TextInput,
-  TouchableOpacity,
-  View,
-} from "react-native";
-import { SafeAreaView } from "react-native-safe-area-context";
-import {
-  SubmitAnswerRequest,
-  TestDetailResponse,
-  testsAPI,
-} from "../../../services/api";
+import {useLocalSearchParams, useRouter} from "expo-router";
+import React, {useEffect, useState} from "react";
+import {ActivityIndicator, Alert, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View,} from "react-native";
+import {SafeAreaView} from "react-native-safe-area-context";
+import {SubmitAnswerRequest, TestDetailResponse, testsAPI,} from "../../../services/api";
 
 interface UserAnswer {
   questionId: string;
@@ -28,7 +14,7 @@ interface UserAnswer {
 
 export default function TestTakingScreen() {
   const router = useRouter();
-  const { attemptId } = useLocalSearchParams<{ attemptId: string }>();
+  const {attemptId} = useLocalSearchParams<{ attemptId: string }>();
 
   const [test, setTest] = useState<TestDetailResponse | null>(null);
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
@@ -40,6 +26,7 @@ export default function TestTakingScreen() {
 
   useEffect(() => {
     loadTestData();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [attemptId]);
 
   useEffect(() => {
@@ -47,6 +34,7 @@ export default function TestTakingScreen() {
     if (attemptId && userAnswers.size > 0) {
       saveAnswersToStorage();
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [userAnswers]);
 
   const loadTestData = async () => {
@@ -91,7 +79,7 @@ export default function TestTakingScreen() {
       const answersObj = Object.fromEntries(userAnswers);
       await AsyncStorage.setItem(
         storageKey,
-        JSON.stringify({ test, answers: answersObj })
+        JSON.stringify({test, answers: answersObj})
       );
     } catch (error) {
       console.error("Error saving answers:", error);
@@ -114,7 +102,7 @@ export default function TestTakingScreen() {
 
       setUserAnswers(
         new Map(
-          userAnswers.set(questionId, { questionId, selectedAnswerIds: newIds })
+          userAnswers.set(questionId, {questionId, selectedAnswerIds: newIds})
         )
       );
     } else {
@@ -132,7 +120,7 @@ export default function TestTakingScreen() {
 
   const handleTextAnswer = (questionId: string, text: string) => {
     setUserAnswers(
-      new Map(userAnswers.set(questionId, { questionId, openTextAnswer: text }))
+      new Map(userAnswers.set(questionId, {questionId, openTextAnswer: text}))
     );
   };
 
@@ -153,8 +141,8 @@ export default function TestTakingScreen() {
       "Testi təsdiqləyin",
       "Testi təsdiq etmək istədiyinizdən əminsiniz? Bu əməliyyatdan sonra cavabları dəyişdirə bilməyəcəksiniz.",
       [
-        { text: "Xeyr", style: "cancel" },
-        { text: "Bəli, təsdiq edirəm", onPress: submitTest },
+        {text: "Xeyr", style: "cancel"},
+        {text: "Bəli, təsdiq edirəm", onPress: submitTest},
       ]
     );
   };
@@ -175,15 +163,14 @@ export default function TestTakingScreen() {
       }));
 
       // Submit test
-      const result = await testsAPI.submitTest(test.id, { answers });
+      await testsAPI.submitTest(test.id, {answers});
 
       // Clear storage
       await AsyncStorage.removeItem(`test_attempt_${attemptId}`);
 
       // Navigate to results
       router.replace(`/test/results/${attemptId}` as any);
-    } catch (error: any) {
-      console.error("Error submitting test:", error);
+    } catch {
       Alert.alert("Xəta", "Testi təsdiq etmək mümkün olmadı");
     } finally {
       setSubmitting(false);
@@ -210,7 +197,7 @@ export default function TestTakingScreen() {
     return (
       <SafeAreaView style={styles.container} edges={["top", "bottom"]}>
         <View style={styles.loadingContainer}>
-          <ActivityIndicator size="large" color="#7313e8" />
+          <ActivityIndicator size="large" color="#7313e8"/>
         </View>
       </SafeAreaView>
     );
@@ -220,7 +207,7 @@ export default function TestTakingScreen() {
     return (
       <SafeAreaView style={styles.container} edges={["top", "bottom"]}>
         <View style={styles.emptyContainer}>
-          <Ionicons name="alert-circle-outline" size={64} color="#9CA3AF" />
+          <Ionicons name="alert-circle-outline" size={64} color="#9CA3AF"/>
           <Text style={styles.emptyText}>Test sualları tapılmadı</Text>
         </View>
       </SafeAreaView>
@@ -243,13 +230,13 @@ export default function TestTakingScreen() {
               "Testdən çıxın",
               "Testdən çıxmaq istədiyinizdən əminsiniz? İrəliləyişiniz saxlanılacaq.",
               [
-                { text: "Xeyr", style: "cancel" },
-                { text: "Bəli, çıx", onPress: () => router.back() },
+                {text: "Xeyr", style: "cancel"},
+                {text: "Bəli, çıx", onPress: () => router.back()},
               ]
             );
           }}
         >
-          <Ionicons name="close" size={24} color="#111827" />
+          <Ionicons name="close" size={24} color="#111827"/>
         </TouchableOpacity>
         <View style={styles.headerCenter}>
           <Text style={styles.headerTitle}>{test.title}</Text>
@@ -259,7 +246,7 @@ export default function TestTakingScreen() {
         </View>
         <View style={styles.headerRight}>
           <View style={styles.timerBadge}>
-            <Ionicons name="time-outline" size={16} color="#7313e8" />
+            <Ionicons name="time-outline" size={16} color="#7313e8"/>
             <Text style={styles.timerText}>{test.estimatedMinutes} dəq</Text>
           </View>
         </View>
@@ -267,7 +254,7 @@ export default function TestTakingScreen() {
 
       {/* Progress Bar */}
       <View style={styles.progressBarContainer}>
-        <View style={[styles.progressBar, { width: `${progress}%` }]} />
+        <View style={[styles.progressBar, {width: `${progress}%`}]}/>
       </View>
 
       {/* Question Content */}
@@ -279,7 +266,7 @@ export default function TestTakingScreen() {
               Sual {currentQuestionIndex + 1}
             </Text>
             <View style={styles.scoreBadge}>
-              <Ionicons name="star" size={12} color="#F59E0B" />
+              <Ionicons name="star" size={12} color="#F59E0B"/>
               <Text style={styles.scoreBadgeText}>
                 {currentQuestion.score} xal
               </Text>
@@ -338,9 +325,9 @@ export default function TestTakingScreen() {
                         style={[
                           isMultiple ? styles.checkbox : styles.radio,
                           isSelected &&
-                            (isMultiple
-                              ? styles.checkboxSelected
-                              : styles.radioSelected),
+                          (isMultiple
+                            ? styles.checkboxSelected
+                            : styles.radioSelected),
                         ]}
                       >
                         {isSelected && (
@@ -381,7 +368,7 @@ export default function TestTakingScreen() {
           )}
         </View>
 
-        <View style={styles.bottomSpacer} />
+        <View style={styles.bottomSpacer}/>
       </ScrollView>
 
       {/* Bottom Navigation */}
@@ -445,18 +432,18 @@ export default function TestTakingScreen() {
               disabled={submitting}
             >
               {submitting ? (
-                <ActivityIndicator size="small" color="#fff" />
+                <ActivityIndicator size="small" color="#fff"/>
               ) : (
                 <>
                   <Text style={styles.submitButtonText}>Təsdiq et</Text>
-                  <Ionicons name="checkmark-circle" size={20} color="#fff" />
+                  <Ionicons name="checkmark-circle" size={20} color="#fff"/>
                 </>
               )}
             </TouchableOpacity>
           ) : (
             <TouchableOpacity style={styles.navButton} onPress={handleNext}>
               <Text style={styles.navButtonText}>Növbəti</Text>
-              <Ionicons name="chevron-forward" size={20} color="#111827" />
+              <Ionicons name="chevron-forward" size={20} color="#111827"/>
             </TouchableOpacity>
           )}
         </View>
