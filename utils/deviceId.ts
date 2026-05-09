@@ -4,9 +4,15 @@ import Constants from 'expo-constants';
 
 const DEVICE_ID_KEY = 'deviceId';
 
+const getItemWithTimeout = (key: string, ms = 3000): Promise<string | null> =>
+  Promise.race([
+    AsyncStorage.getItem(key),
+    new Promise<null>((resolve) => setTimeout(() => resolve(null), ms)),
+  ]);
+
 export const getDeviceId = async (): Promise<string> => {
   try {
-    let deviceId = await AsyncStorage.getItem(DEVICE_ID_KEY);
+    let deviceId = await getItemWithTimeout(DEVICE_ID_KEY);
 
     if (!deviceId) {
       const deviceInfo = [

@@ -102,9 +102,11 @@ api.interceptors.response.use(
       try {
         const refreshToken = await getRefreshToken();
         if (refreshToken) {
-          const response = await axios.post(`${API_BASE_URL}/auth/refresh`, {
-            refreshToken,
-          });
+          const response = await axios.post(
+            `${API_BASE_URL}/auth/refresh`,
+            {refreshToken},
+            {timeout: 15000}
+          );
 
           const {accessToken, refreshToken: newRefreshToken} = response.data;
           await setTokens(accessToken, newRefreshToken);

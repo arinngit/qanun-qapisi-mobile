@@ -109,35 +109,51 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
   }, []);
 
   const login = useCallback(async (email: string, password: string) => {
+    const LOGIN_TIMEOUT_MS = 20000;
+    let timeoutHandle: ReturnType<typeof setTimeout> | undefined;
+    const timeoutPromise = new Promise<never>((_, reject) => {
+      timeoutHandle = setTimeout(
+        () => reject(new Error(translations.loginFailed)),
+        LOGIN_TIMEOUT_MS
+      );
+    });
+
     try {
-      const deviceId = await getDeviceId();
-      const response = await authAPI.login({email, password, deviceId});
+      await Promise.race([
+        (async () => {
+          const deviceId = await getDeviceId();
+          const response = await authAPI.login({email, password, deviceId});
 
-      const profileData = await profileAPI.getProfile();
+          const profileData = await profileAPI.getProfile();
 
-      const userData: User = {
-        id: profileData.id,
-        email: profileData.email,
-        firstName: profileData.firstName,
-        lastName: profileData.lastName,
-        role: profileData.role,
-        verified: profileData.verified,
-        isPremium: profileData.isPremium,
-        createdAt: profileData.createdAt,
-        updatedAt: profileData.updatedAt,
-      };
+          const userData: User = {
+            id: profileData.id,
+            email: profileData.email,
+            firstName: profileData.firstName,
+            lastName: profileData.lastName,
+            role: profileData.role,
+            verified: profileData.verified,
+            isPremium: profileData.isPremium,
+            createdAt: profileData.createdAt,
+            updatedAt: profileData.updatedAt,
+          };
 
-      await AsyncStorage.setItem("user", JSON.stringify(userData));
+          await AsyncStorage.setItem("user", JSON.stringify(userData));
 
-      setToken(response.accessToken);
-      setUser(userData);
-      setIsAuthenticated(true);
-
+          setToken(response.accessToken);
+          setUser(userData);
+          setIsAuthenticated(true);
+        })(),
+        timeoutPromise,
+      ]);
     } catch (error: unknown) {
       const axiosError = error as { response?: { data?: { message?: string } } };
       const errorMessage =
-        axiosError.response?.data?.message || translations.loginFailed;
+        axiosError.response?.data?.message ||
+        (error instanceof Error ? error.message : translations.loginFailed);
       throw new Error(errorMessage);
+    } finally {
+      if (timeoutHandle) clearTimeout(timeoutHandle);
     }
   }, []);
 
